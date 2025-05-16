@@ -1,0 +1,15 @@
+# Build and dist directories
+dist
+build
+
+# Node modules
+node_modules
+
+# Package files
+package-lock.json
+package.json
+
+# Other files
+.eslintrc
+.gitignore
+README.md 
