@@ -1,24 +1,36 @@
-import { useState } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import 'antd/dist/reset.css';
 import './App.css';
-import Navbar from './components/Navbar';
+import GooeyNav from './components/GooeyNav/GooeyNav';
 import HomePage from './pages/HomePage';
 import SavedTrades from './pages/SavedTrades';
 
 function App() {
-	const [currentPage, setCurrentPage] = useState('home');
-
-	const handleNavigate = (page) => {
-		setCurrentPage(page);
-	};
+	const navItems = [
+		{
+			label: 'Home',
+			href: '/home',
+		},
+		{
+			label: 'Saved Trades',
+			href: '/saved',
+		},
+	];
 
 	return (
-		<div className="app-container">
-			<Navbar onNavigate={handleNavigate} currentPage={currentPage} />
-			<main className="content">
-				{currentPage === 'home' && <HomePage />}
-				{currentPage === 'saved' && <SavedTrades />}
-			</main>
-		</div>
+		<Router basename="/Draft-Trade-Analyzer">
+			<div className="app-container">
+				<GooeyNav items={navItems} />
+				<main className="content">
+					<Routes>
+						<Route path="/home" element={<HomePage />} />
+						<Route path="/saved" element={<SavedTrades />} />
+						<Route path="/" element={<Navigate to="/home" />} />
+					</Routes>
+				</main>
+			</div>
+		</Router>
 	);
 }
 

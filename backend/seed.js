@@ -1,0 +1,357 @@
+const sqlite3 = require("sqlite3").verbose();
+const path = require("path");
+
+// Connect to the database
+const dbPath = path.resolve(__dirname, "database.db");
+const db = new sqlite3.Database(dbPath, (err) => {
+	if (err) {
+		console.error("Error opening database", err.message);
+		return;
+	}
+	console.log("Connected to the SQLite database for seeding");
+	initializeDatabase();
+});
+
+// Initialize database tables
+function initializeDatabase() {
+	console.log("Creating database tables if they don't exist...");
+
+	// Create Teams table
+	db.run(
+		`CREATE TABLE IF NOT EXISTS teams (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT NOT NULL,
+		abbreviation TEXT NOT NULL,
+		logo TEXT
+	)`,
+		(err) => {
+			if (err) {
+				console.error("Error creating teams table", err.message);
+				return;
+			}
+			console.log("Teams table is ready");
+
+			// Create Draft Picks table
+			db.run(
+				`CREATE TABLE IF NOT EXISTS draft_picks (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			team_id INTEGER,
+			year INTEGER NOT NULL,
+			round INTEGER NOT NULL,
+			original_team_id INTEGER,
+			protected TEXT,
+			FOREIGN KEY (team_id) REFERENCES teams (id),
+			FOREIGN KEY (original_team_id) REFERENCES teams (id)
+		)`,
+				(err) => {
+					if (err) {
+						console.error(
+							"Error creating draft_picks table",
+							err.message
+						);
+						return;
+					}
+					console.log("Draft Picks table is ready");
+
+					// Create Draft Pick Values table
+					db.run(
+						`CREATE TABLE IF NOT EXISTS pick_values (
+				id INTEGER PRIMARY KEY AUTOINCREMENT,
+				pick_position INTEGER NOT NULL,
+				value REAL NOT NULL,
+				normalized REAL NOT NULL
+			)`,
+						(err) => {
+							if (err) {
+								console.error(
+									"Error creating pick_values table",
+									err.message
+								);
+								return;
+							}
+							console.log("Pick Values table is ready");
+
+							// Start seeding data after tables are created
+							seedDatabase();
+						}
+					);
+				}
+			);
+		}
+	);
+}
+
+async function seedDatabase() {
+	try {
+		// Clear existing data
+		await run("DELETE FROM pick_values");
+		await run("DELETE FROM draft_picks");
+		await run("DELETE FROM teams");
+
+		// Seed NBA Teams
+		const teams = [
+			// Atlantic Division (Eastern Conference)
+			{
+				name: "Boston Celtics",
+				abbreviation: "BOS",
+				logo: "https://cdn.nba.com/logos/nba/1610612738/primary/L/logo.svg",
+			},
+			{
+				name: "Brooklyn Nets",
+				abbreviation: "BKN",
+				logo: "https://cdn.nba.com/logos/nba/1610612751/primary/L/logo.svg",
+			},
+			{
+				name: "New York Knicks",
+				abbreviation: "NYK",
+				logo: "https://cdn.nba.com/logos/nba/1610612752/primary/L/logo.svg",
+			},
+			{
+				name: "Philadelphia 76ers",
+				abbreviation: "PHI",
+				logo: "https://cdn.nba.com/logos/nba/1610612755/primary/L/logo.svg",
+			},
+			{
+				name: "Toronto Raptors",
+				abbreviation: "TOR",
+				logo: "https://cdn.nba.com/logos/nba/1610612761/primary/L/logo.svg",
+			},
+
+			// Central Division (Eastern Conference)
+			{
+				name: "Chicago Bulls",
+				abbreviation: "CHI",
+				logo: "https://cdn.nba.com/logos/nba/1610612741/primary/L/logo.svg",
+			},
+			{
+				name: "Cleveland Cavaliers",
+				abbreviation: "CLE",
+				logo: "https://cdn.nba.com/logos/nba/1610612739/primary/L/logo.svg",
+			},
+			{
+				name: "Detroit Pistons",
+				abbreviation: "DET",
+				logo: "https://cdn.nba.com/logos/nba/1610612765/primary/L/logo.svg",
+			},
+			{
+				name: "Indiana Pacers",
+				abbreviation: "IND",
+				logo: "https://cdn.nba.com/logos/nba/1610612754/primary/L/logo.svg",
+			},
+			{
+				name: "Milwaukee Bucks",
+				abbreviation: "MIL",
+				logo: "https://cdn.nba.com/logos/nba/1610612749/primary/L/logo.svg",
+			},
+
+			// Southeast Division (Eastern Conference)
+			{
+				name: "Atlanta Hawks",
+				abbreviation: "ATL",
+				logo: "https://cdn.nba.com/logos/nba/1610612737/primary/L/logo.svg",
+			},
+			{
+				name: "Charlotte Hornets",
+				abbreviation: "CHA",
+				logo: "https://cdn.nba.com/logos/nba/1610612766/primary/L/logo.svg",
+			},
+			{
+				name: "Miami Heat",
+				abbreviation: "MIA",
+				logo: "https://cdn.nba.com/logos/nba/1610612748/primary/L/logo.svg",
+			},
+			{
+				name: "Orlando Magic",
+				abbreviation: "ORL",
+				logo: "https://cdn.nba.com/logos/nba/1610612753/primary/L/logo.svg",
+			},
+			{
+				name: "Washington Wizards",
+				abbreviation: "WAS",
+				logo: "https://cdn.nba.com/logos/nba/1610612764/primary/L/logo.svg",
+			},
+
+			// Northwest Division (Western Conference)
+			{
+				name: "Denver Nuggets",
+				abbreviation: "DEN",
+				logo: "https://cdn.nba.com/logos/nba/1610612743/primary/L/logo.svg",
+			},
+			{
+				name: "Minnesota Timberwolves",
+				abbreviation: "MIN",
+				logo: "https://cdn.nba.com/logos/nba/1610612750/primary/L/logo.svg",
+			},
+			{
+				name: "Oklahoma City Thunder",
+				abbreviation: "OKC",
+				logo: "https://cdn.nba.com/logos/nba/1610612760/primary/L/logo.svg",
+			},
+			{
+				name: "Portland Trail Blazers",
+				abbreviation: "POR",
+				logo: "https://cdn.nba.com/logos/nba/1610612757/primary/L/logo.svg",
+			},
+			{
+				name: "Utah Jazz",
+				abbreviation: "UTA",
+				logo: "https://cdn.nba.com/logos/nba/1610612762/primary/L/logo.svg",
+			},
+
+			// Pacific Division (Western Conference)
+			{
+				name: "Golden State Warriors",
+				abbreviation: "GSW",
+				logo: "https://cdn.nba.com/logos/nba/1610612744/primary/L/logo.svg",
+			},
+			{
+				name: "Los Angeles Clippers",
+				abbreviation: "LAC",
+				logo: "https://cdn.nba.com/logos/nba/1610612746/primary/L/logo.svg",
+			},
+			{
+				name: "Los Angeles Lakers",
+				abbreviation: "LAL",
+				logo: "https://cdn.nba.com/logos/nba/1610612747/primary/L/logo.svg",
+			},
+			{
+				name: "Phoenix Suns",
+				abbreviation: "PHX",
+				logo: "https://cdn.nba.com/logos/nba/1610612756/primary/L/logo.svg",
+			},
+			{
+				name: "Sacramento Kings",
+				abbreviation: "SAC",
+				logo: "https://cdn.nba.com/logos/nba/1610612758/primary/L/logo.svg",
+			},
+
+			// Southwest Division (Western Conference)
+			{
+				name: "Dallas Mavericks",
+				abbreviation: "DAL",
+				logo: "https://cdn.nba.com/logos/nba/1610612742/primary/L/logo.svg",
+			},
+			{
+				name: "Houston Rockets",
+				abbreviation: "HOU",
+				logo: "https://cdn.nba.com/logos/nba/1610612745/primary/L/logo.svg",
+			},
+			{
+				name: "Memphis Grizzlies",
+				abbreviation: "MEM",
+				logo: "https://cdn.nba.com/logos/nba/1610612763/primary/L/logo.svg",
+			},
+			{
+				name: "New Orleans Pelicans",
+				abbreviation: "NOP",
+				logo: "https://cdn.nba.com/logos/nba/1610612740/primary/L/logo.svg",
+			},
+			{
+				name: "San Antonio Spurs",
+				abbreviation: "SAS",
+				logo: "https://cdn.nba.com/logos/nba/1610612759/primary/L/logo.svg",
+			},
+		];
+
+		console.log("Seeding teams...");
+		for (const team of teams) {
+			await run(
+				"INSERT INTO teams (name, abbreviation, logo) VALUES (?, ?, ?)",
+				[team.name, team.abbreviation, team.logo]
+			);
+		}
+		console.log(`Seeded ${teams.length} teams`);
+
+		// Updated Draft Pick Values
+		const pickValues = [
+			{pick_position: 1, value: 4000, normalized: 100.0},
+			{pick_position: 2, value: 3100, normalized: 77.5},
+			{pick_position: 3, value: 2670, normalized: 66.75},
+			{pick_position: 4, value: 2410, normalized: 60.25},
+			{pick_position: 5, value: 2240, normalized: 56.0},
+			{pick_position: 6, value: 2110, normalized: 52.75},
+			{pick_position: 7, value: 2000, normalized: 50.0},
+			{pick_position: 8, value: 1910, normalized: 47.75},
+			{pick_position: 9, value: 1830, normalized: 45.75},
+			{pick_position: 10, value: 1720, normalized: 43.0},
+			{pick_position: 11, value: 1600, normalized: 40.0},
+			{pick_position: 12, value: 1500, normalized: 37.5},
+			{pick_position: 13, value: 1400, normalized: 35.0},
+			{pick_position: 14, value: 1320, normalized: 33.0},
+			{pick_position: 15, value: 1240, normalized: 31.0},
+			{pick_position: 16, value: 1180, normalized: 29.5},
+			{pick_position: 17, value: 1130, normalized: 28.25},
+			{pick_position: 18, value: 1080, normalized: 27.0},
+			{pick_position: 19, value: 1030, normalized: 25.75},
+			{pick_position: 20, value: 980, normalized: 24.5},
+			{pick_position: 21, value: 920, normalized: 23.0},
+			{pick_position: 22, value: 860, normalized: 21.5},
+			{pick_position: 23, value: 800, normalized: 20.0},
+			{pick_position: 24, value: 750, normalized: 18.75},
+			{pick_position: 25, value: 700, normalized: 17.5},
+			{pick_position: 26, value: 660, normalized: 16.5},
+			{pick_position: 27, value: 620, normalized: 15.5},
+			{pick_position: 28, value: 570, normalized: 14.25},
+			{pick_position: 29, value: 520, normalized: 13.0},
+			{pick_position: 30, value: 470, normalized: 11.75},
+			{pick_position: 31, value: 360, normalized: 9.0},
+			{pick_position: 32, value: 350, normalized: 8.75},
+			{pick_position: 33, value: 330, normalized: 8.25},
+			{pick_position: 34, value: 320, normalized: 8.0},
+			{pick_position: 35, value: 300, normalized: 7.5},
+			{pick_position: 36, value: 290, normalized: 7.25},
+			{pick_position: 37, value: 280, normalized: 7.0},
+			{pick_position: 38, value: 270, normalized: 6.75},
+			{pick_position: 39, value: 250, normalized: 6.25},
+			{pick_position: 40, value: 240, normalized: 6.0},
+			{pick_position: 41, value: 230, normalized: 5.75},
+			{pick_position: 42, value: 220, normalized: 5.5},
+			{pick_position: 43, value: 210, normalized: 5.25},
+			{pick_position: 44, value: 200, normalized: 5.0},
+			{pick_position: 45, value: 190, normalized: 4.75},
+			{pick_position: 46, value: 180, normalized: 4.5},
+			{pick_position: 47, value: 170, normalized: 4.25},
+			{pick_position: 48, value: 160, normalized: 4.0},
+			{pick_position: 49, value: 150, normalized: 3.75},
+			{pick_position: 50, value: 140, normalized: 3.5},
+			{pick_position: 51, value: 130, normalized: 3.25},
+			{pick_position: 52, value: 120, normalized: 3.0},
+			{pick_position: 53, value: 110, normalized: 2.75},
+			{pick_position: 54, value: 100, normalized: 2.5},
+			{pick_position: 55, value: 90, normalized: 2.25},
+			{pick_position: 56, value: 90, normalized: 2.25},
+			{pick_position: 57, value: 80, normalized: 2.0},
+			{pick_position: 58, value: 70, normalized: 1.75},
+			{pick_position: 59, value: 60, normalized: 1.5},
+			{pick_position: 60, value: 50, normalized: 1.25},
+		];
+
+		console.log("Seeding pick values...");
+		for (const pick of pickValues) {
+			await run(
+				"INSERT INTO pick_values (pick_position, value, normalized) VALUES (?, ?, ?)",
+				[pick.pick_position, pick.value, pick.normalized]
+			);
+		}
+		console.log(`Seeded ${pickValues.length} pick values`);
+
+		console.log("Database seeding completed successfully!");
+	} catch (error) {
+		console.error("Error seeding database:", error);
+	} finally {
+		db.close();
+	}
+}
+
+// Helper function to wrap db.run in a promise
+function run(sql, params = []) {
+	return new Promise((resolve, reject) => {
+		db.run(sql, params, function (err) {
+			if (err) {
+				reject(err);
+				return;
+			}
+			resolve(this);
+		});
+	});
+}
