@@ -96,6 +96,13 @@ h2 {
 	text-align: center;
 	margin-bottom: 3rem;
 	padding: 2rem 0;
+	position: relative;
+}
+
+.add-team-button {
+	position: absolute;
+	top: 2rem;
+	right: 1rem;
 }
 
 .main-title {
@@ -107,11 +114,13 @@ h2 {
 
 .trade-builder {
 	width: 100%;
-	max-width: 800px;
+	max-width: min(90vw, 1400px);
+	margin: 0 auto;
 	background-color: #fff;
 	border-radius: 12px;
 	padding: 2.5rem;
 	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+	transition: max-width 0.3s ease-in-out;
 }
 
 .teams-selection {
@@ -183,7 +192,8 @@ h2 {
 
 .draft-picks-container {
 	display: flex;
-	justify-content: space-between;
+	flex-direction: row;
+	flex-wrap: wrap;
 	gap: 24px;
 	margin-top: 2rem;
 	margin-bottom: 1.5rem;
@@ -282,8 +292,25 @@ h2 {
 }
 
 .team-picks-group {
-	flex-grow: 1;
-	max-width: 40%;
+	flex: 0 0 auto;
+	width: calc(50% - 12px);
+	min-width: 300px;
+	margin-bottom: 20px;
+}
+
+/* Adjust team-picks-group width for different team counts */
+@media (min-width: 1200px) {
+	.team-picks-group.three-teams {
+		width: calc(33.333% - 16px);
+	}
+
+	.team-picks-group.four-teams {
+		width: calc(25% - 18px);
+	}
+
+	.team-picks-group.many-teams {
+		width: calc(20% - 20px);
+	}
 }
 
 /* Media Queries */
@@ -299,6 +326,10 @@ h2 {
 
 	.draft-picks-container {
 		flex-direction: column;
+	}
+
+	.team-picks-group {
+		width: 100%;
 	}
 
 	.team-picks-container {
