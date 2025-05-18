@@ -18,11 +18,23 @@ import {
 import { DraftPick, DraftPickOverlay, TeamPicksContainer } from './DraftComponents';
 import TeamSelector from './TeamSelector';
 
-const TradeBuilder = ({ teams, loading, teamGroups, setTeamGroups, getTeamGroupClass }) => {
+const TradeBuilder = ({
+	teams,
+	loading,
+	teamGroups,
+	setTeamGroups,
+	getTeamGroupClass,
+	isResetting,
+}) => {
 	const [activeId, setActiveId] = React.useState(null);
 
 	const sensors = useSensors(
-		useSensor(PointerSensor),
+		useSensor(PointerSensor, {
+			// Disable dragging while animation is in progress
+			activationConstraint: {
+				delay: isResetting ? 1000 : 0, // Prevent dragging while reset animation is happening
+			},
+		}),
 		useSensor(KeyboardSensor, {
 			coordinateGetter: sortableKeyboardCoordinates,
 		})
@@ -108,10 +120,21 @@ const TradeBuilder = ({ teams, loading, teamGroups, setTeamGroups, getTeamGroupC
 					picks: newTeamGroups[sourceTeamIndex].picks.filter((item) => item.id !== active.id),
 				};
 
-				// Add to destination team
+				// Add to destination team with traded-pick class if moving to a non-original team
+				const destTeamId = teamGroups[destTeamIndex].teamId;
+
+				// Check if the pick is being moved to a team different from its original team
+				const isTraded = sourceItem.originalTeamId && sourceItem.originalTeamId !== destTeamId;
+
+				// Add or update the className based on whether it's traded
+				const updatedSourceItem = {
+					...sourceItem,
+					className: isTraded ? 'traded-pick' : '',
+				};
+
 				newTeamGroups[destTeamIndex] = {
 					...newTeamGroups[destTeamIndex],
-					picks: [...newTeamGroups[destTeamIndex].picks, sourceItem],
+					picks: [...newTeamGroups[destTeamIndex].picks, updatedSourceItem],
 				};
 			}
 			// If reordering within the same team and not dropping on the container
@@ -142,6 +165,9 @@ const TradeBuilder = ({ teams, loading, teamGroups, setTeamGroups, getTeamGroupC
 		setTeamGroups(newTeamGroups);
 	};
 
+	// List of all selected team names
+	const selectedTeamNames = teamGroups.map((team) => team.name).filter(Boolean);
+
 	return (
 		<DndContext
 			sensors={sensors}
@@ -158,6 +184,7 @@ const TradeBuilder = ({ teams, loading, teamGroups, setTeamGroups, getTeamGroupC
 							loading={loading}
 							teams={teams}
 							onChange={(value) => handleTeamChange(index, value)}
+							selectedTeams={selectedTeamNames}
 						/>
 						{team.name && (
 							<TeamPicksContainer
@@ -170,14 +197,25 @@ const TradeBuilder = ({ teams, loading, teamGroups, setTeamGroups, getTeamGroupC
 									items={team.picks.map((pick) => pick.id)}
 									strategy={verticalListSortingStrategy}
 								>
-									{team.picks.map((pick) => (
-										<DraftPick
-											key={pick.id}
-											id={pick.id}
-											content={pick.content}
-											teamId={`team-${team.id}`}
-										/>
-									))}
+									{team.picks.map((pick) => {
+										// Check if this pick is from another team
+										const isTraded = pick.originalTeamId && pick.originalTeamId !== team.teamId;
+
+										// Combine existing className with traded-pick if needed
+										const pickClassName = isTraded
+											? `${pick.className || ''} traded-pick`.trim()
+											: pick.className || '';
+
+										return (
+											<DraftPick
+												key={pick.id}
+												id={pick.id}
+												content={pick.content}
+												teamLogo={pick.originalTeamLogo}
+												className={pickClassName}
+											/>
+										);
+									})}
 								</SortableContext>
 							</TeamPicksContainer>
 						)}
@@ -186,7 +224,9 @@ const TradeBuilder = ({ teams, loading, teamGroups, setTeamGroups, getTeamGroupC
 			</div>
 
 			<DragOverlay>
-				{activeItem ? <DraftPickOverlay content={activeItem.content} /> : null}
+				{activeItem ? (
+					<DraftPickOverlay content={activeItem.content} teamLogo={activeItem.originalTeamLogo} />
+				) : null}
 			</DragOverlay>
 		</DndContext>
 	);

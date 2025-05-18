@@ -4,7 +4,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 // Draft Pick component
-export const DraftPick = ({ id, content, teamId }) => {
+export const DraftPick = ({ id, content, teamLogo, className }) => {
 	const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
 
 	const style = {
@@ -13,15 +13,27 @@ export const DraftPick = ({ id, content, teamId }) => {
 	};
 
 	return (
-		<div ref={setNodeRef} style={style} className="draft-pick" {...attributes} {...listeners}>
-			{content}
+		<div
+			ref={setNodeRef}
+			style={style}
+			className={`draft-pick ${className || ''}`}
+			{...attributes}
+			{...listeners}
+		>
+			{teamLogo && <img src={teamLogo} alt="Team Logo" className="draft-pick-team-logo" />}
+			<span>{content}</span>
 		</div>
 	);
 };
 
 // Draft Pick Overlay
-export const DraftPickOverlay = ({ content }) => {
-	return <div className="draft-pick draft-pick-overlay">{content}</div>;
+export const DraftPickOverlay = ({ content, teamLogo }) => {
+	return (
+		<div className="draft-pick draft-pick-overlay">
+			{teamLogo && <img src={teamLogo} alt="Team Logo" className="draft-pick-team-logo" />}
+			<span>{content}</span>
+		</div>
+	);
 };
 
 // Droppable Team Container

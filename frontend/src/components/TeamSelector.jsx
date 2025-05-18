@@ -1,7 +1,7 @@
 import React from 'react';
 import { Select } from 'antd';
 
-const TeamSelector = ({ teamId, teamName, loading, teams, onChange }) => {
+const TeamSelector = ({ teamId, teamName, loading, teams, onChange, selectedTeams }) => {
 	return (
 		<div className="team-select">
 			<label htmlFor={`team-${teamId}`}>Team {teamId}</label>
@@ -17,10 +17,12 @@ const TeamSelector = ({ teamId, teamName, loading, teams, onChange }) => {
 				filterOption={(input, option) =>
 					(option?.label ?? '').toLowerCase().includes(input.toLowerCase())
 				}
-				options={teams.map((dbTeam) => ({
-					value: dbTeam.name,
-					label: dbTeam.name,
-				}))}
+				options={teams
+					.filter((dbTeam) => !selectedTeams.includes(dbTeam.name) || dbTeam.name === teamName)
+					.map((dbTeam) => ({
+						value: dbTeam.name,
+						label: dbTeam.name,
+					}))}
 			/>
 		</div>
 	);

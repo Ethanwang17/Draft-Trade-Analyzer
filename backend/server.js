@@ -40,10 +40,8 @@ function initializeDatabase() {
     team_id INTEGER,
     year INTEGER NOT NULL,
     round INTEGER NOT NULL,
-    original_team_id INTEGER,
-    protected TEXT,
-    FOREIGN KEY (team_id) REFERENCES teams (id),
-    FOREIGN KEY (original_team_id) REFERENCES teams (id)
+    pick_number INTEGER,
+    FOREIGN KEY (team_id) REFERENCES teams (id)
   )`);
 
 	// Create Draft Pick Values table
@@ -74,14 +72,34 @@ app.get("/api/teams", (req, res) => {
 // Draft Picks API Routes
 app.get("/api/draft-picks", (req, res) => {
 	const sql = `
-    SELECT dp.*, t1.name as team_name, t2.name as original_team_name 
+    SELECT dp.*, t.name as team_name 
     FROM draft_picks dp
-    JOIN teams t1 ON dp.team_id = t1.id
-    LEFT JOIN teams t2 ON dp.original_team_id = t2.id
+    JOIN teams t ON dp.team_id = t.id
     ORDER BY dp.year, dp.round
   `;
 
 	db.all(sql, [], (err, rows) => {
+		if (err) {
+			res.status(500).json({error: err.message});
+			return;
+		}
+		res.json(rows);
+	});
+});
+
+// Get picks by team ID
+app.get("/api/teams/:teamId/picks", (req, res) => {
+	const teamId = req.params.teamId;
+
+	const sql = `
+    SELECT dp.*, t.name as team_name 
+    FROM draft_picks dp
+    JOIN teams t ON dp.team_id = t.id
+    WHERE dp.team_id = ?
+    ORDER BY dp.year, dp.round
+  `;
+
+	db.all(sql, [teamId], (err, rows) => {
 		if (err) {
 			res.status(500).json({error: err.message});
 			return;

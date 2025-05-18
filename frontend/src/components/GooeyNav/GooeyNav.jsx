@@ -153,6 +153,10 @@ const GooeyNav = ({
 
 	return (
 		<div className="gooey-nav-container" ref={containerRef}>
+			<div className="logo-title-container">
+				<img src="/Draft-Trade-Analyzer/lakersLogo.svg" alt="Lakers Logo" className="lakers-logo" />
+				<span className="nav-title">Draft Pick Trade Analyzer</span>
+			</div>
 			<nav>
 				<ul ref={navRef}>
 					{items.map((item, index) => (

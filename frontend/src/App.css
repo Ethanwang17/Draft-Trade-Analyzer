@@ -13,9 +13,7 @@ body,
 	margin: 0;
 	padding: 0;
 	overflow-x: hidden;
-	font-family:
-		-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans',
-		'Helvetica Neue', sans-serif;
+	font-family: 'Satoshi', sans-serif;
 	background-color: #f5f5f5;
 }
 
@@ -99,10 +97,26 @@ h2 {
 	position: relative;
 }
 
-.add-team-button {
+.header-actions {
 	position: absolute;
 	top: 2rem;
 	right: 1rem;
+	display: flex;
+	gap: 12px;
+}
+
+.reset-trades-button {
+	background-color: #f8f8f8;
+	border-color: #ddd;
+}
+
+.reset-trades-button:hover {
+	background-color: #f0f0f0;
+	border-color: #ccc;
+}
+
+.add-team-button {
+	/* Position styles removed since the button is now in a container */
 }
 
 .main-title {
@@ -263,6 +277,15 @@ h2 {
 	border: 1px solid #f0f0f0;
 	font-size: 0.95rem;
 	color: #444;
+	display: flex;
+	align-items: center;
+}
+
+.draft-pick-team-logo {
+	width: 24px;
+	height: 24px;
+	object-fit: contain;
+	margin-right: 10px;
 }
 
 .draft-pick:hover {
@@ -335,4 +358,105 @@ h2 {
 	.team-picks-container {
 		min-height: 200px;
 	}
+}
+
+/* Animation for resetting picks */
+@keyframes resetAnimation {
+	0% {
+		opacity: 0.5;
+		transform: translateY(0);
+	}
+	50% {
+		opacity: 1;
+		transform: translateY(-10px);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.pick-resetting {
+	animation: resetAnimation 0.5s ease-out;
+}
+
+/* Trade Overview Component */
+.trade-overview {
+	margin: 0 0 20px 0;
+	padding: 15px;
+	background-color: #fff;
+	border-radius: 8px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	max-width: 900px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.trade-overview .ant-typography {
+	text-align: center;
+	margin-bottom: 15px;
+}
+
+/* Hide sort icons */
+.trade-overview-table th.ant-table-column-has-sorters .ant-table-column-sorter {
+	display: none !important;
+}
+
+/* Remove sorting highlight from column headers and rows */
+.trade-overview-table th.ant-table-column-sort,
+.trade-overview-table td.ant-table-column-sort {
+	background: transparent !important;
+}
+
+/* Make all headers have consistent background */
+.trade-overview-table th.ant-table-cell {
+	background-color: #f6f8fa !important;
+}
+
+/* Remove hover effect on column headers */
+.trade-overview-table th.ant-table-column-has-sorters:hover {
+	background-color: #f6f8fa !important;
+}
+
+/* Remove hover highlights from table rows and cells */
+.trade-overview-table tr.ant-table-row:hover > td {
+	background: transparent !important;
+}
+
+.trade-overview-table {
+	margin-top: 15px;
+}
+
+.trade-overview-table .ant-table-thead > tr > th {
+	background-color: #f6f8fa;
+	font-weight: 600;
+}
+
+.empty-trade-message {
+	padding: 20px;
+	text-align: center;
+	background-color: #f9f9f9;
+	border-radius: 4px;
+	margin-top: 15px;
+}
+
+/* Responsive styling for TradeOverview */
+@media screen and (max-width: 768px) {
+	.trade-overview {
+		padding: 10px;
+	}
+
+	.trade-overview-table .ant-table {
+		font-size: 0.9rem;
+	}
+}
+
+/* Add green border to traded picks */
+.draft-pick.traded-pick {
+	border: 2px solid #b0db9c;
+	/* box-shadow: 0 2px 6px rgba(82, 196, 26, 0.2); */
+}
+
+.draft-pick.traded-pick:hover {
+	box-shadow: 0 4px 8px rgba(82, 196, 26, 0.3);
 }

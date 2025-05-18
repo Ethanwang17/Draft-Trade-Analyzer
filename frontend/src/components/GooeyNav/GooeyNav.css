@@ -34,10 +34,10 @@
 	position: relative;
 	background-color: var(--color-black);
 	padding: 0.5rem 2rem;
-	width: calc(100% - 40px);
+	width: calc(100% - 4rem);
 	flex-shrink: 0;
 	margin: 20px auto 0;
-	border-radius: 30px;
+	border-radius: 20px;
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
@@ -102,6 +102,8 @@
 
 .gooey-nav-container nav ul li a {
 	color: var(--color-white);
+	font-family: 'Satoshi', sans-serif;
+	font-weight: 500;
 }
 
 .gooey-nav-container .effect {
@@ -154,16 +156,25 @@
 	animation: pill 0.3s ease both;
 }
 
-.gooey-nav-container::before {
-	content: 'Lakers Trade Analyzer';
-	color: var(--color-white);
-	font-size: 1.5rem;
-	font-weight: bold;
+.logo-title-container {
+	display: flex;
+	align-items: center;
 	position: absolute;
 	left: 2.5rem;
 	top: 50%;
 	transform: translateY(-50%);
-	z-index: 10;
+	z-index: 10; /* Ensure it's above other elements if necessary */
+}
+
+.lakers-logo {
+	height: 40px; /* Adjust size as needed */
+	margin-right: 20px;
+}
+
+.nav-title {
+	color: var(--color-white);
+	font-size: 1.5rem;
+	font-weight: bold;
 }
 
 @keyframes pill {

@@ -1,5 +1,4 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
 import 'antd/dist/reset.css';
 import './App.css';
 import GooeyNav from './components/GooeyNav/GooeyNav';
