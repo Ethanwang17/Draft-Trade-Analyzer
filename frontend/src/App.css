@@ -115,10 +115,6 @@ h2 {
 	border-color: #ccc;
 }
 
-.add-team-button {
-	/* Position styles removed since the button is now in a container */
-}
-
 .main-title {
 	font-size: 2.5rem;
 	font-weight: 700;
@@ -227,6 +223,17 @@ h2 {
 
 .team-picks-container:hover {
 	background-color: #f5f5f5;
+}
+
+.team-picks-content {
+	width: 100%;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	position: relative;
+	padding-top: 10px;
+	margin-top: 10px;
+	border-top: 1px dashed #e0e0e0;
 }
 
 .team-header {
@@ -380,75 +387,118 @@ h2 {
 	animation: resetAnimation 0.5s ease-out;
 }
 
-/* Trade Overview Component */
-.trade-overview {
-	margin: 0 0 20px 0;
-	padding: 15px;
-	background-color: #fff;
-	border-radius: 8px;
-	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-	max-width: 900px;
-	margin-left: auto;
-	margin-right: auto;
+/* Trade summary styles */
+.trade-summary-container {
+	width: 100%;
+	margin-bottom: 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin-top: -8px;
 }
 
-.trade-overview .ant-typography {
-	text-align: center;
-	margin-bottom: 15px;
+.trade-summary-section {
+	width: 100%;
+	border-radius: 6px;
+	overflow: hidden;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+	transition: all 0.2s ease;
 }
 
-/* Hide sort icons */
-.trade-overview-table th.ant-table-column-has-sorters .ant-table-column-sorter {
-	display: none !important;
+.trade-summary-section:hover {
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
-/* Remove sorting highlight from column headers and rows */
-.trade-overview-table th.ant-table-column-sort,
-.trade-overview-table td.ant-table-column-sort {
-	background: transparent !important;
+.trade-summary-header {
+	display: flex;
+	align-items: center;
+	padding: 8px 12px;
+	background-color: #f0f0f0;
 }
 
-/* Make all headers have consistent background */
-.trade-overview-table th.ant-table-cell {
-	background-color: #f6f8fa !important;
-}
-
-/* Remove hover effect on column headers */
-.trade-overview-table th.ant-table-column-has-sorters:hover {
-	background-color: #f6f8fa !important;
-}
-
-/* Remove hover highlights from table rows and cells */
-.trade-overview-table tr.ant-table-row:hover > td {
-	background: transparent !important;
-}
-
-.trade-overview-table {
-	margin-top: 15px;
-}
-
-.trade-overview-table .ant-table-thead > tr > th {
-	background-color: #f6f8fa;
+.trade-summary-header h4 {
+	margin: 0;
+	font-size: 0.9rem;
 	font-weight: 600;
+	color: #333;
 }
 
-.empty-trade-message {
-	padding: 20px;
+.trade-direction-icon {
+	margin-right: 8px;
+	color: #888;
+	font-size: 14px;
+	font-weight: bold;
+}
+
+.incoming .trade-direction-icon {
+	color: #52c41a;
+}
+
+.outgoing .trade-direction-icon {
+	color: #ff4d4f;
+}
+
+.incoming .trade-summary-header {
+	background-color: rgba(82, 196, 26, 0.1);
+}
+
+.outgoing .trade-summary-header {
+	background-color: rgba(255, 77, 79, 0.1);
+}
+
+.trade-summary-content {
+	padding: 8px 12px;
+	background-color: white;
+	border: 1px solid #f0f0f0;
+	border-top: none;
+	font-size: 0.85rem;
+}
+
+.trade-empty-message {
+	color: #999;
+	font-style: italic;
 	text-align: center;
-	background-color: #f9f9f9;
-	border-radius: 4px;
-	margin-top: 15px;
+	padding: 8px 0;
 }
 
-/* Responsive styling for TradeOverview */
-@media screen and (max-width: 768px) {
-	.trade-overview {
-		padding: 10px;
-	}
+.trade-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
 
-	.trade-overview-table .ant-table {
-		font-size: 0.9rem;
-	}
+.trade-summary-item {
+	display: flex;
+	flex-direction: column;
+	padding: 4px 0;
+	border-bottom: 1px solid #f5f5f5;
+}
+
+.trade-summary-item:last-child {
+	border-bottom: none;
+}
+
+.trade-item-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.trade-item-logo {
+	width: 18px;
+	height: 18px;
+	object-fit: contain;
+	flex-shrink: 0;
+}
+
+.trade-item-content {
+	color: #333;
+	font-weight: 500;
+}
+
+.trade-item-from {
+	font-size: 0.75rem;
+	color: #888;
 }
 
 /* Add green border to traded picks */

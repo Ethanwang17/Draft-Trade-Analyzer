@@ -52,6 +52,55 @@ const TradeBuilder = ({
 		return null;
 	}, [activeId, teamGroups]);
 
+	// Calculate outgoing picks for each team
+	const tradeData = useMemo(() => {
+		// Create a map to store each team's outgoing and incoming picks
+		const teamTradeData = {};
+
+		// Initialize the trade data structure for each team
+		teamGroups.forEach((team) => {
+			if (team.teamId) {
+				teamTradeData[team.teamId] = {
+					outgoing: [],
+					incoming: [],
+				};
+			}
+		});
+
+		// Find all picks that are not with their original team
+		teamGroups.forEach((team) => {
+			if (!team.teamId) return;
+
+			// Check each pick
+			team.picks.forEach((pick) => {
+				// If this pick belongs to another team originally
+				if (pick.originalTeamId && pick.originalTeamId !== team.teamId) {
+					// Add to current team's incoming
+					if (teamTradeData[team.teamId]) {
+						teamTradeData[team.teamId].incoming.push({
+							...pick,
+							fromTeam: pick.originalTeamName,
+						});
+					}
+
+					// Add to original team's outgoing
+					if (teamTradeData[pick.originalTeamId]) {
+						// Find the original team name
+						const originalTeam = teamGroups.find((t) => t.teamId === pick.originalTeamId);
+						const originalTeamName = originalTeam ? originalTeam.name : 'Unknown';
+
+						teamTradeData[pick.originalTeamId].outgoing.push({
+							...pick,
+							toTeam: team.name,
+						});
+					}
+				}
+			});
+		});
+
+		return teamTradeData;
+	}, [teamGroups]);
+
 	// Handle drag start
 	const handleDragStart = (event) => {
 		setActiveId(event.active.id);
@@ -192,6 +241,8 @@ const TradeBuilder = ({
 								teamLogo={team.logo || 'default-logo.png'}
 								teamName={team.name || `Team ${team.id}`}
 								picks={team.picks}
+								teamId={team.teamId}
+								tradeData={team.teamId ? tradeData[team.teamId] : null}
 							>
 								<SortableContext
 									items={team.picks.map((pick) => pick.id)}

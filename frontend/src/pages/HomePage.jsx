@@ -3,7 +3,6 @@ import { Modal } from 'antd';
 import TradeBuilder from '../components/TradeBuilder';
 import TradeHeader from '../components/TradeHeader';
 import TradeActions from '../components/TradeActions';
-import TradeOverview from '../components/TradeOverview';
 import { getTeamGroupClass, getTradeBuilderStyle } from '../utils/tradeUtils';
 import { sortPicks } from '../utils/pickSorter';
 
@@ -290,8 +289,6 @@ function HomePage() {
 				disableAddTeam={teamGroups.length >= 5}
 				disableResetTrades={!hasTradesMade}
 			/>
-
-			<TradeOverview teamGroups={teamGroups} />
 
 			<div className="trade-builder" style={getTradeBuilderStyle(teamGroups.length)}>
 				<TradeBuilder
