@@ -90,6 +90,36 @@ function initializeDatabase() {
     FOREIGN KEY (receiving_team_id) REFERENCES teams (id)
   )`);
 
+	// Add valuation_model_id column to saved_trades table if it doesn't exist
+	db.all("PRAGMA table_info(saved_trades)", [], (err, rows) => {
+		if (err) {
+			console.error("Error checking saved_trades schema:", err.message);
+			return;
+		}
+
+		// Check if column exists
+		const hasValuationModelColumn =
+			rows && rows.some((row) => row.name === "valuation_model_id");
+
+		if (!hasValuationModelColumn) {
+			db.run(
+				`ALTER TABLE saved_trades ADD COLUMN valuation_model_id INTEGER DEFAULT 1 REFERENCES valuations(id)`,
+				(err) => {
+					if (err) {
+						console.error(
+							"Error adding valuation_model_id column:",
+							err.message
+						);
+					} else {
+						console.log(
+							"Added valuation_model_id column to saved_trades table"
+						);
+					}
+				}
+			);
+		}
+	});
+
 	// Insert default valuation if it doesn't exist
 	db.get("SELECT id FROM valuations WHERE id = 1", [], (err, row) => {
 		if (err) {
@@ -489,9 +519,227 @@ app.get("/api/saved-trades/:id", (req, res) => {
 	});
 });
 
+// Get a specific saved trade with data formatted for loading into trade builder
+app.get("/api/trades/:id/full", (req, res) => {
+	const tradeId = req.params.id;
+
+	// Get the trade details
+	const tradeSql = `
+    SELECT id, created_at, trade_name, valuation_model_id
+    FROM saved_trades
+    WHERE id = ?
+  `;
+
+	db.get(tradeSql, [tradeId], (err, trade) => {
+		if (err) {
+			res.status(500).json({error: err.message});
+			return;
+		}
+
+		if (!trade) {
+			res.status(404).json({error: "Trade not found"});
+			return;
+		}
+
+		// Get the teams involved in the trade
+		const teamsSql = `
+      SELECT stt.team_order, t.id, t.name, t.abbreviation, t.logo
+      FROM saved_trade_teams stt
+      JOIN teams t ON stt.team_id = t.id
+      WHERE stt.saved_trade_id = ?
+      ORDER BY stt.team_order
+    `;
+
+		db.all(teamsSql, [tradeId], (err, teams) => {
+			if (err) {
+				res.status(500).json({error: err.message});
+				return;
+			}
+
+			if (teams.length === 0) {
+				res.status(404).json({error: "No teams found for this trade"});
+				return;
+			}
+
+			// Get all picks for all teams in this trade
+			const allPicksSql = `
+        SELECT 
+          dp.team_id as team_id, 
+          dp.id as pick_id,
+          dp.year, 
+          dp.round, 
+          dp.pick_number,
+          t.id as original_team_id,
+          t.name as original_team_name,
+          t.logo as original_team_logo
+        FROM draft_picks dp
+        JOIN teams t ON dp.team_id = t.id
+        WHERE dp.team_id IN (${teams.map(() => "?").join(",")})
+      `;
+
+			const teamIds = teams.map((team) => team.id);
+
+			db.all(allPicksSql, teamIds, (err, allPicks) => {
+				if (err) {
+					res.status(500).json({error: err.message});
+					return;
+				}
+
+				// Get the picks involved in the trade
+				const tradedPicksSql = `
+          SELECT 
+            stp.draft_pick_id,
+            stp.sending_team_id,
+            stp.receiving_team_id
+          FROM saved_trade_picks stp
+          WHERE stp.saved_trade_id = ?
+        `;
+
+				db.all(tradedPicksSql, [tradeId], (err, tradedPicks) => {
+					if (err) {
+						res.status(500).json({error: err.message});
+						return;
+					}
+
+					// Create team groups for the trade builder
+					const teamGroups = teams.map((team, index) => {
+						// Format team data for trade builder
+						const teamGroup = {
+							id: index + 1,
+							name: team.name,
+							logo: team.logo,
+							teamId: team.id,
+							picks: [], // will be populated with picks
+						};
+
+						// Get this team's picks
+						const teamPicksMap = {};
+
+						allPicks.forEach((pick) => {
+							if (pick.team_id === team.id) {
+								// Create a unique pick ID
+								const pickId = `pick-${pick.pick_id}`;
+								teamPicksMap[pick.pick_id] = {
+									id: pickId,
+									content: `${pick.year} ${getOrdinalRound(
+										pick.round
+									)} Pick${
+										pick.pick_number
+											? ` (#${pick.pick_number})`
+											: ""
+									}`,
+									pickId: pick.pick_id,
+									year: pick.year,
+									round: pick.round,
+									pick_number: pick.pick_number,
+									originalTeamLogo:
+										pick.original_team_logo || team.logo,
+									originalTeamId: pick.original_team_id,
+									originalTeamName: pick.original_team_name,
+									valuation: trade.valuation_model_id || 1,
+								};
+							}
+						});
+
+						// Initialize picks array with this team's original picks
+						const teamPicks = Object.values(teamPicksMap);
+
+						// Apply traded picks
+						tradedPicks.forEach((tradedPick) => {
+							// If this pick was sent by this team
+							if (tradedPick.sending_team_id === team.id) {
+								// Remove the pick if it was sent away
+								const pickIndex = teamPicks.findIndex(
+									(p) =>
+										parseInt(p.pickId) ===
+										tradedPick.draft_pick_id
+								);
+								if (pickIndex !== -1) {
+									teamPicks.splice(pickIndex, 1);
+								}
+							}
+
+							// If this pick was received by this team
+							if (tradedPick.receiving_team_id === team.id) {
+								// Find the pick in all picks
+								const receivedPick = allPicks.find(
+									(p) =>
+										p.pick_id === tradedPick.draft_pick_id
+								);
+								if (receivedPick) {
+									// Find original team
+									const originalTeam = teams.find(
+										(t) =>
+											t.id === tradedPick.sending_team_id
+									);
+									if (originalTeam) {
+										// Add the received pick to this team's picks
+										teamPicks.push({
+											id: `pick-${receivedPick.pick_id}`,
+											content: `${
+												receivedPick.year
+											} ${getOrdinalRound(
+												receivedPick.round
+											)} Pick${
+												receivedPick.pick_number
+													? ` (#${receivedPick.pick_number})`
+													: ""
+											}`,
+											pickId: receivedPick.pick_id,
+											year: receivedPick.year,
+											round: receivedPick.round,
+											pick_number:
+												receivedPick.pick_number,
+											originalTeamLogo: originalTeam.logo,
+											originalTeamId:
+												tradedPick.sending_team_id,
+											originalTeamName: originalTeam.name,
+											valuation:
+												trade.valuation_model_id || 1,
+											className: "traded-pick", // Add traded class
+										});
+									}
+								}
+							}
+						});
+
+						// Assign picks to the team group
+						teamGroup.picks = teamPicks;
+
+						return teamGroup;
+					});
+
+					// Function to get ordinal round names
+					function getOrdinalRound(round) {
+						const ordinals = [
+							"First",
+							"Second",
+							"Third",
+							"Fourth",
+							"Fifth",
+							"Sixth",
+							"Seventh",
+						];
+						return round >= 1 && round <= 7
+							? ordinals[round - 1]
+							: `Round ${round}`;
+					}
+
+					res.json({
+						id: trade.id,
+						trade_name: trade.trade_name,
+						valuation_model_id: trade.valuation_model_id || 1,
+						teamGroups: teamGroups,
+					});
+				});
+			});
+		});
+	});
+});
+
 // Save a new trade
 app.post("/api/saved-trades", (req, res) => {
-	const {teams, trade_name, picks} = req.body;
+	const {teams, trade_name, picks, valuation_model_id} = req.body;
 
 	if (
 		!teams ||
@@ -510,8 +758,8 @@ app.post("/api/saved-trades", (req, res) => {
 
 		// Insert the trade
 		db.run(
-			"INSERT INTO saved_trades (trade_name) VALUES (?)",
-			[trade_name || null],
+			"INSERT INTO saved_trades (trade_name, valuation_model_id) VALUES (?, ?)",
+			[trade_name || null, valuation_model_id || 1],
 			function (err) {
 				if (err) {
 					db.run("ROLLBACK");

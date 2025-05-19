@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, List, Typography, Button, Empty, Spin } from 'antd';
-import { SwapOutlined, DeleteOutlined, LoadingOutlined } from '@ant-design/icons';
+import { Card, List, Typography, Button, Empty, Spin, message } from 'antd';
+import { SwapOutlined, DeleteOutlined, LoadingOutlined, EditOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import '../App.css';
 import { useSavedTrades, useTradeDetails, useTradeDelete, useTradeUtils } from '../hooks';
@@ -25,7 +25,7 @@ function SavedTrades() {
 		setTradeDetails
 	);
 	const { formatDate, getTeamPickDetails } = useTradeUtils();
-	const _navigate = useNavigate();
+	const navigate = useNavigate();
 
 	// Render the pick details for a specific team
 	const renderTeamPickDetails = (teamId, type) => {
@@ -66,6 +66,55 @@ function SavedTrades() {
 		);
 	};
 
+	const handleLoadTrade = async (tradeId, e) => {
+		if (e) {
+			e.stopPropagation(); // Prevent card expansion when clicking the button
+		}
+
+		try {
+			// Fetch full trade data to reconstruct the trade builder state
+			const response = await fetch(`/api/trades/${tradeId}/full`);
+
+			if (!response.ok) {
+				throw new Error('Failed to load trade data');
+			}
+
+			const tradeData = await response.json();
+
+			// Navigate to homepage with trade data
+			navigate('/home', {
+				state: {
+					preserveTradeState: true,
+					teamGroups: tradeData.teamGroups,
+					selectedValuation: tradeData.valuation_model_id || 1,
+				},
+			});
+		} catch (error) {
+			console.error('Error loading trade:', error);
+			message.error('Failed to load trade: ' + error.message);
+		}
+	};
+
+	// Separate button component to prevent event bubbling issues
+	const LoadTradeButton = ({ tradeId }) => (
+		<Button
+			type="primary"
+			icon={<EditOutlined />}
+			onClick={(e) => {
+				e.stopPropagation();
+				handleLoadTrade(tradeId);
+			}}
+			style={{
+				marginRight: '8px',
+				background: '#1890ff',
+				borderColor: '#1890ff',
+				fontWeight: 'bold',
+			}}
+		>
+			Load Trade
+		</Button>
+	);
+
 	return (
 		<div className="st-container">
 			<Title level={2}>Saved Trade Concepts</Title>
@@ -91,12 +140,15 @@ function SavedTrades() {
 									<Title level={4}>{trade.trade_name || `Trade #${trade.id}`}</Title>
 									<Text type="secondary">{formatDate(trade.created_at)}</Text>
 								</div>
-								<Button
-									type="text"
-									danger
-									icon={<DeleteOutlined />}
-									onClick={(e) => deleteTrade(trade.id, e)}
-								/>
+								<div className="st-trade-actions">
+									<LoadTradeButton tradeId={trade.id} />
+									<Button
+										type="text"
+										danger
+										icon={<DeleteOutlined />}
+										onClick={(e) => deleteTrade(trade.id, e)}
+									/>
+								</div>
 							</div>
 
 							<div className="st-trade-teams">

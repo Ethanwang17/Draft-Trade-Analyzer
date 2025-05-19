@@ -50,6 +50,7 @@ export const useTradeSave = () => {
 					})),
 				trade_name: tradeName || null,
 				picks: tradedPicks,
+				valuation_model_id: tradeData.selectedValuation || 1,
 			};
 
 			// Send to the API
