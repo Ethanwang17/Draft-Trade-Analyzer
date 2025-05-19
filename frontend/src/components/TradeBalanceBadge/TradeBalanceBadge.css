@@ -1,0 +1,22 @@
+.analyze-trade-badge {
+	padding: 7px 15px;
+	border-radius: 999px;
+	color: white;
+	font-weight: bold;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.analyze-trade-badge.balanced {
+	background-color: #52c41a;
+}
+
+.analyze-trade-badge.slightly-favors {
+	background-color: #52c41a;
+}
+
+.analyze-trade-badge.heavily-favors {
+	background-color: #ff4d4f;
+}

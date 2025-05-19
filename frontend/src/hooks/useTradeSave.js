@@ -25,10 +25,39 @@ export const useTradeSave = () => {
 			team.picks.forEach((pick) => {
 				// If this pick belongs to another team originally
 				if (pick.originalTeamId !== team.teamId) {
+					// Validate pickId, originalTeamId, and team.teamId
+					if (!pick.pickId) {
+						console.error('Missing pickId for traded pick:', pick);
+						return; // Skip this pick
+					}
+
+					const draft_pick_id = parseInt(pick.pickId);
+					if (isNaN(draft_pick_id)) {
+						console.error('Invalid pickId format:', pick.pickId);
+						return; // Skip this pick
+					}
+
+					// Ensure sending and receiving team IDs are valid integers
+					const sending_team_id =
+						typeof pick.originalTeamId === 'string'
+							? parseInt(pick.originalTeamId)
+							: pick.originalTeamId;
+
+					const receiving_team_id =
+						typeof team.teamId === 'string' ? parseInt(team.teamId) : team.teamId;
+
+					if (isNaN(sending_team_id) || isNaN(receiving_team_id)) {
+						console.error('Invalid team ID:', {
+							sending: pick.originalTeamId,
+							receiving: team.teamId,
+						});
+						return; // Skip this pick
+					}
+
 					tradedPicks.push({
-						draft_pick_id: parseInt(pick.pickId),
-						sending_team_id: pick.originalTeamId,
-						receiving_team_id: team.teamId,
+						draft_pick_id,
+						sending_team_id,
+						receiving_team_id,
 					});
 				}
 			});
@@ -40,12 +69,14 @@ export const useTradeSave = () => {
 		}
 
 		try {
+			console.log('Saving trade with picks:', tradedPicks);
+
 			// Prepare the trade data with all teams
 			const saveData = {
 				teams: tradeData.teamGroups
 					.filter((team) => team.teamId) // Only include teams with IDs
 					.map((team) => ({
-						id: team.teamId,
+						id: typeof team.teamId === 'string' ? parseInt(team.teamId) : team.teamId,
 						name: team.name,
 					})),
 				trade_name: tradeName || null,
@@ -63,7 +94,9 @@ export const useTradeSave = () => {
 			});
 
 			if (!response.ok) {
-				throw new Error('Failed to save trade');
+				const errorData = await response.json().catch(() => ({}));
+				console.error('Server error response:', errorData);
+				throw new Error(`Failed to save trade: ${errorData.error || response.statusText}`);
 			}
 
 			await response.json();
@@ -73,7 +106,7 @@ export const useTradeSave = () => {
 			return true;
 		} catch (error) {
 			console.error('Error saving trade:', error);
-			message.error('Failed to save trade');
+			message.error(`Failed to save trade: ${error.message}`);
 			return false;
 		}
 	};

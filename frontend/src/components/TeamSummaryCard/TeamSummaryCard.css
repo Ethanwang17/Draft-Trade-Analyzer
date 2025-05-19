@@ -1,0 +1,15 @@
+.team-title-container {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.team-logo {
+	width: 40px;
+	height: 40px;
+	margin-right: 8px;
+}
+
+.team-card {
+	height: 100%;
+}

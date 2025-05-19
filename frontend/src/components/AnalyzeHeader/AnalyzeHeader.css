@@ -1,0 +1,53 @@
+.analyze-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 16px;
+	width: 100%;
+}
+
+.back-button-container {
+	display: flex;
+	align-items: center;
+}
+
+.save-button-container {
+	display: flex;
+	align-items: center;
+}
+
+.analyze-back-button {
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	font-weight: 500;
+	transition: all 0.2s;
+}
+
+.analyze-back-button:hover {
+	transform: translateX(-2px);
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.save-trade-button {
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	font-weight: 500;
+	transition: all 0.2s;
+}
+
+.save-trade-button:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.header-valuation-select {
+	width: 220px;
+}
+
+.valuation-controls-container {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}

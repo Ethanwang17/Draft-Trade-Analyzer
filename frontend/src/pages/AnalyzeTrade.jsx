@@ -1,9 +1,6 @@
 import React from 'react';
-import { Card, Typography, Row, Col, Tabs, Badge, Spin, Alert, Button, Modal, Input } from 'antd';
-import { ArrowLeftOutlined, SaveOutlined } from '@ant-design/icons';
+import { Typography, Row, Spin, Alert } from 'antd';
 import { useLocation } from 'react-router-dom';
-import TradeSummary from '../components/TradeSummary/TradeSummary';
-import ValuationSelector from '../components/ValuationSelector/ValuationSelector';
 import {
 	useTradeAnalysis,
 	usePickValues,
@@ -11,6 +8,10 @@ import {
 	useTradeSave,
 	usePick,
 } from '../hooks';
+import AnalyzeHeader from '../components/AnalyzeHeader/AnalyzeHeader';
+import TradeBalanceBadge from '../components/TradeBalanceBadge/TradeBalanceBadge';
+import TeamSummaryCard from '../components/TeamSummaryCard/TeamSummaryCard';
+import SaveTradeModal from '../components/SaveTradeModal/SaveTradeModal';
 
 const { Title, Text } = Typography;
 
@@ -65,57 +66,22 @@ function AnalyzeTrade() {
 
 	return (
 		<div className="analyze-page">
-			<div className="analyze-header">
-				<div className="back-button-container">
-					<Button
-						type="default"
-						icon={<ArrowLeftOutlined />}
-						onClick={handleBackToTrade}
-						className="analyze-back-button"
-					>
-						Back to Trade
-					</Button>
-				</div>
-
-				<div className="valuation-controls-container">
-					<div className="header-valuation-select">
-						<ValuationSelector defaultValue={selectedValuation} onChange={handleValuationChange} />
-					</div>
-					<div className="save-button-container">
-						<Button
-							type="primary"
-							icon={<SaveOutlined />}
-							onClick={() => setSaveModalVisible(true)}
-							className="save-trade-button"
-						>
-							Save Trade
-						</Button>
-					</div>
-				</div>
-			</div>
+			<AnalyzeHeader
+				selectedValuation={selectedValuation}
+				onValuationChange={handleValuationChange}
+				onBackToTrade={handleBackToTrade}
+				onSaveClick={() => setSaveModalVisible(true)}
+			/>
 
 			<div className="analyze-title-container">
 				<Title level={2}>Trade Analysis</Title>
 
 				{/* Trade Balance Badge */}
-				{!loading && !valuesLoading && tradeBalance && (
-					<Badge
-						count={
-							<div
-								className={`analyze-trade-badge ${
-									tradeBalance.status === 'balanced'
-										? 'balanced'
-										: tradeBalance.status === 'slightlyFavors'
-											? 'slightly-favors'
-											: 'heavily-favors'
-								}`}
-							>
-								{tradeBalance.iconType && React.createElement(tradeBalance.iconType)}{' '}
-								{tradeBalance.message} {tradeBalance.value ? `(${tradeBalance.value})` : ''}
-							</div>
-						}
-					/>
-				)}
+				<TradeBalanceBadge
+					tradeBalance={tradeBalance}
+					loading={loading}
+					valuesLoading={valuesLoading}
+				/>
 			</div>
 
 			{/* Trade Summary Components - One per team */}
@@ -124,46 +90,29 @@ function AnalyzeTrade() {
 				<Row gutter={[16, 16]} justify="space-between">
 					{teamsWithPicks.map((team) => {
 						const teamTradeData = prepareTeamTradeData(team);
+						const colSize = teamsWithPicks.length <= 3 ? 8 : 6;
 
 						return (
-							<Col key={team.teamId} xs={24} sm={12} md={8} lg={teamsWithPicks.length <= 3 ? 8 : 6}>
-								<Card
-									title={
-										<div className="team-title-container">
-											<img src={team.logo} alt={team.name} className="team-logo" />
-											<span>{team.name}</span>
-										</div>
-									}
-									className="team-card"
-								>
-									<TradeSummary
-										tradeData={teamTradeData}
-										onResetPick={handleResetPick}
-										showNetValue={true}
-									/>
-								</Card>
-							</Col>
+							<TeamSummaryCard
+								key={team.teamId}
+								team={team}
+								teamTradeData={teamTradeData}
+								onResetPick={handleResetPick}
+								colSize={colSize}
+							/>
 						);
 					})}
 				</Row>
 			</div>
 
 			{/* Save Trade Modal */}
-			<Modal
-				title="Save Trade"
-				open={saveModalVisible}
-				onOk={handleSaveTrade}
+			<SaveTradeModal
+				visible={saveModalVisible}
+				tradeName={tradeName}
+				setTradeName={setTradeName}
+				onSave={handleSaveTrade}
 				onCancel={() => setSaveModalVisible(false)}
-				okText="Save"
-				cancelText="Cancel"
-			>
-				<p>Enter a name for this trade (optional):</p>
-				<Input
-					placeholder="Trade Name"
-					value={tradeName}
-					onChange={(e) => setTradeName(e.target.value)}
-				/>
-			</Modal>
+			/>
 		</div>
 	);
 }
