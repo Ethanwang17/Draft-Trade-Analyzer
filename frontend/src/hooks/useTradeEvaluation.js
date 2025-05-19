@@ -1,0 +1,181 @@
+import { CheckCircleOutlined, WarningOutlined, CloseCircleOutlined } from '@ant-design/icons';
+
+/**
+ * Hook for evaluating trade balance
+ * @param {Object} tradeData - The trade data
+ * @param {Object} pickValues - Object mapping pick numbers to values
+ * @returns {Object} Trade evaluation functions and utilities
+ */
+export const useTradeEvaluation = (tradeData, pickValues) => {
+	// Find moved picks and track their movements
+	const findMovedPicks = () => {
+		if (!tradeData || !tradeData.teamGroups) return {};
+
+		const movedPicks = {};
+
+		// Track where each pick currently is
+		const currentPickLocations = {};
+
+		// Find all picks that have moved
+		tradeData.teamGroups.forEach((team) => {
+			if (!team.teamId || !team.picks) return;
+
+			team.picks.forEach((pick) => {
+				// Store current location of each pick
+				currentPickLocations[pick.id] = {
+					teamId: team.teamId,
+					teamName: team.name,
+					pick,
+				};
+
+				// If pick is not with its original team, it has moved
+				if (pick.originalTeamId !== team.teamId) {
+					// Record this as a moved pick
+					if (!movedPicks[pick.originalTeamId]) {
+						movedPicks[pick.originalTeamId] = {
+							outgoing: [],
+							incoming: [],
+						};
+					}
+
+					if (!movedPicks[team.teamId]) {
+						movedPicks[team.teamId] = {
+							outgoing: [],
+							incoming: [],
+						};
+					}
+
+					// Add to outgoing for original team
+					movedPicks[pick.originalTeamId].outgoing.push({
+						...pick,
+						currentTeamId: team.teamId,
+						currentTeamName: team.name,
+					});
+
+					// Add to incoming for current team
+					movedPicks[team.teamId].incoming.push(pick);
+				}
+			});
+		});
+
+		return movedPicks;
+	};
+
+	// Calculate team values based on pick movements
+	const calculateTeamValues = (team) => {
+		if (!tradeData)
+			return {
+				outgoingPicks: [],
+				incomingPicks: [],
+				outgoingValue: 0,
+				incomingValue: 0,
+				netValue: 0,
+			};
+
+		const movedPicks = findMovedPicks();
+		const teamMovedPicks = movedPicks[team.teamId] || { outgoing: [], incoming: [] };
+
+		// Use the correctly identified moved picks
+		const outgoingPicks = teamMovedPicks.outgoing;
+		const incomingPicks = teamMovedPicks.incoming;
+
+		// Calculate values using the fetched pick values
+		const outgoingValue = outgoingPicks.reduce((sum, pick) => {
+			return (
+				sum + (pick.pick_number && pickValues[pick.pick_number] ? pickValues[pick.pick_number] : 0)
+			);
+		}, 0);
+
+		const incomingValue = incomingPicks.reduce((sum, pick) => {
+			return (
+				sum + (pick.pick_number && pickValues[pick.pick_number] ? pickValues[pick.pick_number] : 0)
+			);
+		}, 0);
+
+		const netValue = incomingValue - outgoingValue;
+
+		return {
+			outgoingPicks,
+			incomingPicks,
+			outgoingValue,
+			incomingValue,
+			netValue,
+		};
+	};
+
+	// Evaluate trade balance
+	const evaluateTrade = () => {
+		if (!tradeData) return null;
+
+		const teamValues = tradeData.teamGroups
+			.filter((team) => team.teamId)
+			.map((team) => {
+				const values = calculateTeamValues(team);
+				return {
+					teamId: team.teamId,
+					name: team.name,
+					netValue: values.netValue,
+				};
+			});
+
+		// Find the team with highest and lowest net values
+		const sortedTeams = [...teamValues].sort((a, b) => b.netValue - a.netValue);
+		const highestValue = sortedTeams[0];
+		const lowestValue = sortedTeams[sortedTeams.length - 1];
+
+		const valueDifference = highestValue.netValue - lowestValue.netValue;
+
+		// Determine if the trade is balanced
+		if (valueDifference < 100) {
+			return {
+				status: 'balanced',
+				message: 'Balanced Trade',
+				iconType: CheckCircleOutlined,
+			};
+		} else if (valueDifference < 300) {
+			return {
+				status: 'slightlyFavors',
+				message: `Slightly Favors ${highestValue.name}`,
+				value: `+${Math.round(highestValue.netValue)}`,
+				iconType: WarningOutlined,
+			};
+		} else {
+			return {
+				status: 'heavilyFavors',
+				message: `Heavily Favors ${highestValue.name}`,
+				value: `+${Math.round(highestValue.netValue)}`,
+				iconType: CloseCircleOutlined,
+			};
+		}
+	};
+
+	// Prepare team trade data for display
+	const prepareTeamTradeData = (team) => {
+		const movedPicks = findMovedPicks();
+		const teamMovedPicks = movedPicks[team.teamId] || { outgoing: [], incoming: [] };
+
+		// Transform outgoing picks for proper display
+		const outgoingWithInfo = teamMovedPicks.outgoing.map((pick) => ({
+			...pick,
+			toTeam: pick.currentTeamName,
+		}));
+
+		// Transform incoming picks for proper display
+		const incomingWithInfo = teamMovedPicks.incoming.map((pick) => ({
+			...pick,
+			fromTeam: pick.originalTeamName,
+		}));
+
+		return {
+			outgoing: outgoingWithInfo,
+			incoming: incomingWithInfo,
+		};
+	};
+
+	return {
+		findMovedPicks,
+		calculateTeamValues,
+		evaluateTrade,
+		prepareTeamTradeData,
+	};
+};

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import './TradeSummaryValue.css';
 
 const TradeSummaryValue = ({ picks, direction }) => {
 	const [totalValue, setTotalValue] = useState(null);

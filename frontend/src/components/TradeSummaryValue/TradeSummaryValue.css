@@ -1,0 +1,39 @@
+/* Trade summary value styles */
+.trade-summary-value {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 0.85rem;
+	padding: 8px 4px;
+	margin-top: 8px;
+	border-top: 1px dashed #f0f0f0;
+	color: #333;
+}
+
+.trade-summary-value.incoming strong {
+	color: #52c41a;
+}
+
+.trade-summary-value.outgoing strong {
+	color: #ff4d4f;
+}
+
+.trade-summary-value-loading {
+	font-size: 0.8rem;
+	color: #999;
+	font-style: italic;
+	text-align: center;
+	padding: 4px 0;
+}
+
+.trade-summary-value strong {
+	font-weight: 600;
+	font-size: 0.9rem;
+	display: flex;
+	align-items: center;
+}
+
+.value-prefix {
+	font-weight: bold;
+	margin-right: 2px;
+}

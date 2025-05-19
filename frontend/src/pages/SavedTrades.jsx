@@ -1,114 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { Card, List, Typography, Button, Empty, message, Modal, Spin, Divider } from 'antd';
-import {
-	SwapOutlined,
-	DeleteOutlined,
-	LoadingOutlined,
-	ArrowRightOutlined,
-} from '@ant-design/icons';
+import React from 'react';
+import { Card, List, Typography, Button, Empty, Spin } from 'antd';
+import { SwapOutlined, DeleteOutlined, LoadingOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import '../App.css';
+import { useSavedTrades, useTradeDetails, useTradeDelete, useTradeUtils } from '../hooks';
 
 const { Title, Text } = Typography;
 
 function SavedTrades() {
-	const [trades, setTrades] = useState([]);
-	const [loading, setLoading] = useState(true);
-	const [expandedTradeId, setExpandedTradeId] = useState(null);
-	const [tradeDetails, setTradeDetails] = useState(null);
-	const [loadingDetails, setLoadingDetails] = useState(false);
+	const { trades, loading, setTrades } = useSavedTrades();
+	const {
+		expandedTradeId,
+		tradeDetails,
+		loadingDetails,
+		loadTradeDetails,
+		setExpandedTradeId,
+		setTradeDetails,
+	} = useTradeDetails();
+	const deleteTrade = useTradeDelete(
+		trades,
+		setTrades,
+		expandedTradeId,
+		setExpandedTradeId,
+		setTradeDetails
+	);
+	const { formatDate, getTeamPickDetails } = useTradeUtils();
 	const _navigate = useNavigate();
-
-	// Fetch all saved trades
-	useEffect(() => {
-		const fetchSavedTrades = async () => {
-			try {
-				setLoading(true);
-				const response = await fetch('/api/saved-trades');
-
-				if (!response.ok) {
-					throw new Error('Failed to fetch saved trades');
-				}
-
-				const data = await response.json();
-				setTrades(data);
-			} catch (error) {
-				console.error('Error loading saved trades:', error);
-				message.error('Failed to load saved trades');
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		fetchSavedTrades();
-	}, []);
-
-	// Fetch trade details
-	const loadTradeDetails = async (tradeId) => {
-		if (expandedTradeId === tradeId) {
-			setExpandedTradeId(null);
-			return;
-		}
-
-		try {
-			setExpandedTradeId(tradeId);
-			setLoadingDetails(true);
-
-			const response = await fetch(`/api/saved-trades/${tradeId}`);
-
-			if (!response.ok) {
-				throw new Error('Failed to fetch trade details');
-			}
-
-			const data = await response.json();
-			setTradeDetails(data);
-		} catch (error) {
-			console.error('Error loading trade details:', error);
-			message.error('Failed to load trade details');
-			setExpandedTradeId(null);
-		} finally {
-			setLoadingDetails(false);
-		}
-	};
-
-	// Delete a trade
-	const deleteTrade = async (tradeId, event) => {
-		event.stopPropagation();
-
-		try {
-			const response = await fetch(`/api/saved-trades/${tradeId}`, {
-				method: 'DELETE',
-			});
-
-			if (!response.ok) {
-				throw new Error('Failed to delete trade');
-			}
-
-			// Remove from local state
-			setTrades(trades.filter((trade) => trade.id !== tradeId));
-			if (expandedTradeId === tradeId) {
-				setExpandedTradeId(null);
-				setTradeDetails(null);
-			}
-
-			message.success('Trade deleted successfully');
-		} catch (error) {
-			console.error('Error deleting trade:', error);
-			message.error('Failed to delete trade');
-		}
-	};
-
-	// Format date for display
-	const formatDate = (dateString) => {
-		const date = new Date(dateString);
-		return date.toLocaleDateString('en-US', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric',
-			hour: '2-digit',
-			minute: '2-digit',
-		});
-	};
 
 	// Render the pick details for a specific team
 	const renderTeamPickDetails = (teamId, type) => {
@@ -133,9 +50,9 @@ function SavedTrades() {
 								src={
 									type === 'receiving'
 										? pick.sending_team_logo
-										: pick.receiving_team_logo || 'default-logo.png'
+										: pick.sending_team_logo || 'default-logo.png'
 								}
-								alt={type === 'receiving' ? pick.sending_team_name : pick.receiving_team_name}
+								alt={type === 'receiving' ? pick.sending_team_name : pick.sending_team_name}
 								className="st-team-logo-small"
 							/>
 							<Text>

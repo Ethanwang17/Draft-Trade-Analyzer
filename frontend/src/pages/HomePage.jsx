@@ -1,28 +1,25 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Modal, message } from 'antd';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { Modal } from 'antd';
+import { useLocation } from 'react-router-dom';
 import TradeBuilder from '../components/TradeBuilder';
 import TradeMenuBar from '../components/TradeMenuBar/TradeMenuBar';
 import { getTeamGroupClass, getTradeBuilderStyle } from '../utils/tradeUtils';
 import { sortPicks } from '../utils/pickSorter';
+import {
+	useTeamManagement,
+	useTradeReset,
+	useTeamPicks,
+	useTradeAnalyzer,
+	useTradeSave,
+} from '../hooks';
 
 function HomePage() {
-	const navigate = useNavigate();
 	const location = useLocation();
-	const [teams, setTeams] = useState([]);
-	const [loading, setLoading] = useState(true);
-	// Store original picks for each team to enable reset functionality
 	const originalPicksRef = useRef({});
-	const [isResetting, setIsResetting] = useState(false);
-	// State for reset confirmation modal
-	const [resetModalVisible, setResetModalVisible] = useState(false);
-	// State to track if any trades have been made
 	const [hasTradesMade, setHasTradesMade] = useState(false);
-	// State for selected valuation model
-	const [selectedValuation, setSelectedValuation] = useState(1);
 
 	// Initialize with empty team groups or from location state if coming back from analyze page
-	const [teamGroups, setTeamGroups] = useState(() => {
+	const initialTeamGroups = (() => {
 		// Check if we have state passed from analyze page
 		if (location.state?.preserveTradeState && location.state?.teamGroups) {
 			// If we do, use that state
@@ -45,112 +42,42 @@ function HomePage() {
 				teamId: null,
 			},
 		];
-	});
+	})();
 
-	// Function to check if any picks have been moved from their original teams
-	const checkForTradesMade = useCallback(
-		(groups = teamGroups) => {
-			const hasTrades = groups.some((group) => {
-				if (!group.teamId) return false;
+	// Get teams first
+	const { teams, loading } = useTeamManagement(initialTeamGroups, null); // Pass null for now
 
-				// Get original picks for this team
-				const originalPicks = originalPicksRef.current[group.teamId] || [];
-				const originalPickIds = new Set(originalPicks.map((p) => p.id));
-
-				// Check if current picks are different from original picks
-				const currentPickIds = new Set(group.picks.map((p) => p.id));
-
-				// If the sets are different sizes or contain different IDs, trades have been made
-				if (originalPickIds.size !== currentPickIds.size) return true;
-
-				for (const id of originalPickIds) {
-					if (!currentPickIds.has(id)) return true;
-				}
-
-				// Also check if this team has received picks from other teams
-				for (const pick of group.picks) {
-					if (pick.originalTeamId && pick.originalTeamId !== group.teamId) {
-						return true;
-					}
-				}
-
-				return false;
-			});
-
-			setHasTradesMade(hasTrades);
-			return hasTrades;
-		},
-		[teamGroups]
-	);
-
-	// Check for returning from analyze page with saved state
-	useEffect(() => {
-		if (location.state?.preserveTradeState) {
-			// Restore valuation model if passed
-			if (location.state.selectedValuation) {
-				setSelectedValuation(location.state.selectedValuation);
-			}
-
-			// Determine if trades are made in the restored state
-			if (location.state.teamGroups) {
-				checkForTradesMade(location.state.teamGroups);
-			}
-		}
-	}, [location.state, checkForTradesMade]);
-
-	// Handler for valuation change
-	const handleValuationChange = (valuationId) => {
-		setSelectedValuation(valuationId);
-
-		// Update the valuation for all picks without changing their positions
-		const updatedTeamGroups = teamGroups.map((group) => ({
-			...group,
-			picks: group.picks.map((pick) => ({
-				...pick,
-				valuation: valuationId,
-			})),
-		}));
-
-		setTeamGroups(updatedTeamGroups);
+	// Helper function to check for trades
+	const checkForTradesMadeAndUpdateState = (groups, checkFn) => {
+		if (!checkFn) return false;
+		const hasTrades = checkFn(groups);
+		console.log('Trade status changed:', hasTrades);
+		setHasTradesMade(hasTrades);
+		return hasTrades;
 	};
 
-	// Helper function to update team groups with sorted picks
-	const updateTeamGroups = (newTeamGroups) => {
-		const sortedTeamGroups = newTeamGroups.map((group) => ({
-			...group,
-			picks: sortPicks(group.picks),
-		}));
-		setTeamGroups(sortedTeamGroups);
+	// Define state for teamGroups directly
+	const [teamGroups, setTeamGroups] = useState(initialTeamGroups);
+	const [selectedValuation, setSelectedValuation] = useState(1);
 
-		// Check if trades have been made after updating the team groups
-		checkForTradesMade(sortedTeamGroups);
-	};
+	// Get reset functionality, now with direct access to setTeamGroups
+	const {
+		isResetting,
+		resetModalVisible,
+		checkForTradesMade,
+		showResetConfirmation,
+		handleResetConfirm,
+		handleResetCancel,
+	} = useTradeReset(originalPicksRef, setTeamGroups, hasTradesMade, setHasTradesMade);
 
-	// Fetch teams from the database
-	useEffect(() => {
-		const fetchTeams = async () => {
-			try {
-				const response = await fetch('/api/teams');
-				if (!response.ok) {
-					throw new Error('Failed to fetch teams');
-				}
-				const teamsData = await response.json();
-				setTeams(teamsData);
-			} catch (error) {
-				console.error('Error fetching teams:', error);
-			} finally {
-				setLoading(false);
-			}
-		};
-
-		fetchTeams();
-	}, []);
-
-	// Update team logo and fetch team picks when team selection changes
+	// Update team picks when teams or selected valuation changes
 	useEffect(() => {
 		const updateTeamsAndPicks = async () => {
+			if (!teams || teams.length === 0) return;
+
 			const updatedTeamGroupsLocal = [...teamGroups];
 
+			// Process team selections and fetch picks (similar to useTeamPicks)
 			for (let i = 0; i < updatedTeamGroupsLocal.length; i++) {
 				const group = updatedTeamGroupsLocal[i];
 				const selectedTeam = teams.find((team) => team.name === group.name);
@@ -163,8 +90,7 @@ function HomePage() {
 						teamId: selectedTeam.id,
 					};
 
-					// If team ID changed or if picks are currently empty (for initial load for a pre-selected team)
-					// and selectedTeam.id is valid
+					// If team ID changed or if picks are empty, fetch picks
 					if (
 						selectedTeam.id &&
 						(selectedTeam.id !== group.teamId ||
@@ -187,7 +113,7 @@ function HomePage() {
 								'Seventh',
 							];
 
-							// Transform picks data to the format expected by the UI
+							// Format picks
 							const formattedPicks = picksData.map((pick) => ({
 								id: `pick-${pick.id}`,
 								content: `${pick.year} ${pick.round >= 1 && pick.round <= 7 ? roundWords[pick.round - 1] : `Round ${pick.round}`} Pick${pick.pick_number ? ` (#${pick.pick_number})` : ''}`,
@@ -197,25 +123,20 @@ function HomePage() {
 								pick_number: pick.pick_number,
 								originalTeamLogo:
 									pick.original_team_logo || selectedTeam.logo || 'default-logo.png',
-								originalTeamId: selectedTeam.id, // Store original team ID
-								originalTeamName: selectedTeam.name, // Store original team name
+								originalTeamId: selectedTeam.id,
+								originalTeamName: selectedTeam.name,
+								valuation: selectedValuation,
 							}));
 
 							// Store the original picks for this team
 							originalPicksRef.current[selectedTeam.id] = [...formattedPicks];
 
-							updatedTeamGroupsLocal[i].picks = formattedPicks;
+							// Apply sorting to the picks
+							updatedTeamGroupsLocal[i].picks = sortPicks(formattedPicks);
 						} catch (error) {
 							console.error(`Error fetching picks for team ${selectedTeam.name}:`, error);
 							updatedTeamGroupsLocal[i].picks = [];
 						}
-					} else if (!selectedTeam.id && group.name === '') {
-						updatedTeamGroupsLocal[i] = {
-							...group,
-							logo: '',
-							teamId: null,
-							picks: [],
-						};
 					}
 				} else if (group.name === '') {
 					updatedTeamGroupsLocal[i] = {
@@ -226,17 +147,59 @@ function HomePage() {
 					};
 				}
 			}
-			updateTeamGroups(updatedTeamGroupsLocal);
+
+			// Apply sorting to each team's picks again to ensure everything is properly sorted
+			const sortedTeamGroups = updatedTeamGroupsLocal.map((group) => ({
+				...group,
+				picks: sortPicks(group.picks),
+			}));
+
+			// Update teamGroups state
+			setTeamGroups(sortedTeamGroups);
+
+			// Check for trades
+			checkForTradesMadeAndUpdateState(sortedTeamGroups, checkForTradesMade);
 		};
 
-		if (teams.length > 0 || teamGroups.some((tg) => tg.name === '')) {
-			updateTeamsAndPicks();
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [teamGroups.map((t) => t.name).join(','), teams]);
+		updateTeamsAndPicks();
+	}, [teams, teamGroups.map((t) => t.name).join(','), selectedValuation]);
 
-	// Add a new team (maximum 4 teams)
-	const addTeam = () => {
+	// Other hooks
+	const { handleAnalyzeTrade } = useTradeAnalyzer();
+	const { tradeName, setTradeName, saveTrade } = useTradeSave();
+
+	// Function to update team groups (used by TradeBuilder)
+	const updateTeamGroups = (newTeamGroups) => {
+		// Apply sorting to each team's picks
+		const sortedTeamGroups = newTeamGroups.map((group) => ({
+			...group,
+			picks: sortPicks(group.picks),
+		}));
+
+		setTeamGroups(sortedTeamGroups);
+		checkForTradesMadeAndUpdateState(sortedTeamGroups, checkForTradesMade);
+	};
+
+	// Handle valuation change
+	const handleValuationChange = (valuationId) => {
+		setSelectedValuation(valuationId);
+
+		// Update the valuation for all picks and apply sorting
+		const updatedTeamGroups = teamGroups.map((group) => ({
+			...group,
+			picks: sortPicks(
+				group.picks.map((pick) => ({
+					...pick,
+					valuation: valuationId,
+				}))
+			),
+		}));
+
+		setTeamGroups(updatedTeamGroups);
+	};
+
+	// Handle adding a team
+	const handleAddTeam = () => {
 		if (teamGroups.length >= 4) return;
 
 		const newId = teamGroups.length + 1;
@@ -252,8 +215,8 @@ function HomePage() {
 		]);
 	};
 
-	// Remove a team and renumber remaining teams
-	const removeTeam = (teamId) => {
+	// Handle removing a team
+	const handleRemoveTeam = (teamId) => {
 		// Don't allow removing if only 2 teams remain
 		if (teamGroups.length <= 2) return;
 
@@ -335,185 +298,78 @@ function HomePage() {
 		updateTeamGroups(updatedTeamGroups);
 	};
 
-	// Show reset confirmation modal
-	const showResetConfirmation = () => {
-		// Only show confirmation if trades have been made
-		if (hasTradesMade) {
-			setResetModalVisible(true);
-		} else {
-			// If no trades have been made, just proceed with reset
-			performReset();
-		}
-	};
-
-	// Handle confirmation modal OK button
-	const handleResetConfirm = () => {
-		setResetModalVisible(false);
-		performReset();
-	};
-
-	// Handle confirmation modal Cancel button
-	const handleResetCancel = () => {
-		setResetModalVisible(false);
-	};
-
-	// Perform the actual reset
-	const performReset = () => {
-		// If no trades have been made, no need to reset
-		if (!hasTradesMade) return;
-
-		// Start the animation
-		setIsResetting(true);
-
-		// Create new team groups with original picks for each team
-		const resetTeamGroups = teamGroups.map((group) => {
-			// If this group has a team selected, restore its original picks only
-			if (group.teamId) {
-				const originalPicks = originalPicksRef.current[group.teamId] || [];
-				return {
-					...group,
-					picks: [...originalPicks].map((pick) => ({
-						...pick,
-					})),
-				};
+	// Check for returning from analyze page with saved state
+	useEffect(() => {
+		if (location.state?.preserveTradeState) {
+			// Restore valuation model if passed
+			if (location.state.selectedValuation) {
+				handleValuationChange(location.state.selectedValuation);
 			}
-			// Otherwise return the group as is (empty)
-			return {
-				...group,
-				picks: [],
-			};
-		});
 
-		// Update the team groups
-		updateTeamGroups(resetTeamGroups);
+			// Determine if trades are made in the restored state
+			if (location.state.teamGroups) {
+				// Rebuild the originalPicksRef for each team if we're returning from analyze page
+				// This ensures that reset functionality works properly after returning from analyze
+				const teams = location.state.teamGroups.filter((team) => team.teamId);
 
-		// Reset animation state after animation completes
-		setTimeout(() => {
-			setIsResetting(false);
-			// Remove animation classes
-			const updatedGroups = resetTeamGroups.map((group) => ({
-				...group,
-				picks: group.picks.map((pick) => {
-					return pick;
-				}),
-			}));
-			updateTeamGroups(updatedGroups);
+				// For each team, store its original picks (picks with originalTeamId matching the team's id)
+				teams.forEach((team) => {
+					if (!team.teamId) return;
 
-			// After reset, no trades have been made
-			setHasTradesMade(false);
-		}, 500); // Match animation duration
-	};
-
-	// Handle analyzing the trade
-	const handleAnalyzeTrade = () => {
-		// Check if we have at least two teams with valid IDs
-		const validTeams = teamGroups.filter((team) => team.teamId && team.name !== '');
-
-		if (validTeams.length < 2) {
-			message.error('Please select at least two teams for the trade');
-			return;
-		}
-
-		// Check if any trades have been made
-		if (!hasTradesMade) {
-			message.warning('No trades have been made yet');
-			return;
-		}
-
-		// Navigate to the analyze page with the trade data
-		// Include the selected valuation model and teamGroups
-		navigate('/analyze', {
-			state: {
-				teamGroups,
-				selectedValuation,
-			},
-		});
-	};
-
-	// Add saveTrade function
-	const _saveTrade = async (tradeName) => {
-		// We need at least two teams selected with valid IDs
-		const validTeams = teamGroups.filter((team) => team.teamId && team.name !== '');
-
-		if (validTeams.length < 2) {
-			message.error('Please select at least two teams for the trade');
-			return;
-		}
-
-		// Check if there are any trades made
-		if (!hasTradesMade) {
-			message.warning('No trades have been made yet');
-			return;
-		}
-
-		try {
-			// Get all picks that have been traded (have moved from their original team)
-			const tradedPicks = [];
-
-			// Check each team's picks
-			teamGroups.forEach((team) => {
-				if (!team.teamId) return;
-
-				team.picks.forEach((pick) => {
-					// If this pick belongs to another team originally
-					if (pick.originalTeamId !== team.teamId) {
-						tradedPicks.push({
-							draft_pick_id: parseInt(pick.pickId),
-							sending_team_id: pick.originalTeamId,
-							receiving_team_id: team.teamId,
+					// Find all picks that originally belonged to this team (across all teams)
+					const originalPicks = [];
+					teams.forEach((sourceTeam) => {
+						sourceTeam.picks.forEach((pick) => {
+							if (pick.originalTeamId === team.teamId) {
+								originalPicks.push({ ...pick });
+							}
 						});
+					});
+
+					// Store these picks in the originalPicksRef for this team
+					if (originalPicks.length > 0) {
+						originalPicksRef.current[team.teamId] = originalPicks;
 					}
 				});
-			});
 
-			if (tradedPicks.length === 0) {
-				message.warning('No picks have been traded');
-				return;
+				// Check for trades in the restored state
+				checkForTradesMadeAndUpdateState(location.state.teamGroups, checkForTradesMade);
 			}
-
-			// Prepare the trade data with all teams
-			const tradeData = {
-				teams: teamGroups
-					.filter((team) => team.teamId) // Only include teams with IDs
-					.map((team) => ({
-						id: team.teamId,
-						name: team.name,
-					})),
-				trade_name: tradeName || null,
-				picks: tradedPicks,
-			};
-
-			// Send to the API
-			const response = await fetch('/api/saved-trades', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(tradeData),
-			});
-
-			if (!response.ok) {
-				throw new Error('Failed to save trade');
-			}
-
-			await response.json();
-			message.success('Trade saved successfully');
-		} catch (error) {
-			console.error('Error saving trade:', error);
-			message.error('Failed to save trade');
 		}
+	}, [location.state]);
+
+	// Initial check for trades
+	useEffect(() => {
+		if (checkForTradesMade && teamGroups.length > 0) {
+			console.log('Initial check for trades');
+			const hasTrades = checkForTradesMade(teamGroups);
+			setHasTradesMade(hasTrades);
+		}
+	}, [checkForTradesMade, teamGroups]);
+
+	const handleResetTrades = () => {
+		console.log('Reset trades clicked. Has trades made:', hasTradesMade);
+		showResetConfirmation(teamGroups);
+	};
+
+	const handleModalResetConfirm = () => {
+		handleResetConfirm(teamGroups);
+	};
+
+	const handleAnalyze = () => {
+		handleAnalyzeTrade(teamGroups, selectedValuation, hasTradesMade);
 	};
 
 	return (
 		<div className="home-page">
 			<TradeMenuBar
-				onAddTeam={addTeam}
-				onResetTrades={showResetConfirmation}
+				onAddTeam={handleAddTeam}
+				onResetTrades={handleResetTrades}
 				onValuationChange={handleValuationChange}
 				selectedValuation={selectedValuation}
 				disableAddTeam={teamGroups.length >= 4}
 				disableResetTrades={!hasTradesMade}
-				onAnalyze={handleAnalyzeTrade}
+				onAnalyze={handleAnalyze}
 			/>
 
 			<div className="trade-builder" style={getTradeBuilderStyle(teamGroups.length)}>
@@ -524,7 +380,7 @@ function HomePage() {
 					setTeamGroups={updateTeamGroups}
 					getTeamGroupClass={getTeamGroupClass}
 					isResetting={isResetting}
-					onRemoveTeam={removeTeam}
+					onRemoveTeam={handleRemoveTeam}
 				/>
 			</div>
 
@@ -532,7 +388,7 @@ function HomePage() {
 			<Modal
 				title="Reset Trades"
 				open={resetModalVisible}
-				onOk={handleResetConfirm}
+				onOk={handleModalResetConfirm}
 				onCancel={handleResetCancel}
 				okText="Reset"
 				cancelText="Cancel"

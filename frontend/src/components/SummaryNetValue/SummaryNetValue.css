@@ -1,0 +1,42 @@
+.summary-net-value {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 10px;
+	background-color: #f5f5f5;
+	border-radius: 4px;
+	font-weight: bold;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+	transition: all 0.2s ease;
+}
+
+.summary-net-value:hover {
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.net-value-label {
+	font-size: 16px;
+}
+
+.net-value-amount {
+	font-size: 16px;
+}
+
+.net-value-amount.positive {
+	color: #52c41a;
+}
+
+.net-value-amount.negative {
+	color: #ff4d4f;
+}
+
+.net-value-amount.neutral {
+	color: #666;
+}
+
+.summary-net-value-loading {
+	text-align: center;
+	padding: 8px;
+	color: #888;
+	font-style: italic;
+}

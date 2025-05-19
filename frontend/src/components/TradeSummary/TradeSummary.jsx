@@ -1,8 +1,9 @@
 import React from 'react';
 import TradeSummarySection from '../TradeSummarySection/TradeSummarySection';
+import SummaryNetValue from '../SummaryNetValue/SummaryNetValue';
 import './TradeSummary.css';
 
-const TradeSummary = ({ tradeData, onResetPick }) => {
+const TradeSummary = ({ tradeData, onResetPick, showNetValue = false }) => {
 	const { outgoing = [], incoming = [] } = tradeData || {};
 
 	return (
@@ -22,6 +23,8 @@ const TradeSummary = ({ tradeData, onResetPick }) => {
 				icon="↓"
 				onResetPick={onResetPick}
 			/>
+
+			{showNetValue && <SummaryNetValue picks={tradeData} />}
 		</div>
 	);
 };
