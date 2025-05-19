@@ -335,6 +335,57 @@ async function seedDatabase() {
 		}
 		console.log(`Seeded ${pickValues.length} pick values`);
 
+		// Seed valuation models
+		const valuations = [
+			{
+				id: 1,
+				name: "Standard",
+				table_name: "pick_values",
+				description:
+					"Default valuation model based on historical draft value",
+			},
+			{
+				id: 2,
+				name: "Conservative",
+				table_name: "pick_values",
+				description: "Values picks more conservatively",
+			},
+			{
+				id: 3,
+				name: "Aggressive",
+				table_name: "pick_values",
+				description: "Values top picks more aggressively",
+			},
+		];
+
+		console.log("Seeding valuation models...");
+		for (const valuation of valuations) {
+			// Check if valuation already exists
+			const existingValuation = await new Promise((resolve, reject) => {
+				db.get(
+					"SELECT id FROM valuations WHERE id = ?",
+					[valuation.id],
+					(err, row) => {
+						if (err) reject(err);
+						else resolve(row);
+					}
+				);
+			});
+
+			if (!existingValuation) {
+				await run(
+					"INSERT INTO valuations (id, name, table_name, description) VALUES (?, ?, ?, ?)",
+					[
+						valuation.id,
+						valuation.name,
+						valuation.table_name,
+						valuation.description,
+					]
+				);
+			}
+		}
+		console.log(`Checked/seeded ${valuations.length} valuation models`);
+
 		console.log("Database seeding completed successfully!");
 	} catch (error) {
 		console.error("Error seeding database:", error);

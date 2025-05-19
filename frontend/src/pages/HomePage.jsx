@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Modal } from 'antd';
+import { Modal, message } from 'antd';
 import TradeBuilder from '../components/TradeBuilder';
-import TradeHeader from '../components/TradeHeader';
-import TradeActions from '../components/TradeActions';
+import TradeMenuBar from '../components/TradeMenuBar';
 import { getTeamGroupClass, getTradeBuilderStyle } from '../utils/tradeUtils';
 import { sortPicks } from '../utils/pickSorter';
 
@@ -16,6 +15,8 @@ function HomePage() {
 	const [resetModalVisible, setResetModalVisible] = useState(false);
 	// State to track if any trades have been made
 	const [hasTradesMade, setHasTradesMade] = useState(false);
+	// State for selected valuation model
+	const [selectedValuation, setSelectedValuation] = useState(1);
 
 	// Initialize with empty team groups
 	const [teamGroups, setTeamGroups] = useState([
@@ -34,6 +35,22 @@ function HomePage() {
 			teamId: null,
 		},
 	]);
+
+	// Handler for valuation change
+	const handleValuationChange = (valuationId) => {
+		setSelectedValuation(valuationId);
+
+		// Update the valuation for all picks without changing their positions
+		const updatedTeamGroups = teamGroups.map((group) => ({
+			...group,
+			picks: group.picks.map((pick) => ({
+				...pick,
+				valuation: valuationId,
+			})),
+		}));
+
+		setTeamGroups(updatedTeamGroups);
+	};
 
 	// Helper function to update team groups with sorted picks
 	const updateTeamGroups = (newTeamGroups) => {
@@ -189,9 +206,9 @@ function HomePage() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [teamGroups.map((t) => t.name).join(','), teams]);
 
-	// Add a new team (maximum 5 teams)
+	// Add a new team (maximum 4 teams)
 	const addTeam = () => {
-		if (teamGroups.length >= 5) return;
+		if (teamGroups.length >= 4) return;
 
 		const newId = teamGroups.length + 1;
 		updateTeamGroups([
@@ -204,6 +221,92 @@ function HomePage() {
 				teamId: null,
 			},
 		]);
+	};
+
+	// Remove a team and renumber remaining teams
+	const removeTeam = (teamId) => {
+		// Don't allow removing if only 2 teams remain
+		if (teamGroups.length <= 2) return;
+
+		// Find the team being removed
+		const teamToRemove = teamGroups.find((team) => team.id === teamId);
+
+		if (!teamToRemove || !teamToRemove.teamId) {
+			// If the team doesn't exist or doesn't have a team ID (not selected), just remove it
+			const newTeamGroups = teamGroups
+				.filter((team) => team.id !== teamId)
+				.map((team, index) => ({
+					...team,
+					id: index + 1, // Renumber teams starting from 1
+				}));
+
+			updateTeamGroups(newTeamGroups);
+			return;
+		}
+
+		// Handle picks before removing the team
+		let updatedTeamGroups = [...teamGroups];
+
+		// 1. Find picks that belonged to the team being removed but are now with other teams
+		// and return them to their original teams
+		const removedTeamOriginalPickIds =
+			originalPicksRef.current[teamToRemove.teamId]?.map((pick) => pick.id) || [];
+
+		updatedTeamGroups = updatedTeamGroups.map((group) => {
+			// Skip the team being removed
+			if (group.id === teamId) return group;
+
+			// For each team, check if they have picks that belonged to the team being removed
+			const picksToReturn = group.picks.filter(
+				(pick) => pick.originalTeamId === teamToRemove.teamId
+			);
+
+			// If no picks to return, no changes needed for this team
+			if (picksToReturn.length === 0) return group;
+
+			// Remove the picks that belonged to the team being removed
+			return {
+				...group,
+				picks: group.picks.filter((pick) => pick.originalTeamId !== teamToRemove.teamId),
+			};
+		});
+
+		// 2. Find picks from other teams that the removed team had
+		// and return those picks to their original teams
+		const picksToReturn = teamToRemove.picks.filter(
+			(pick) => pick.originalTeamId !== teamToRemove.teamId
+		);
+
+		picksToReturn.forEach((pick) => {
+			const originalTeamGroup = updatedTeamGroups.find(
+				(group) => group.teamId === pick.originalTeamId
+			);
+
+			if (originalTeamGroup) {
+				// Reset the className (remove traded-pick class) before returning to original team
+				const resetPick = {
+					...pick,
+					className: '', // Remove traded-pick class
+				};
+
+				// Add the pick back to its original team
+				const teamIndex = updatedTeamGroups.findIndex((group) => group.id === originalTeamGroup.id);
+				updatedTeamGroups[teamIndex] = {
+					...originalTeamGroup,
+					picks: [...originalTeamGroup.picks, resetPick],
+				};
+			}
+		});
+
+		// 3. Remove the team and renumber the remaining teams
+		updatedTeamGroups = updatedTeamGroups
+			.filter((team) => team.id !== teamId)
+			.map((team, index) => ({
+				...team,
+				id: index + 1, // Renumber teams starting from 1
+			}));
+
+		updateTeamGroups(updatedTeamGroups);
 	};
 
 	// Show reset confirmation modal
@@ -281,13 +384,91 @@ function HomePage() {
 		// Additional logic for trade analysis would go here
 	};
 
+	// Add saveTrade function
+	const saveTrade = async (tradeName) => {
+		// We need at least two teams selected with valid IDs
+		const validTeams = teamGroups.filter((team) => team.teamId && team.name !== '');
+
+		if (validTeams.length < 2) {
+			message.error('Please select at least two teams for the trade');
+			return;
+		}
+
+		// Check if there are any trades made
+		if (!hasTradesMade) {
+			message.warning('No trades have been made yet');
+			return;
+		}
+
+		try {
+			// Get all picks that have been traded (have moved from their original team)
+			const tradedPicks = [];
+
+			// Check each team's picks
+			teamGroups.forEach((team) => {
+				if (!team.teamId) return;
+
+				team.picks.forEach((pick) => {
+					// If this pick belongs to another team originally
+					if (pick.originalTeamId !== team.teamId) {
+						tradedPicks.push({
+							draft_pick_id: parseInt(pick.pickId),
+							sending_team_id: pick.originalTeamId,
+							receiving_team_id: team.teamId,
+						});
+					}
+				});
+			});
+
+			if (tradedPicks.length === 0) {
+				message.warning('No picks have been traded');
+				return;
+			}
+
+			// Prepare the trade data with all teams
+			const tradeData = {
+				teams: teamGroups
+					.filter((team) => team.teamId) // Only include teams with IDs
+					.map((team) => ({
+						id: team.teamId,
+						name: team.name,
+					})),
+				trade_name: tradeName || null,
+				picks: tradedPicks,
+			};
+
+			// Send to the API
+			const response = await fetch('/api/saved-trades', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(tradeData),
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to save trade');
+			}
+
+			const result = await response.json();
+			message.success('Trade saved successfully');
+		} catch (error) {
+			console.error('Error saving trade:', error);
+			message.error('Failed to save trade');
+		}
+	};
+
 	return (
 		<div className="home-page">
-			<TradeHeader
+			<TradeMenuBar
 				onAddTeam={addTeam}
 				onResetTrades={showResetConfirmation}
-				disableAddTeam={teamGroups.length >= 5}
+				onValuationChange={handleValuationChange}
+				selectedValuation={selectedValuation}
+				disableAddTeam={teamGroups.length >= 4}
 				disableResetTrades={!hasTradesMade}
+				onAnalyze={handleAnalyzeTrade}
+				onSaveTrade={saveTrade}
 			/>
 
 			<div className="trade-builder" style={getTradeBuilderStyle(teamGroups.length)}>
@@ -298,9 +479,8 @@ function HomePage() {
 					setTeamGroups={updateTeamGroups}
 					getTeamGroupClass={getTeamGroupClass}
 					isResetting={isResetting}
+					onRemoveTeam={removeTeam}
 				/>
-
-				<TradeActions onAnalyze={handleAnalyzeTrade} />
 			</div>
 
 			{/* Reset Confirmation Modal */}

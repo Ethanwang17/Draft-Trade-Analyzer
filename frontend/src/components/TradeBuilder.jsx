@@ -25,6 +25,7 @@ const TradeBuilder = ({
 	setTeamGroups,
 	getTeamGroupClass,
 	isResetting,
+	onRemoveTeam,
 }) => {
 	const [activeId, setActiveId] = React.useState(null);
 
@@ -85,10 +86,6 @@ const TradeBuilder = ({
 
 					// Add to original team's outgoing
 					if (teamTradeData[pick.originalTeamId]) {
-						// Find the original team name
-						const originalTeam = teamGroups.find((t) => t.teamId === pick.originalTeamId);
-						const originalTeamName = originalTeam ? originalTeam.name : 'Unknown';
-
 						teamTradeData[pick.originalTeamId].outgoing.push({
 							...pick,
 							toTeam: team.name,
@@ -207,10 +204,121 @@ const TradeBuilder = ({
 	// Handle team selection
 	const handleTeamChange = (index, value) => {
 		const newTeamGroups = [...teamGroups];
+		const previousTeam = newTeamGroups[index];
+		const previousTeamId = previousTeam.teamId;
+
+		// Store the ID before updating
 		newTeamGroups[index] = {
 			...newTeamGroups[index],
 			name: value,
 		};
+
+		// If this was a previously selected team with a teamId, we need to handle its picks
+		if (previousTeamId) {
+			// 1. Find picks that belonged to the team being changed but are now with other teams
+			// and remove them from those teams
+			for (let i = 0; i < newTeamGroups.length; i++) {
+				// Skip the team being changed
+				if (i === index) continue;
+
+				const group = newTeamGroups[i];
+
+				// Check for picks that belonged to the previous team
+				const filteredPicks = group.picks.filter((pick) => pick.originalTeamId !== previousTeamId);
+
+				// Update picks if any were removed
+				if (filteredPicks.length !== group.picks.length) {
+					newTeamGroups[i] = {
+						...group,
+						picks: filteredPicks,
+					};
+				}
+			}
+
+			// 2. Return any picks from other teams that this team currently has
+			const picksToReturn = previousTeam.picks.filter(
+				(pick) => pick.originalTeamId !== previousTeamId
+			);
+
+			picksToReturn.forEach((pick) => {
+				const originalTeamIndex = newTeamGroups.findIndex(
+					(group) => group.teamId === pick.originalTeamId
+				);
+
+				if (originalTeamIndex !== -1) {
+					// Reset the className (remove traded-pick class) before returning to original team
+					const resetPick = {
+						...pick,
+						className: '', // Remove traded-pick class
+					};
+
+					// Add the pick back to its original team
+					newTeamGroups[originalTeamIndex] = {
+						...newTeamGroups[originalTeamIndex],
+						picks: [...newTeamGroups[originalTeamIndex].picks, resetPick],
+					};
+				}
+			});
+
+			// 3. Clear the picks for the team that changed
+			newTeamGroups[index] = {
+				...newTeamGroups[index],
+				picks: [],
+			};
+		}
+
+		setTeamGroups(newTeamGroups);
+	};
+
+	// Reset a specific pick to its original team
+	const resetPickToOriginalTeam = (pickId) => {
+		// Find which team currently has this pick
+		let currentTeamIndex = -1;
+		let pickToReset = null;
+
+		for (let i = 0; i < teamGroups.length; i++) {
+			const pick = teamGroups[i].picks.find((item) => item.id === pickId);
+			if (pick) {
+				currentTeamIndex = i;
+				pickToReset = pick;
+				break;
+			}
+		}
+
+		if (!pickToReset || currentTeamIndex === -1) return;
+
+		// Find the original team index
+		const originalTeamIndex = teamGroups.findIndex(
+			(team) => team.teamId === pickToReset.originalTeamId
+		);
+
+		if (originalTeamIndex === -1) return;
+
+		// Create new team groups array
+		const newTeamGroups = [...teamGroups];
+
+		// Remove the pick from its current team
+		newTeamGroups[currentTeamIndex] = {
+			...newTeamGroups[currentTeamIndex],
+			picks: newTeamGroups[currentTeamIndex].picks.filter((p) => p.id !== pickId),
+		};
+
+		// Reset the className (remove traded-pick class) before returning to original team
+		const resetPick = {
+			...pickToReset,
+			className: '', // Remove traded-pick class
+		};
+
+		// Add the pick back to its original team
+		newTeamGroups[originalTeamIndex] = {
+			...newTeamGroups[originalTeamIndex],
+			picks: [...newTeamGroups[originalTeamIndex].picks, resetPick],
+		};
+
+		// Apply a brief animation class to highlight the returned pick
+		resetPick.className = 'pick-resetting';
+
+		// Update the team groups - let the parent component sort the picks
 		setTeamGroups(newTeamGroups);
 	};
 
@@ -234,6 +342,8 @@ const TradeBuilder = ({
 							teams={teams}
 							onChange={(value) => handleTeamChange(index, value)}
 							selectedTeams={selectedTeamNames}
+							onRemoveTeam={onRemoveTeam}
+							totalTeams={teamGroups.length}
 						/>
 						{team.name && (
 							<TeamPicksContainer
@@ -243,6 +353,7 @@ const TradeBuilder = ({
 								picks={team.picks}
 								teamId={team.teamId}
 								tradeData={team.teamId ? tradeData[team.teamId] : null}
+								onResetPick={resetPickToOriginalTeam}
 							>
 								<SortableContext
 									items={team.picks.map((pick) => pick.id)}
