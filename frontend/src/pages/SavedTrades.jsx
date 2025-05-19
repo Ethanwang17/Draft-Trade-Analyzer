@@ -7,6 +7,7 @@ import {
 	ArrowRightOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import '../App.css';
 
 const { Title, Text } = Typography;
 
@@ -127,7 +128,7 @@ function SavedTrades() {
 				dataSource={picks}
 				renderItem={(pick) => (
 					<List.Item>
-						<div className="pick-item">
+						<div className="st-pick-item">
 							<img
 								src={
 									type === 'receiving'
@@ -135,7 +136,7 @@ function SavedTrades() {
 										: pick.receiving_team_logo || 'default-logo.png'
 								}
 								alt={type === 'receiving' ? pick.sending_team_name : pick.receiving_team_name}
-								className="team-logo-small"
+								className="st-team-logo-small"
 							/>
 							<Text>
 								{pick.year} Round {pick.round}
@@ -149,26 +150,26 @@ function SavedTrades() {
 	};
 
 	return (
-		<div className="saved-trades">
+		<div className="st-container">
 			<Title level={2}>Saved Trade Concepts</Title>
 
 			{loading ? (
-				<div className="loading-container">
+				<div className="st-loading-container">
 					<Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
 					<p>Loading saved trades...</p>
 				</div>
 			) : trades.length === 0 ? (
 				<Empty description="No saved trades yet" />
 			) : (
-				<div className="trades-list">
+				<div className="st-trades-list">
 					{trades.map((trade) => (
 						<Card
 							key={trade.id}
-							className="trade-card"
+							className={`st-trade-card team-count-${trade.teams ? trade.teams.length : 0}`}
 							onClick={() => loadTradeDetails(trade.id)}
 							hoverable
 						>
-							<div className="trade-header">
+							<div className="st-trade-header">
 								<div className="trade-title">
 									<Title level={4}>{trade.trade_name || `Trade #${trade.id}`}</Title>
 									<Text type="secondary">{formatDate(trade.created_at)}</Text>
@@ -181,147 +182,50 @@ function SavedTrades() {
 								/>
 							</div>
 
-							<div className="trade-teams">
+							<div className="st-trade-teams">
 								{trade.teams &&
 									trade.teams.map((team, index) => (
 										<React.Fragment key={team.id}>
-											<div className="team">
+											<div className="st-team">
 												<img
 													src={team.logo || 'default-logo.png'}
 													alt={team.name}
-													className="team-logo"
+													className="st-team-logo"
 												/>
 												<Text strong>{team.name}</Text>
+
+												{expandedTradeId === trade.id && !loadingDetails && tradeDetails && (
+													<div className="st-team-picks-inline">
+														<div className="st-team-pick-section">
+															<Title level={5}>Receives:</Title>
+															{renderTeamPickDetails(team.id, 'receiving')}
+														</div>
+														<div className="st-team-pick-section">
+															<Title level={5}>Sends:</Title>
+															{renderTeamPickDetails(team.id, 'sending')}
+														</div>
+													</div>
+												)}
 											</div>
 
 											{index < trade.teams.length - 1 && (
-												<div className="trade-direction">
-													<SwapOutlined className="swap-icon" />
+												<div className="st-trade-direction">
+													<SwapOutlined className="st-swap-icon" />
 												</div>
 											)}
 										</React.Fragment>
 									))}
 							</div>
 
-							{expandedTradeId === trade.id && (
-								<div className="trade-details">
-									{loadingDetails ? (
-										<Spin size="small" />
-									) : (
-										tradeDetails &&
-										tradeDetails.teams && (
-											<div className="all-team-details">
-												{tradeDetails.teams.map((team) => (
-													<div key={team.id} className="team-detail-section">
-														<Divider orientation="left">{team.name}</Divider>
-
-														<div className="team-picks-container">
-															<div className="team-picks">
-																<Title level={5}>Receives:</Title>
-																{renderTeamPickDetails(team.id, 'receiving')}
-															</div>
-
-															<div className="team-picks">
-																<Title level={5}>Sends:</Title>
-																{renderTeamPickDetails(team.id, 'sending')}
-															</div>
-														</div>
-													</div>
-												))}
-											</div>
-										)
-									)}
+							{expandedTradeId === trade.id && loadingDetails && (
+								<div className="st-loading-details">
+									<Spin size="small" />
 								</div>
 							)}
 						</Card>
 					))}
 				</div>
 			)}
-
-			<style jsx>{`
-				.saved-trades {
-					padding: 20px;
-				}
-				.trades-list {
-					margin-top: 20px;
-				}
-				.trade-card {
-					margin-bottom: 16px;
-					border-radius: 8px;
-				}
-				.trade-header {
-					display: flex;
-					justify-content: space-between;
-					align-items: center;
-					margin-bottom: 16px;
-				}
-				.trade-teams {
-					display: flex;
-					align-items: center;
-					justify-content: center;
-					flex-wrap: wrap;
-					gap: 10px;
-				}
-				.team {
-					display: flex;
-					flex-direction: column;
-					align-items: center;
-					min-width: 80px;
-				}
-				.team-logo {
-					width: 60px;
-					height: 60px;
-					object-fit: contain;
-					margin-bottom: 8px;
-				}
-				.team-logo-small {
-					width: 24px;
-					height: 24px;
-					object-fit: contain;
-					margin-right: 8px;
-				}
-				.trade-direction {
-					display: flex;
-					align-items: center;
-				}
-				.swap-icon {
-					font-size: 24px;
-				}
-				.trade-details {
-					margin-top: 16px;
-					padding-top: 16px;
-					border-top: 1px solid #f0f0f0;
-				}
-				.all-team-details {
-					display: flex;
-					flex-direction: column;
-					gap: 20px;
-				}
-				.team-detail-section {
-					margin-bottom: 12px;
-				}
-				.team-picks-container {
-					display: flex;
-					flex-wrap: wrap;
-					gap: 20px;
-					margin-top: 8px;
-				}
-				.team-picks {
-					flex: 1;
-					min-width: 200px;
-				}
-				.pick-item {
-					display: flex;
-					align-items: center;
-				}
-				.loading-container {
-					display: flex;
-					flex-direction: column;
-					align-items: center;
-					justify-content: center;
-					padding: 40px;
-				}
-			`}</style>
 		</div>
 	);
 }

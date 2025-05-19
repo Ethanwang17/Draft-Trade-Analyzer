@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Modal, message } from 'antd';
+import { useNavigate } from 'react-router-dom';
 import TradeBuilder from '../components/TradeBuilder';
 import TradeMenuBar from '../components/TradeMenuBar';
 import { getTeamGroupClass, getTradeBuilderStyle } from '../utils/tradeUtils';
 import { sortPicks } from '../utils/pickSorter';
 
 function HomePage() {
+	const navigate = useNavigate();
 	const [teams, setTeams] = useState([]);
 	const [loading, setLoading] = useState(true);
 	// Store original picks for each team to enable reset functionality
@@ -380,8 +382,28 @@ function HomePage() {
 
 	// Handle analyzing the trade
 	const handleAnalyzeTrade = () => {
-		console.log('Analyzing trade for teams:', teamGroups);
-		// Additional logic for trade analysis would go here
+		// Check if we have at least two teams with valid IDs
+		const validTeams = teamGroups.filter((team) => team.teamId && team.name !== '');
+
+		if (validTeams.length < 2) {
+			message.error('Please select at least two teams for the trade');
+			return;
+		}
+
+		// Check if any trades have been made
+		if (!hasTradesMade) {
+			message.warning('No trades have been made yet');
+			return;
+		}
+
+		// Navigate to the analyze page with the trade data
+		// Include the selected valuation model and teamGroups
+		navigate('/analyze', {
+			state: {
+				teamGroups,
+				selectedValuation,
+			},
+		});
 	};
 
 	// Add saveTrade function

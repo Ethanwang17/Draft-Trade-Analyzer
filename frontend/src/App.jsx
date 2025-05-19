@@ -6,6 +6,7 @@ import './App.css';
 import NavBar from './components/NavBar/NavBar';
 import HomePage from './pages/HomePage';
 import SavedTrades from './pages/SavedTrades';
+import AnalyzeTrade from './pages/AnalyzeTrade';
 
 const { Content } = Layout;
 
@@ -32,6 +33,7 @@ function App() {
 						<Routes>
 							<Route path="/home" element={<HomePage />} />
 							<Route path="/saved" element={<SavedTrades />} />
+							<Route path="/analyze" element={<AnalyzeTrade />} />
 							<Route path="/" element={<Navigate to="/home" />} />
 						</Routes>
 					</Content>
