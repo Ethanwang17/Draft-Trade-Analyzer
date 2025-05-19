@@ -198,7 +198,7 @@ export const TeamPicksContainer = ({
 
 			{/* Trade summary section */}
 			<div className="trade-summary-container">
-			<div className="trade-summary-section outgoing">
+				<div className="trade-summary-section outgoing">
 					<div className="trade-summary-header">
 						<span className="trade-direction-icon">↑</span>
 						<h4>Sending</h4>
@@ -243,7 +243,6 @@ export const TeamPicksContainer = ({
 						)}
 					</div>
 				</div>
-
 
 				<div className="trade-summary-section incoming">
 					<div className="trade-summary-header">

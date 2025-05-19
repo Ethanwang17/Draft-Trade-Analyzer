@@ -1,13 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Modal, message } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import TradeBuilder from '../components/TradeBuilder';
-import TradeMenuBar from '../components/TradeMenuBar';
+import TradeMenuBar from '../components/TradeMenuBar/TradeMenuBar';
 import { getTeamGroupClass, getTradeBuilderStyle } from '../utils/tradeUtils';
 import { sortPicks } from '../utils/pickSorter';
 
 function HomePage() {
 	const navigate = useNavigate();
+	const location = useLocation();
 	const [teams, setTeams] = useState([]);
 	const [loading, setLoading] = useState(true);
 	// Store original picks for each team to enable reset functionality
@@ -20,23 +21,46 @@ function HomePage() {
 	// State for selected valuation model
 	const [selectedValuation, setSelectedValuation] = useState(1);
 
-	// Initialize with empty team groups
-	const [teamGroups, setTeamGroups] = useState([
-		{
-			id: 1,
-			name: '',
-			logo: '',
-			picks: [],
-			teamId: null,
-		},
-		{
-			id: 2,
-			name: '',
-			logo: '',
-			picks: [],
-			teamId: null,
-		},
-	]);
+	// Initialize with empty team groups or from location state if coming back from analyze page
+	const [teamGroups, setTeamGroups] = useState(() => {
+		// Check if we have state passed from analyze page
+		if (location.state?.preserveTradeState && location.state?.teamGroups) {
+			// If we do, use that state
+			return location.state.teamGroups;
+		}
+		// Otherwise use default initialization
+		return [
+			{
+				id: 1,
+				name: '',
+				logo: '',
+				picks: [],
+				teamId: null,
+			},
+			{
+				id: 2,
+				name: '',
+				logo: '',
+				picks: [],
+				teamId: null,
+			},
+		];
+	});
+
+	// Check for returning from analyze page with saved state
+	useEffect(() => {
+		if (location.state?.preserveTradeState) {
+			// Restore valuation model if passed
+			if (location.state.selectedValuation) {
+				setSelectedValuation(location.state.selectedValuation);
+			}
+
+			// Determine if trades are made in the restored state
+			if (location.state.teamGroups) {
+				checkForTradesMade(location.state.teamGroups);
+			}
+		}
+	}, [location.state, checkForTradesMade]);
 
 	// Handler for valuation change
 	const handleValuationChange = (valuationId) => {
@@ -67,37 +91,40 @@ function HomePage() {
 	};
 
 	// Function to check if any picks have been moved from their original teams
-	const checkForTradesMade = (groups = teamGroups) => {
-		const hasTrades = groups.some((group) => {
-			if (!group.teamId) return false;
+	const checkForTradesMade = useCallback(
+		(groups = teamGroups) => {
+			const hasTrades = groups.some((group) => {
+				if (!group.teamId) return false;
 
-			// Get original picks for this team
-			const originalPicks = originalPicksRef.current[group.teamId] || [];
-			const originalPickIds = new Set(originalPicks.map((p) => p.id));
+				// Get original picks for this team
+				const originalPicks = originalPicksRef.current[group.teamId] || [];
+				const originalPickIds = new Set(originalPicks.map((p) => p.id));
 
-			// Check if current picks are different from original picks
-			const currentPickIds = new Set(group.picks.map((p) => p.id));
+				// Check if current picks are different from original picks
+				const currentPickIds = new Set(group.picks.map((p) => p.id));
 
-			// If the sets are different sizes or contain different IDs, trades have been made
-			if (originalPickIds.size !== currentPickIds.size) return true;
+				// If the sets are different sizes or contain different IDs, trades have been made
+				if (originalPickIds.size !== currentPickIds.size) return true;
 
-			for (const id of originalPickIds) {
-				if (!currentPickIds.has(id)) return true;
-			}
-
-			// Also check if this team has received picks from other teams
-			for (const pick of group.picks) {
-				if (pick.originalTeamId && pick.originalTeamId !== group.teamId) {
-					return true;
+				for (const id of originalPickIds) {
+					if (!currentPickIds.has(id)) return true;
 				}
-			}
 
-			return false;
-		});
+				// Also check if this team has received picks from other teams
+				for (const pick of group.picks) {
+					if (pick.originalTeamId && pick.originalTeamId !== group.teamId) {
+						return true;
+					}
+				}
 
-		setHasTradesMade(hasTrades);
-		return hasTrades;
-	};
+				return false;
+			});
+
+			setHasTradesMade(hasTrades);
+			return hasTrades;
+		},
+		[teamGroups]
+	);
 
 	// Fetch teams from the database
 	useEffect(() => {
@@ -251,8 +278,6 @@ function HomePage() {
 
 		// 1. Find picks that belonged to the team being removed but are now with other teams
 		// and return them to their original teams
-		const removedTeamOriginalPickIds =
-			originalPicksRef.current[teamToRemove.teamId]?.map((pick) => pick.id) || [];
 
 		updatedTeamGroups = updatedTeamGroups.map((group) => {
 			// Skip the team being removed
@@ -472,7 +497,7 @@ function HomePage() {
 				throw new Error('Failed to save trade');
 			}
 
-			const result = await response.json();
+			await response.json();
 			message.success('Trade saved successfully');
 		} catch (error) {
 			console.error('Error saving trade:', error);

@@ -1,7 +1,8 @@
 import React from 'react';
-import { Button, Modal, Input } from 'antd';
+import { Button } from 'antd';
 import { PlusOutlined, UndoOutlined, BarChartOutlined, SaveOutlined } from '@ant-design/icons';
-import ValuationSelector from './ValuationSelector';
+import ValuationSelector from '../ValuationSelector/ValuationSelector';
+import './TradeMenuBar.css';
 
 const TradeMenuBar = ({
 	onAddTeam,
@@ -11,17 +12,7 @@ const TradeMenuBar = ({
 	disableAddTeam,
 	disableResetTrades,
 	onAnalyze,
-	onSaveTrade,
 }) => {
-	const [isModalVisible, setIsModalVisible] = React.useState(false);
-	const [tradeName, setTradeName] = React.useState('');
-
-	const handleSave = () => {
-		onSaveTrade(tradeName);
-		setTradeName('');
-		setIsModalVisible(false);
-	};
-
 	return (
 		<div className="header-container">
 			<div className="header-actions">
@@ -56,31 +47,7 @@ const TradeMenuBar = ({
 				>
 					Analyze Trade
 				</Button>
-				<Button
-					type="primary"
-					icon={<SaveOutlined />}
-					onClick={() => setIsModalVisible(true)}
-					className="save-trade-button"
-				>
-					Save Trade
-				</Button>
 			</div>
-
-			<Modal
-				title="Save Trade"
-				open={isModalVisible}
-				onOk={handleSave}
-				onCancel={() => setIsModalVisible(false)}
-				okText="Save"
-				cancelText="Cancel"
-			>
-				<p>Enter a name for this trade (optional):</p>
-				<Input
-					placeholder="Trade Name"
-					value={tradeName}
-					onChange={(e) => setTradeName(e.target.value)}
-				/>
-			</Modal>
 		</div>
 	);
 };

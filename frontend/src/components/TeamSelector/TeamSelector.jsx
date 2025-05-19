@@ -1,6 +1,7 @@
 import React from 'react';
 import { Select } from 'antd';
 import { CloseOutlined } from '@ant-design/icons';
+import './TeamSelector.css';
 
 const TeamSelector = ({
 	teamId,

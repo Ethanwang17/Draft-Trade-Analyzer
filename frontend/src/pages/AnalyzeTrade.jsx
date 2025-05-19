@@ -1,6 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Typography, Row, Col, Tabs, Badge, Select, Table, Spin, Alert } from 'antd';
-import { CheckCircleOutlined, WarningOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import {
+	Card,
+	Typography,
+	Row,
+	Col,
+	Tabs,
+	Badge,
+	Select,
+	Spin,
+	Alert,
+	Button,
+	Modal,
+	Input,
+	message,
+} from 'antd';
+import {
+	CheckCircleOutlined,
+	WarningOutlined,
+	CloseCircleOutlined,
+	ArrowLeftOutlined,
+	SaveOutlined,
+} from '@ant-design/icons';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const { Title, Text } = Typography;
@@ -15,6 +35,8 @@ function AnalyzeTrade() {
 	const [valuationModels, setValuationModels] = useState([]);
 	const [pickValues, setPickValues] = useState({});
 	const [valuesLoading, setValuesLoading] = useState(false);
+	const [saveModalVisible, setSaveModalVisible] = useState(false);
+	const [tradeName, setTradeName] = useState('');
 
 	// Get trade data from location state or redirect back to home
 	useEffect(() => {
@@ -231,77 +253,80 @@ function AnalyzeTrade() {
 		}
 	};
 
-	// Create a pick distribution data structure
-	const createPickDistribution = () => {
-		if (!tradeData) return { columns: [], data: [] };
+	// Handle going back to the trade builder while preserving state
+	const handleBackToTrade = () => {
+		// Navigate back to home page with the original trade data
+		navigate('/home', {
+			state: {
+				preserveTradeState: true,
+				teamGroups: tradeData.teamGroups,
+				selectedValuation: selectedValuation,
+			},
+		});
+	};
 
-		const years = [];
-		const teamsWithPicks = tradeData.teamGroups.filter((team) => team.teamId);
+	// Handle saving the trade
+	const handleSaveTrade = async () => {
+		if (!tradeData || !tradeData.teamGroups) return;
 
-		// Get all unique years
-		teamsWithPicks.forEach((team) => {
+		// Track picks that have moved from their original teams
+		const tradedPicks = [];
+
+		// Check each team's picks
+		tradeData.teamGroups.forEach((team) => {
+			if (!team.teamId) return;
+
 			team.picks.forEach((pick) => {
-				if (pick.year && !years.includes(pick.year)) {
-					years.push(pick.year);
+				// If this pick belongs to another team originally
+				if (pick.originalTeamId !== team.teamId) {
+					tradedPicks.push({
+						draft_pick_id: parseInt(pick.pickId),
+						sending_team_id: pick.originalTeamId,
+						receiving_team_id: team.teamId,
+					});
 				}
 			});
 		});
 
-		years.sort();
+		if (tradedPicks.length === 0) {
+			message.warning('No picks have been traded');
+			return;
+		}
 
-		// Create columns for table
-		const columns = [
-			{
-				title: 'Team',
-				dataIndex: 'team',
-				key: 'team',
-				render: (text, record) => (
-					<div style={{ display: 'flex', alignItems: 'center' }}>
-						<img src={record.logo} alt={text} style={{ width: 24, height: 24, marginRight: 8 }} />
-						{text}
-					</div>
-				),
-			},
-			...years.map((year) => ({
-				title: year.toString(),
-				dataIndex: year.toString(),
-				key: year.toString(),
-				align: 'center',
-				render: (text) => {
-					const intensity = Math.min(text * 20, 100);
-					return (
-						<div
-							style={{
-								backgroundColor: text > 0 ? `rgba(82, 196, 26, ${intensity / 100})` : 'transparent',
-								padding: '4px 8px',
-								borderRadius: '4px',
-								fontWeight: text > 0 ? 'bold' : 'normal',
-							}}
-						>
-							{text || 0}
-						</div>
-					);
-				},
-			})),
-		];
-
-		// Create data for table rows
-		const data = teamsWithPicks.map((team) => {
-			const row = {
-				key: team.teamId,
-				team: team.name,
-				logo: team.logo,
+		try {
+			// Prepare the trade data with all teams
+			const saveData = {
+				teams: tradeData.teamGroups
+					.filter((team) => team.teamId) // Only include teams with IDs
+					.map((team) => ({
+						id: team.teamId,
+						name: team.name,
+					})),
+				trade_name: tradeName || null,
+				picks: tradedPicks,
 			};
 
-			// Calculate picks per year
-			years.forEach((year) => {
-				row[year.toString()] = team.picks.filter((pick) => pick.year === year).length;
+			// Send to the API
+			const response = await fetch('/api/saved-trades', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(saveData),
 			});
 
-			return row;
-		});
+			if (!response.ok) {
+				throw new Error('Failed to save trade');
+			}
 
-		return { columns, data };
+			await response.json();
+			message.success('Trade saved successfully');
+			setSaveModalVisible(false);
+			setTradeName('');
+		} catch (error) {
+			console.error('Error saving trade:', error);
+			message.error('Failed to save trade');
+		}
 	};
 
 	// Handle valuation model change
@@ -324,11 +349,34 @@ function AnalyzeTrade() {
 	}
 
 	const tradeBalance = evaluateTrade();
-	const pickDistribution = createPickDistribution();
 	const teamsWithPicks = tradeData.teamGroups.filter((team) => team.teamId);
 
 	return (
 		<div className="analyze-page">
+			<div className="analyze-header">
+				<div className="back-button-container">
+					<Button
+						type="default"
+						icon={<ArrowLeftOutlined />}
+						onClick={handleBackToTrade}
+						className="analyze-back-button"
+					>
+						Back to Trade
+					</Button>
+				</div>
+
+				<div className="save-button-container">
+					<Button
+						type="primary"
+						icon={<SaveOutlined />}
+						onClick={() => setSaveModalVisible(true)}
+						className="save-trade-button"
+					>
+						Save Trade
+					</Button>
+				</div>
+			</div>
+
 			<div style={{ textAlign: 'center', marginBottom: 24 }}>
 				<Title level={2}>Trade Analysis</Title>
 
@@ -518,19 +566,7 @@ function AnalyzeTrade() {
 				)}
 			</div>
 
-			{/* 4. Pick Distribution Chart */}
-			<div className="analysis-section">
-				<Title level={4}>Pick Distribution By Year</Title>
-				<Table
-					columns={pickDistribution.columns}
-					dataSource={pickDistribution.data}
-					pagination={false}
-					bordered
-					size="middle"
-				/>
-			</div>
-
-			{/* 5. Valuation Model Comparison */}
+			{/* 3. Valuation Model Comparison */}
 			<div className="analysis-section">
 				<Title level={4}>Valuation Model</Title>
 				<div style={{ maxWidth: 300, marginBottom: 16 }}>
@@ -548,6 +584,23 @@ function AnalyzeTrade() {
 					Change the valuation model to see how it affects the trade evaluation.
 				</Text>
 			</div>
+
+			{/* Save Trade Modal */}
+			<Modal
+				title="Save Trade"
+				open={saveModalVisible}
+				onOk={handleSaveTrade}
+				onCancel={() => setSaveModalVisible(false)}
+				okText="Save"
+				cancelText="Cancel"
+			>
+				<p>Enter a name for this trade (optional):</p>
+				<Input
+					placeholder="Trade Name"
+					value={tradeName}
+					onChange={(e) => setTradeName(e.target.value)}
+				/>
+			</Modal>
 		</div>
 	);
 }

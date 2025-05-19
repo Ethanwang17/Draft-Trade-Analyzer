@@ -1,0 +1,19 @@
+/* Valuation selector styles */
+.valuation-select {
+	margin-bottom: 0;
+}
+
+.valuation-dropdown {
+	width: 100%;
+}
+
+.valuation-selected {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* Header valuation selector overrides */
+.header-valuation-select .valuation-select {
+	margin-bottom: 0;
+}

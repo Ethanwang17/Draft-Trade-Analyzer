@@ -16,7 +16,7 @@ import {
 } from '@dnd-kit/sortable';
 
 import { DraftPick, DraftPickOverlay, TeamPicksContainer } from './DraftComponents';
-import TeamSelector from './TeamSelector';
+import TeamSelector from './TeamSelector/TeamSelector';
 
 const TradeBuilder = ({
 	teams,

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Select } from 'antd';
+import './ValuationSelector.css';
 
 const ValuationSelector = ({ onChange, defaultValue = 1 }) => {
 	const [valuations, setValuations] = useState([]);
