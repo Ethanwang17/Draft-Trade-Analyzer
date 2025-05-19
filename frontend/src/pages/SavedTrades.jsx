@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Card, List, Typography, Button, Empty, message, Modal, Spin, Divider } from 'antd';
-import { SwapOutlined, DeleteOutlined, LoadingOutlined } from '@ant-design/icons';
+import {
+	SwapOutlined,
+	DeleteOutlined,
+	LoadingOutlined,
+	ArrowRightOutlined,
+} from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
 import '../App.css';
 
 const { Title, Text } = Typography;
@@ -11,6 +17,7 @@ function SavedTrades() {
 	const [expandedTradeId, setExpandedTradeId] = useState(null);
 	const [tradeDetails, setTradeDetails] = useState(null);
 	const [loadingDetails, setLoadingDetails] = useState(false);
+	const _navigate = useNavigate();
 
 	// Fetch all saved trades
 	useEffect(() => {

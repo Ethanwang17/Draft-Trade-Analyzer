@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { CloseOutlined } from '@ant-design/icons';
+import TradeSummary from '../TradeSummary/TradeSummary';
+import './DraftComponents.css';
 
 // Draft Pick component
 export const DraftPick = ({ id, content, teamLogo, className }) => {
@@ -182,13 +183,6 @@ export const TeamPicksContainer = ({
 		return { incoming, outgoing: [] };
 	}, [picks, teamId, tradeData]);
 
-	// Handle removing a pick from a trade
-	const handleResetPick = (pickId) => {
-		if (onResetPick) {
-			onResetPick(pickId);
-		}
-	};
-
 	return (
 		<div ref={setNodeRef} className="team-picks-container">
 			<div className="team-header">
@@ -197,101 +191,7 @@ export const TeamPicksContainer = ({
 			</div>
 
 			{/* Trade summary section */}
-			<div className="trade-summary-container">
-				<div className="trade-summary-section outgoing">
-					<div className="trade-summary-header">
-						<span className="trade-direction-icon">↑</span>
-						<h4>Sending</h4>
-					</div>
-					<div className="trade-summary-content">
-						{tradeSummary.outgoing.length > 0 ? (
-							<>
-								<ul className="trade-list">
-									{tradeSummary.outgoing.map((pick) => (
-										<li key={pick.id} className="trade-summary-item">
-											<div className="trade-item-row">
-												<img
-													src={pick.originalTeamLogo}
-													alt="Team Logo"
-													className="trade-item-logo"
-												/>
-												<span className="trade-item-content">{pick.content}</span>
-												<button
-													className="trade-item-delete-btn"
-													onClick={() => handleResetPick(pick.id)}
-													title="Remove from trade"
-												>
-													<CloseOutlined />
-												</button>
-											</div>
-											<div className="trade-item-details">
-												<span className="trade-item-from">to {pick.toTeam}</span>
-												{pick.pick_number && (
-													<PickValueDisplay
-														pickNumber={pick.pick_number}
-														valuation={pick.valuation || 1}
-													/>
-												)}
-											</div>
-										</li>
-									))}
-								</ul>
-								<TradeSummaryValue picks={tradeSummary.outgoing} direction="outgoing" />
-							</>
-						) : (
-							<div className="trade-empty-message">No picks outgoing</div>
-						)}
-					</div>
-				</div>
-
-				<div className="trade-summary-section incoming">
-					<div className="trade-summary-header">
-						<span className="trade-direction-icon">↓</span>
-						<h4>Receiving</h4>
-					</div>
-					<div className="trade-summary-content">
-						{tradeSummary.incoming.length > 0 ? (
-							<>
-								<ul className="trade-list">
-									{tradeSummary.incoming.map((pick) => (
-										<li key={pick.id} className="trade-summary-item">
-											<div className="trade-item-row">
-												<img
-													src={pick.originalTeamLogo}
-													alt="Team Logo"
-													className="trade-item-logo"
-												/>
-												<span className="trade-item-content">{pick.content}</span>
-												<button
-													className="trade-item-delete-btn"
-													onClick={() => handleResetPick(pick.id)}
-													title="Remove from trade"
-												>
-													<CloseOutlined />
-												</button>
-											</div>
-											<div className="trade-item-details">
-												<span className="trade-item-from">
-													from {pick.originalTeamName || pick.fromTeam}
-												</span>
-												{pick.pick_number && (
-													<PickValueDisplay
-														pickNumber={pick.pick_number}
-														valuation={pick.valuation || 1}
-													/>
-												)}
-											</div>
-										</li>
-									))}
-								</ul>
-								<TradeSummaryValue picks={tradeSummary.incoming} direction="incoming" />
-							</>
-						) : (
-							<div className="trade-empty-message">No picks incoming</div>
-						)}
-					</div>
-				</div>
-			</div>
+			<TradeSummary tradeData={tradeSummary} onResetPick={onResetPick} />
 
 			<div className="team-picks-content">
 				{children}

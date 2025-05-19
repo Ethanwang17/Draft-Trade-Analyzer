@@ -47,6 +47,42 @@ function HomePage() {
 		];
 	});
 
+	// Function to check if any picks have been moved from their original teams
+	const checkForTradesMade = useCallback(
+		(groups = teamGroups) => {
+			const hasTrades = groups.some((group) => {
+				if (!group.teamId) return false;
+
+				// Get original picks for this team
+				const originalPicks = originalPicksRef.current[group.teamId] || [];
+				const originalPickIds = new Set(originalPicks.map((p) => p.id));
+
+				// Check if current picks are different from original picks
+				const currentPickIds = new Set(group.picks.map((p) => p.id));
+
+				// If the sets are different sizes or contain different IDs, trades have been made
+				if (originalPickIds.size !== currentPickIds.size) return true;
+
+				for (const id of originalPickIds) {
+					if (!currentPickIds.has(id)) return true;
+				}
+
+				// Also check if this team has received picks from other teams
+				for (const pick of group.picks) {
+					if (pick.originalTeamId && pick.originalTeamId !== group.teamId) {
+						return true;
+					}
+				}
+
+				return false;
+			});
+
+			setHasTradesMade(hasTrades);
+			return hasTrades;
+		},
+		[teamGroups]
+	);
+
 	// Check for returning from analyze page with saved state
 	useEffect(() => {
 		if (location.state?.preserveTradeState) {
@@ -89,42 +125,6 @@ function HomePage() {
 		// Check if trades have been made after updating the team groups
 		checkForTradesMade(sortedTeamGroups);
 	};
-
-	// Function to check if any picks have been moved from their original teams
-	const checkForTradesMade = useCallback(
-		(groups = teamGroups) => {
-			const hasTrades = groups.some((group) => {
-				if (!group.teamId) return false;
-
-				// Get original picks for this team
-				const originalPicks = originalPicksRef.current[group.teamId] || [];
-				const originalPickIds = new Set(originalPicks.map((p) => p.id));
-
-				// Check if current picks are different from original picks
-				const currentPickIds = new Set(group.picks.map((p) => p.id));
-
-				// If the sets are different sizes or contain different IDs, trades have been made
-				if (originalPickIds.size !== currentPickIds.size) return true;
-
-				for (const id of originalPickIds) {
-					if (!currentPickIds.has(id)) return true;
-				}
-
-				// Also check if this team has received picks from other teams
-				for (const pick of group.picks) {
-					if (pick.originalTeamId && pick.originalTeamId !== group.teamId) {
-						return true;
-					}
-				}
-
-				return false;
-			});
-
-			setHasTradesMade(hasTrades);
-			return hasTrades;
-		},
-		[teamGroups]
-	);
 
 	// Fetch teams from the database
 	useEffect(() => {
@@ -278,7 +278,6 @@ function HomePage() {
 
 		// 1. Find picks that belonged to the team being removed but are now with other teams
 		// and return them to their original teams
-
 		updatedTeamGroups = updatedTeamGroups.map((group) => {
 			// Skip the team being removed
 			if (group.id === teamId) return group;
@@ -432,7 +431,7 @@ function HomePage() {
 	};
 
 	// Add saveTrade function
-	const saveTrade = async (tradeName) => {
+	const _saveTrade = async (tradeName) => {
 		// We need at least two teams selected with valid IDs
 		const validTeams = teamGroups.filter((team) => team.teamId && team.name !== '');
 
@@ -515,7 +514,6 @@ function HomePage() {
 				disableAddTeam={teamGroups.length >= 4}
 				disableResetTrades={!hasTradesMade}
 				onAnalyze={handleAnalyzeTrade}
-				onSaveTrade={saveTrade}
 			/>
 
 			<div className="trade-builder" style={getTradeBuilderStyle(teamGroups.length)}>
