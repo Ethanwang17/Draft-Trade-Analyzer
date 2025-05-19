@@ -362,6 +362,10 @@ function HomePage() {
 
 	return (
 		<div className="home-page">
+			<h2 className="home-page-title">
+				Trade Builder
+			</h2>
+
 			<TradeMenuBar
 				onAddTeam={handleAddTeam}
 				onResetTrades={handleResetTrades}

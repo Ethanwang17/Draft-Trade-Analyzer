@@ -1,9 +1,9 @@
 import React from 'react';
 import { CloseOutlined } from '@ant-design/icons';
 import PickValueDisplay from '../PickValueDisplay/PickValueDisplay';
-import './TradeItem.css';
+import './PickInfo.css';
 
-const TradeItem = ({ pick, onResetPick }) => {
+const PickInfo = ({ pick, onResetPick }) => {
 	return (
 		<li className="trade-summary-item">
 			<div className="trade-item-row">
@@ -29,4 +29,4 @@ const TradeItem = ({ pick, onResetPick }) => {
 	);
 };
 
-export default TradeItem;
+export default PickInfo;

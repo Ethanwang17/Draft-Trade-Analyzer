@@ -126,18 +126,21 @@ export const useTradeEvaluation = (tradeData, pickValues) => {
 		const valueDifference = highestValue.netValue - lowestValue.netValue;
 
 		// Determine if the trade is balanced
+		/*
 		if (valueDifference < 100) {
 			return {
 				status: 'balanced',
 				message: 'Balanced Trade',
 				iconType: CheckCircleOutlined,
 			};
-		} else if (valueDifference < 300) {
+		} else*/ if (valueDifference < 300) {
 			return {
 				status: 'slightlyFavors',
 				message: `Slightly Favors ${highestValue.name}`,
 				value: `+${Math.round(highestValue.netValue)}`,
-				iconType: WarningOutlined,
+				iconType: CheckCircleOutlined,
+
+				// iconType: WarningOutlined,
 			};
 		} else {
 			return {
@@ -158,12 +161,14 @@ export const useTradeEvaluation = (tradeData, pickValues) => {
 		const outgoingWithInfo = teamMovedPicks.outgoing.map((pick) => ({
 			...pick,
 			toTeam: pick.currentTeamName,
+			value: pick.pick_number && pickValues[pick.pick_number] ? pickValues[pick.pick_number] : 0,
 		}));
 
 		// Transform incoming picks for proper display
 		const incomingWithInfo = teamMovedPicks.incoming.map((pick) => ({
 			...pick,
 			fromTeam: pick.originalTeamName,
+			value: pick.pick_number && pickValues[pick.pick_number] ? pickValues[pick.pick_number] : 0,
 		}));
 
 		return {

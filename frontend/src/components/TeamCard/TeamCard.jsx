@@ -3,7 +3,7 @@ import { useDroppable } from '@dnd-kit/core';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import TradeSummary from '../TradeSummary/TradeSummary';
-import './DraftComponents.css';
+import './TeamCard.css';
 
 // Draft Pick component
 export const DraftPick = ({ id, content, teamLogo, className }) => {
@@ -86,7 +86,7 @@ const PickValueDisplay = ({ pickNumber, valuation = 1 }) => {
 };
 
 // Trade Summary Value component to show total values
-const TradeSummaryValue = ({ picks, direction }) => {
+const TradeSummaryTotal = ({ picks, direction }) => {
 	const [totalValue, setTotalValue] = useState(null);
 	const [loading, setLoading] = useState(false);
 

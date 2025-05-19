@@ -1,5 +1,5 @@
 import React from 'react';
-import TradeSummarySection from '../TradeSummarySection/TradeSummarySection';
+import TradeReceiveSend from '../TradeReceiveSend/TradeReceiveSend';
 import SummaryNetValue from '../SummaryNetValue/SummaryNetValue';
 import './TradeSummary.css';
 
@@ -8,7 +8,7 @@ const TradeSummary = ({ tradeData, onResetPick, showNetValue = false }) => {
 
 	return (
 		<div className="trade-summary-container">
-			<TradeSummarySection
+			<TradeReceiveSend
 				title="Sending"
 				direction="outgoing"
 				picks={outgoing}
@@ -16,7 +16,7 @@ const TradeSummary = ({ tradeData, onResetPick, showNetValue = false }) => {
 				onResetPick={onResetPick}
 			/>
 
-			<TradeSummarySection
+			<TradeReceiveSend
 				title="Receiving"
 				direction="incoming"
 				picks={incoming}

@@ -1,21 +1,9 @@
 import React from 'react';
-import {
-	Card,
-	Typography,
-	Row,
-	Col,
-	Tabs,
-	Badge,
-	Select,
-	Spin,
-	Alert,
-	Button,
-	Modal,
-	Input,
-} from 'antd';
+import { Card, Typography, Row, Col, Tabs, Badge, Spin, Alert, Button, Modal, Input } from 'antd';
 import { ArrowLeftOutlined, SaveOutlined } from '@ant-design/icons';
 import { useLocation } from 'react-router-dom';
 import TradeSummary from '../components/TradeSummary/TradeSummary';
+import ValuationSelector from '../components/ValuationSelector/ValuationSelector';
 import {
 	useTradeAnalysis,
 	usePickValues,
@@ -62,7 +50,7 @@ function AnalyzeTrade() {
 
 	if (loading) {
 		return (
-			<div style={{ display: 'flex', justifyContent: 'center', padding: 50 }}>
+			<div className="analyze-loading-container">
 				<Spin size="large" />
 			</div>
 		);
@@ -89,38 +77,43 @@ function AnalyzeTrade() {
 					</Button>
 				</div>
 
-				<div className="save-button-container">
-					<Button
-						type="primary"
-						icon={<SaveOutlined />}
-						onClick={() => setSaveModalVisible(true)}
-						className="save-trade-button"
-					>
-						Save Trade
-					</Button>
+				<div className="valuation-controls-container">
+					<div className="header-valuation-select">
+						<ValuationSelector defaultValue={selectedValuation} onChange={handleValuationChange} />
+					</div>
+					<div className="save-button-container">
+						<Button
+							type="primary"
+							icon={<SaveOutlined />}
+							onClick={() => setSaveModalVisible(true)}
+							className="save-trade-button"
+						>
+							Save Trade
+						</Button>
+					</div>
 				</div>
 			</div>
 
-			<div style={{ textAlign: 'center', marginBottom: 24 }}>
+			<div className="analyze-title-container">
 				<Title level={2}>Trade Analysis</Title>
 
 				{/* Trade Balance Badge */}
-				{tradeBalance && (
+				{!loading && !valuesLoading && tradeBalance && (
 					<Badge
 						count={
-							<div style={{ padding: '0 12px' }}>
+							<div
+								className={`analyze-trade-badge ${
+									tradeBalance.status === 'balanced'
+										? 'balanced'
+										: tradeBalance.status === 'slightlyFavors'
+											? 'slightly-favors'
+											: 'heavily-favors'
+								}`}
+							>
 								{tradeBalance.iconType && React.createElement(tradeBalance.iconType)}{' '}
 								{tradeBalance.message} {tradeBalance.value ? `(${tradeBalance.value})` : ''}
 							</div>
 						}
-						style={{
-							backgroundColor:
-								tradeBalance.status === 'balanced'
-									? '#52c41a'
-									: tradeBalance.status === 'slightlyFavors'
-										? '#faad14'
-										: '#ff4d4f',
-						}}
 					/>
 				)}
 			</div>
@@ -128,7 +121,7 @@ function AnalyzeTrade() {
 			{/* Trade Summary Components - One per team */}
 			<div className="analysis-section">
 				<Title level={4}>Trade Summary by Team</Title>
-				<Row gutter={[16, 16]}>
+				<Row gutter={[16, 16]} justify="space-between">
 					{teamsWithPicks.map((team) => {
 						const teamTradeData = prepareTeamTradeData(team);
 
@@ -136,18 +129,12 @@ function AnalyzeTrade() {
 							<Col key={team.teamId} xs={24} sm={12} md={8} lg={teamsWithPicks.length <= 3 ? 8 : 6}>
 								<Card
 									title={
-										<div
-											style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-										>
-											<img
-												src={team.logo}
-												alt={team.name}
-												style={{ width: 40, height: 40, marginRight: 8 }}
-											/>
+										<div className="team-title-container">
+											<img src={team.logo} alt={team.name} className="team-logo" />
 											<span>{team.name}</span>
 										</div>
 									}
-									style={{ height: '100%' }}
+									className="team-card"
 								>
 									<TradeSummary
 										tradeData={teamTradeData}
@@ -159,25 +146,6 @@ function AnalyzeTrade() {
 						);
 					})}
 				</Row>
-			</div>
-
-			{/* 3. Valuation Model Comparison */}
-			<div className="analysis-section">
-				<Title level={4}>Valuation Model</Title>
-				<div style={{ maxWidth: 300, marginBottom: 16 }}>
-					<Select
-						style={{ width: '100%' }}
-						value={selectedValuation}
-						onChange={handleValuationChange}
-						options={valuationModels.map((model) => ({
-							value: model.id,
-							label: model.name,
-						}))}
-					/>
-				</div>
-				<Text type="secondary">
-					Change the valuation model to see how it affects the trade evaluation.
-				</Text>
 			</div>
 
 			{/* Save Trade Modal */}

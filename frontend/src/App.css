@@ -62,14 +62,16 @@ body,
 	min-height: 100%;
 }
 
+.home-page-title {
+	font-size: 2rem;
+	font-weight: 700;
+	color: #333;
+	align-self: flex-start;
+}
+
 h1 {
 	margin-bottom: 1.5rem;
 	color: #333;
-}
-
-h2 {
-	margin-bottom: 1rem;
-	color: #444;
 }
 
 .main-title {
@@ -113,110 +115,7 @@ h2 {
 	flex-direction: column;
 	align-items: center;
 }
-.st-trade-card {
-	margin-bottom: 16px;
-	border-radius: 8px;
-	width: 98%;
-	max-width: 1300px;
-	margin-left: auto;
-	margin-right: auto;
-}
-.st-trade-header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	margin-bottom: 16px;
-}
-.st-trade-teams {
-	display: flex;
-	align-items: flex-start;
-	justify-content: space-around;
-	flex-wrap: nowrap;
-	gap: 15px;
-	width: 100%;
-	padding: 0 5%;
-}
-.st-team {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	flex: 0 0 auto;
-	width: 220px;
-}
-.team-count-2 .st-team {
-	width: 300px;
-}
-.team-count-3 .st-team {
-	width: 250px;
-}
-.team-count-4 .st-team,
-.team-count-5 .st-team,
-.team-count-6 .st-team {
-	width: 220px;
-}
-.st-team-logo {
-	width: 60px;
-	height: 60px;
-	object-fit: contain;
-	margin-bottom: 8px;
-}
-.st-team-logo-small {
-	width: 24px;
-	height: 24px;
-	object-fit: contain;
-	margin-right: 8px;
-}
-.st-trade-direction {
-	display: flex;
-	align-items: center;
-	align-self: center;
-	margin-top: 30px;
-	flex: 0 0 auto;
-	width: 30px;
-}
-.st-swap-icon {
-	font-size: 20px;
-}
-.st-team-picks-inline {
-	width: 100%;
-	margin-top: 16px;
-	display: flex;
-	flex-direction: column;
-	gap: 16px;
-	min-width: 220px;
-}
-.st-team-pick-section {
-	width: 100%;
-}
-.st-pick-item {
-	display: flex;
-	align-items: center;
-	white-space: nowrap;
-}
-.st-loading-container {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	padding: 40px;
-}
-.st-loading-details {
-	display: flex;
-	justify-content: center;
-	padding: 20px;
-}
 
-/* Override Ant Design list item borders in saved trades */
-.st-team-pick-section .ant-list-item {
-	border-bottom: none !important;
-	padding: 8px 0;
-}
-
-.st-pick-item {
-	display: flex;
-	align-items: center;
-	white-space: nowrap;
-}
 
 /* Analyze Trade Page Styles */
 .analyze-page {
@@ -286,6 +185,67 @@ h2 {
 	font-size: 14px;
 	font-weight: 500;
 	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Additional AnalyzeTrade Styles */
+.analyze-loading-container {
+	display: flex;
+	justify-content: center;
+	padding: 50px;
+}
+
+.header-valuation-select {
+	width: 220px;
+}
+
+.valuation-controls-container {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.analyze-trade-badge {
+	padding: 7px 15px;
+	border-radius: 999px;
+	color: white;
+	font-weight: bold;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.analyze-trade-badge.balanced {
+	background-color: #52c41a;
+}
+
+.analyze-trade-badge.slightly-favors {
+	background-color: #52c41a;
+}
+
+.analyze-trade-badge.heavily-favors {
+	background-color: #ff4d4f;
+}
+
+.team-title-container {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.team-logo {
+	width: 40px;
+	height: 40px;
+	margin-right: 8px;
+}
+
+.team-card {
+	height: 100%;
+}
+
+.analyze-title-container {
+	text-align: center;
+	margin-bottom: 24px;
 }
 
 /* Responsive adjustments for analyze page */

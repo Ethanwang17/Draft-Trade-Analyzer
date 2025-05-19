@@ -1,0 +1,77 @@
+/* TradeCard styles */
+.st-trade-card {
+	margin-bottom: 16px;
+	border-radius: 8px;
+	width: 98%;
+	max-width: 1300px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.st-trade-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 16px;
+}
+
+.st-trade-teams {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-around;
+	flex-wrap: nowrap;
+	gap: 15px;
+	width: 100%;
+	padding: 0 5%;
+}
+
+.st-team {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	flex: 0 0 auto;
+	width: 220px;
+}
+
+.st-team-picks-inline {
+	width: 100%;
+	margin-top: 16px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	min-width: 220px;
+}
+
+.st-trade-direction {
+	display: flex;
+	align-items: center;
+	align-self: center;
+	margin-top: 30px;
+	flex: 0 0 auto;
+	width: 30px;
+}
+
+.st-swap-icon {
+	font-size: 20px;
+}
+
+.st-loading-details {
+	display: flex;
+	justify-content: center;
+	padding: 20px;
+}
+
+/* Team count specific styles */
+.team-count-2 .st-team {
+	width: 300px;
+}
+
+.team-count-3 .st-team {
+	width: 250px;
+}
+
+.team-count-4 .st-team,
+.team-count-5 .st-team,
+.team-count-6 .st-team {
+	width: 220px;
+}

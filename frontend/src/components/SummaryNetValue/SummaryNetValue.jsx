@@ -14,50 +14,12 @@ const SummaryNetValue = ({ picks, direction }) => {
 			return;
 		}
 
-		setLoading(true);
-		const fetchValues = async () => {
-			try {
-				let totalIncoming = 0;
-				let totalOutgoing = 0;
+		// Calculate totals directly from the provided values
+		const totalIncoming = picks.incoming.reduce((sum, pick) => sum + (pick.value || 0), 0);
+		const totalOutgoing = picks.outgoing.reduce((sum, pick) => sum + (pick.value || 0), 0);
 
-				// Calculate incoming value
-				for (const pick of picks.incoming) {
-					if (pick.pick_number) {
-						const valuation = pick.valuation || 1;
-						const apiUrl = `/api/pick-value/${pick.pick_number}/${valuation}`;
-
-						const response = await fetch(apiUrl);
-						if (response.ok) {
-							const data = await response.json();
-							totalIncoming += parseFloat(data.value);
-						}
-					}
-				}
-
-				// Calculate outgoing value
-				for (const pick of picks.outgoing) {
-					if (pick.pick_number) {
-						const valuation = pick.valuation || 1;
-						const apiUrl = `/api/pick-value/${pick.pick_number}/${valuation}`;
-
-						const response = await fetch(apiUrl);
-						if (response.ok) {
-							const data = await response.json();
-							totalOutgoing += parseFloat(data.value);
-						}
-					}
-				}
-
-				setIncomingValue(totalIncoming);
-				setOutgoingValue(totalOutgoing);
-				setLoading(false);
-			} catch (error) {
-				console.error('Error calculating net value:', error);
-				setLoading(false);
-			}
-		};
-
-		fetchValues();
+		setIncomingValue(totalIncoming);
+		setOutgoingValue(totalOutgoing);
 	}, [picks]);
 
 	if (loading) {
