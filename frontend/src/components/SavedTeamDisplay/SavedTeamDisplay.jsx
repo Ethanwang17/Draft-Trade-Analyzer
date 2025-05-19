@@ -1,10 +1,10 @@
 import React from 'react';
 import { Typography } from 'antd';
-import './TeamDisplay.css';
+import './SavedTeamDisplay.css';
 
 const { Text } = Typography;
 
-function TeamDisplay({ team }) {
+function SavedTeamDisplay({ team }) {
 	return (
 		<div className="team-display">
 			<img src={team.logo || 'default-logo.png'} alt={team.name} className="team-logo" />
@@ -13,4 +13,4 @@ function TeamDisplay({ team }) {
 	);
 }
 
-export default TeamDisplay;
+export default SavedTeamDisplay;

@@ -1,14 +1,14 @@
 import React from 'react';
 import { Card, Typography, Button, Spin } from 'antd';
 import { DeleteOutlined, SwapOutlined, LoadingOutlined } from '@ant-design/icons';
-import TeamPicksDisplay from '../TeamPicksDisplay/TeamPicksDisplay';
+import SavedTeamPicksTrade from '../SavedTeamPicksTrade/SavedTeamPicksTrade';
 import LoadTradeButton from '../LoadTradeButton/LoadTradeButton';
-import TeamDisplay from '../TeamDisplay/TeamDisplay';
-import './TradeCard.css';
+import SavedTeamDisplay from '../SavedTeamDisplay/SavedTeamDisplay';
+import './SavedTradeCard.css';
 
 const { Title, Text } = Typography;
 
-function TradeCard({
+function SavedTradeCard({
 	trade,
 	expandedTradeId,
 	loadingDetails,
@@ -45,12 +45,16 @@ function TradeCard({
 					trade.teams.map((team, index) => (
 						<React.Fragment key={team.id}>
 							<div className="st-team">
-								<TeamDisplay team={team} />
+								<SavedTeamDisplay team={team} />
 
 								{expandedTradeId === trade.id && !loadingDetails && tradeDetails && (
 									<div className="st-team-picks-inline">
-										<TeamPicksDisplay teamId={team.id} type="sending" tradeDetails={tradeDetails} />
-										<TeamPicksDisplay
+										<SavedTeamPicksTrade
+											teamId={team.id}
+											type="sending"
+											tradeDetails={tradeDetails}
+										/>
+										<SavedTeamPicksTrade
 											teamId={team.id}
 											type="receiving"
 											tradeDetails={tradeDetails}
@@ -77,4 +81,4 @@ function TradeCard({
 	);
 }
 
-export default TradeCard;
+export default SavedTradeCard;

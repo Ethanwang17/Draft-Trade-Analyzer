@@ -1,6 +1,6 @@
 import React from 'react';
 import { SwapOutlined } from '@ant-design/icons';
-import TeamDisplay from '../TeamDisplay/TeamDisplay';
+import SavedTeamDisplay from '../SavedTeamDisplay/SavedTeamDisplay';
 import './TradeTeamsVisualization.css';
 
 function TradeTeamsVisualization({
@@ -16,7 +16,7 @@ function TradeTeamsVisualization({
 			{teams &&
 				teams.map((team, index) => (
 					<React.Fragment key={team.id}>
-						<TeamDisplay team={team} />
+						<SavedTeamDisplay team={team} />
 
 						{children &&
 							expandedTradeId === tradeId &&

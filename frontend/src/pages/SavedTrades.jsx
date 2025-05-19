@@ -3,7 +3,7 @@ import { Typography, Empty, Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import '../App.css';
 import { useSavedTrades, useTradeDetails, useTradeDelete, useTradeUtils } from '../hooks';
-import TradeCard from '../components/TradeCard/TradeCard';
+import SavedTradeCard from '../components/SavedTradeCard/SavedTradeCard';
 
 const { Title } = Typography;
 
@@ -40,7 +40,7 @@ function SavedTrades() {
 			) : (
 				<div className="st-trades-list">
 					{trades.map((trade) => (
-						<TradeCard
+						<SavedTradeCard
 							key={trade.id}
 							trade={trade}
 							expandedTradeId={expandedTradeId}

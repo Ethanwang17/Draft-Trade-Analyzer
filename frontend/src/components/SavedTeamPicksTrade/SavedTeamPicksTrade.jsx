@@ -1,10 +1,10 @@
 import React from 'react';
 import { List, Typography } from 'antd';
-import './TeamPicksDisplay.css';
+import './SavedTeamPicksTrade.css';
 
 const { Title, Text } = Typography;
 
-function TeamPicksDisplay({ teamId, type, tradeDetails }) {
+function SavedTeamPicksTrade({ teamId, type, tradeDetails }) {
 	if (!tradeDetails || !tradeDetails.picksByTeam || !tradeDetails.picksByTeam[teamId]) {
 		return (
 			<div className="team-pick-section">
@@ -55,4 +55,4 @@ function TeamPicksDisplay({ teamId, type, tradeDetails }) {
 	);
 }
 
-export default TeamPicksDisplay;
+export default SavedTeamPicksTrade;
