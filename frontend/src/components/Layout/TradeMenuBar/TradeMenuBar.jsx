@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Modal, Input } from 'antd';
 import { PlusOutlined, UndoOutlined, BarChartOutlined, SaveOutlined } from '@ant-design/icons';
-import ValuationSelector from '../ValuationSelector/ValuationSelector';
+import ValuationSelector from '../../Selector/ValuationSelector/ValuationSelector';
 import './TradeMenuBar.css';
 
 const TradeMenuBar = ({

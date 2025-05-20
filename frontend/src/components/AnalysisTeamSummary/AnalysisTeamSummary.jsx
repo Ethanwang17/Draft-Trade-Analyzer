@@ -1,9 +1,9 @@
 import React from 'react';
 import { Card, Col } from 'antd';
-import TradeSummary from '../TradeSummary/TradeSummary';
-import './TeamSummaryCard.css';
+import TradeSummary from '../Summary/TradeSummary/TradeSummary';
+import './AnalysisTeamSummary.css';
 
-function TeamSummaryCard({ team, teamTradeData, onResetPick, colSize }) {
+function AnalysisTeamSummary({ team, teamTradeData, onResetPick, colSize }) {
 	return (
 		<Col xs={24} sm={12} md={8} lg={colSize || 8}>
 			<Card
@@ -21,4 +21,4 @@ function TeamSummaryCard({ team, teamTradeData, onResetPick, colSize }) {
 	);
 }
 
-export default TeamSummaryCard;
+export default AnalysisTeamSummary;

@@ -8,9 +8,9 @@ import {
 	useTradeSave,
 	usePick,
 } from '../hooks';
-import AnalyzeHeader from '../components/AnalyzeHeader/AnalyzeHeader';
+import AnalyzeHeader from '../components/Layout/AnalyzeHeader/AnalyzeHeader';
 import TradeBalanceBadge from '../components/TradeBalanceBadge/TradeBalanceBadge';
-import TeamSummaryCard from '../components/TeamSummaryCard/TeamSummaryCard';
+import AnalysisTeamSummary from '../components/AnalysisTeamSummary/AnalysisTeamSummary';
 import SaveTradeModal from '../components/SaveTradeModal/SaveTradeModal';
 
 const { Title, Text } = Typography;
@@ -93,7 +93,7 @@ function AnalyzeTrade() {
 						const colSize = teamsWithPicks.length <= 3 ? 8 : 6;
 
 						return (
-							<TeamSummaryCard
+							<AnalysisTeamSummary
 								key={team.teamId}
 								team={team}
 								teamTradeData={teamTradeData}

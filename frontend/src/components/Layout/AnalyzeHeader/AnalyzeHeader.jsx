@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from 'antd';
 import { ArrowLeftOutlined, SaveOutlined } from '@ant-design/icons';
-import ValuationSelector from '../ValuationSelector/ValuationSelector';
+import ValuationSelector from '../../Selector/ValuationSelector/ValuationSelector';
 import './AnalyzeHeader.css';
 
 function AnalyzeHeader({ selectedValuation, onValuationChange, onBackToTrade, onSaveClick }) {

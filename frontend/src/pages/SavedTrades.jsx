@@ -3,7 +3,7 @@ import { Typography, Empty, Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import '../App.css';
 import { useSavedTrades, useTradeDetails, useTradeDelete, useTradeUtils } from '../hooks';
-import SavedTradeCard from '../components/SavedTradeCard/SavedTradeCard';
+import SavedTradeCard from '../components/Saved/SavedTradeCard/SavedTradeCard';
 
 const { Title } = Typography;
 

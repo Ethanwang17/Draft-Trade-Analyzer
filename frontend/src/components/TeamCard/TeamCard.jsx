@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDroppable } from '@dnd-kit/core';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import TradeSummary from '../TradeSummary/TradeSummary';
+import TradeSummary from '../Summary/TradeSummary/TradeSummary';
 import './TeamCard.css';
 
 // Draft Pick component

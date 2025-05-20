@@ -3,7 +3,7 @@ import { Layout } from 'antd';
 import { useState } from 'react';
 import 'antd/dist/reset.css';
 import './App.css';
-import NavBar from './components/NavBar/NavBar';
+import NavBar from './components/Layout/NavBar/NavBar';
 import HomePage from './pages/HomePage';
 import SavedTrades from './pages/SavedTrades';
 import AnalyzeTrade from './pages/AnalyzeTrade';

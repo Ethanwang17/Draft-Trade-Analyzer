@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Modal } from 'antd';
 import { useLocation } from 'react-router-dom';
 import TradeBuilder from '../components/TradeBuilder/TradeBuilder';
-import TradeMenuBar from '../components/TradeMenuBar/TradeMenuBar';
+import TradeMenuBar from '../components/Layout/TradeMenuBar/TradeMenuBar';
 import { getTeamGroupClass, getTradeBuilderStyle } from '../utils/tradeUtils';
 import { sortPicks } from '../utils/pickSorter';
 import {
