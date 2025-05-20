@@ -5,7 +5,7 @@ import 'antd/dist/reset.css';
 import './App.css';
 import NavBar from './components/Layout/NavBar/NavBar';
 import HomePage from './pages/HomePage';
-import SavedTrades from './pages/SavedTrades';
+import SavedTradesPage from './pages/SavedTradesPage';
 import AnalyzeTrade from './pages/AnalyzeTrade';
 
 const { Content } = Layout;
@@ -32,7 +32,7 @@ function App() {
 					<Content className="content">
 						<Routes>
 							<Route path="/home" element={<HomePage />} />
-							<Route path="/saved" element={<SavedTrades />} />
+							<Route path="/saved" element={<SavedTradesPage />} />
 							<Route path="/analyze" element={<AnalyzeTrade />} />
 							<Route path="/" element={<Navigate to="/home" />} />
 						</Routes>

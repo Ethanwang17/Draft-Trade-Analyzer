@@ -7,7 +7,7 @@ import SavedTradeCard from '../components/Saved/SavedTradeCard/SavedTradeCard';
 
 const { Title } = Typography;
 
-function SavedTrades() {
+function SavedTradesPage() {
 	const { trades, loading, setTrades } = useSavedTrades();
 	const {
 		expandedTradeId,
@@ -57,4 +57,4 @@ function SavedTrades() {
 	);
 }
 
-export default SavedTrades;
+export default SavedTradesPage;
