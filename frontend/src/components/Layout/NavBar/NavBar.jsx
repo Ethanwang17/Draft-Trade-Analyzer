@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import {
 	HomeOutlined,
 	SaveOutlined,
+	BarChartOutlined,
 	MenuFoldOutlined,
 	MenuUnfoldOutlined,
 } from '@ant-design/icons';
@@ -30,6 +31,8 @@ const NavBar = ({ items, collapsed, setCollapsed }) => {
 			icon = <HomeOutlined />;
 		} else if (item.label === 'Saved Trades') {
 			icon = <SaveOutlined />;
+		} else if (item.label === 'Valuations') {
+			icon = <BarChartOutlined />;
 		}
 
 		return {

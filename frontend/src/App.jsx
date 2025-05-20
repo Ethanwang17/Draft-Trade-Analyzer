@@ -7,6 +7,7 @@ import NavBar from './components/Layout/NavBar/NavBar';
 import HomePage from './pages/HomePage';
 import SavedTradesPage from './pages/SavedTradesPage';
 import AnalyzeTrade from './pages/AnalyzeTrade';
+import ValuationModelPage from './pages/ValuationModelPage';
 
 const { Content } = Layout;
 
@@ -22,6 +23,10 @@ function App() {
 			label: 'Saved Trades',
 			href: '/saved',
 		},
+		{
+			label: 'Valuations',
+			href: '/valuations',
+		},
 	];
 
 	return (
@@ -34,6 +39,7 @@ function App() {
 							<Route path="/home" element={<HomePage />} />
 							<Route path="/saved" element={<SavedTradesPage />} />
 							<Route path="/analyze" element={<AnalyzeTrade />} />
+							<Route path="/valuations" element={<ValuationModelPage />} />
 							<Route path="/" element={<Navigate to="/home" />} />
 						</Routes>
 					</Content>

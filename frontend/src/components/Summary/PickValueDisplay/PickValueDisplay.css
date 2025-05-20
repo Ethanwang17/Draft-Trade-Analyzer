@@ -1,13 +1,21 @@
 .pick-value-display {
-	font-size: 0.75rem;
-	color: #444;
-	background-color: #f9f9f9;
-	border-radius: 3px;
-	padding: 1px 4px;
+	display: inline-block;
+	font-size: 0.8rem;
+	color: #555;
+	margin-left: 8px;
+	font-weight: 400;
 }
 
 .pick-value-loading {
-	font-size: 0.75rem;
+	display: inline-block;
+	margin-left: 8px;
+	font-size: 0.8rem;
 	color: #999;
+}
+
+.depreciation-info {
+	font-size: 0.75rem;
+	color: #f56c6c;
+	margin-left: 1px;
 	font-style: italic;
 }

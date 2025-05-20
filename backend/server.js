@@ -323,6 +323,84 @@ app.get("/api/pick-value/:pickNumber", (req, res) => {
 	);
 });
 
+// Get round average pick value for future picks
+app.get("/api/future-pick-value/:year/:round/:valuation", (req, res) => {
+	const year = parseInt(req.params.year);
+	const round = parseInt(req.params.round);
+	const valuation = parseInt(req.params.valuation) || 1;
+	const currentYear = new Date().getFullYear();
+
+	// Validate inputs
+	if (isNaN(year) || isNaN(round) || round < 1 || round > 7) {
+		res.status(400).json({error: "Invalid year or round parameters"});
+		return;
+	}
+
+	// Get the valuation table name
+	db.get(
+		"SELECT table_name FROM valuations WHERE id = ?",
+		[valuation],
+		(err, valuationRow) => {
+			if (err) {
+				res.status(500).json({error: err.message});
+				return;
+			}
+
+			if (!valuationRow) {
+				res.status(404).json({error: "Valuation model not found"});
+				return;
+			}
+
+			const tableName = valuationRow.table_name;
+			const columnName =
+				tableName === "pick_values" ? "pick_position" : "pick_number";
+
+			// Calculate average value for the specified round
+			const roundRangeSql = `
+				SELECT AVG(value) as avg_value, AVG(normalized) as avg_normalized
+				FROM ${tableName}
+				WHERE ${columnName} BETWEEN ? AND ?
+			`;
+
+			// Calculate range for each round (1-32 for 1st round, 33-64 for 2nd round, etc.)
+			const startPosition = (round - 1) * 32 + 1;
+			const endPosition = round * 32;
+
+			db.get(roundRangeSql, [startPosition, endPosition], (err, row) => {
+				if (err) {
+					res.status(500).json({error: err.message});
+					return;
+				}
+
+				if (!row || !row.avg_value) {
+					res.status(404).json({
+						error: "Could not calculate average value for round",
+					});
+					return;
+				}
+
+				// Calculate depreciation based on years in the future
+				const yearsInFuture = year - currentYear;
+				const depreciationFactor = Math.pow(0.9, yearsInFuture); // 10% depreciation per year
+
+				// Apply depreciation to the average value
+				const futureValue = row.avg_value * depreciationFactor;
+				const futureNormalized =
+					row.avg_normalized * depreciationFactor;
+
+				res.json({
+					valuation_name: "Future Pick Estimate",
+					value: Math.round(futureValue),
+					normalized: parseFloat(futureNormalized.toFixed(2)),
+					year: year,
+					round: round,
+					depreciation: (1 - depreciationFactor) * 100,
+				});
+			});
+		}
+	);
+});
+
 // Get all valuation models
 app.get("/api/valuations", (req, res) => {
 	db.all("SELECT * FROM valuations ORDER BY id", [], (err, rows) => {
@@ -331,6 +409,163 @@ app.get("/api/valuations", (req, res) => {
 			return;
 		}
 		res.json(rows);
+	});
+});
+
+// Create a new valuation model
+app.post("/api/valuation-models", (req, res) => {
+	const {name, description, values} = req.body;
+
+	// Validate required fields
+	if (!name || !values || !Array.isArray(values) || values.length === 0) {
+		res.status(400).json({
+			error: "Missing required fields or invalid values array",
+		});
+		return;
+	}
+
+	// Check that all values have required fields
+	const validValues = values.every(
+		(val) =>
+			val &&
+			val.pick_position !== undefined &&
+			val.value !== undefined &&
+			val.normalized !== undefined
+	);
+
+	if (!validValues) {
+		res.status(400).json({
+			error: "All values must have pick_position, value, and normalized fields",
+		});
+		return;
+	}
+
+	// Start a transaction to ensure all operations complete or none do
+	db.serialize(() => {
+		db.run("BEGIN TRANSACTION");
+
+		// Check if the model name already exists
+		db.get(
+			"SELECT id FROM valuations WHERE name = ?",
+			[name],
+			(err, row) => {
+				if (err) {
+					db.run("ROLLBACK");
+					res.status(500).json({error: err.message});
+					return;
+				}
+
+				if (row) {
+					db.run("ROLLBACK");
+					res.status(409).json({
+						error: "Valuation model with this name already exists",
+					});
+					return;
+				}
+
+				// Create a new table name based on the model name (replace spaces and special chars with underscores)
+				const tableName = `pick_values_${name
+					.replace(/[^a-zA-Z0-9]/g, "_")
+					.toLowerCase()}`;
+
+				// Create the new table for the valuation model
+				const createTableSql = `
+				CREATE TABLE IF NOT EXISTS ${tableName} (
+					id INTEGER PRIMARY KEY AUTOINCREMENT,
+					pick_position INTEGER NOT NULL,
+					value REAL NOT NULL,
+					normalized REAL NOT NULL
+				)
+			`;
+
+				db.run(createTableSql, (err) => {
+					if (err) {
+						db.run("ROLLBACK");
+						res.status(500).json({
+							error: `Failed to create table: ${err.message}`,
+						});
+						return;
+					}
+
+					// Insert the new valuation model into the valuations table
+					db.run(
+						"INSERT INTO valuations (name, table_name, description) VALUES (?, ?, ?)",
+						[
+							name,
+							tableName,
+							description || `Custom valuation model: ${name}`,
+						],
+						function (err) {
+							if (err) {
+								db.run("ROLLBACK");
+								res.status(500).json({
+									error: `Failed to insert valuation model: ${err.message}`,
+								});
+								return;
+							}
+
+							const valuationId = this.lastID;
+
+							// Prepare to insert all pick values into the new table
+							const insertValueSql = `
+							INSERT INTO ${tableName} (pick_position, value, normalized)
+							VALUES (?, ?, ?)
+						`;
+
+							// Use a counter to track how many inserts have completed
+							let insertCount = 0;
+							let hasError = false;
+
+							// Insert each value
+							values.forEach((val) => {
+								db.run(
+									insertValueSql,
+									[
+										val.pick_position,
+										val.value,
+										val.normalized,
+									],
+									(err) => {
+										if (hasError) return; // Skip if we already have an error
+
+										if (err) {
+											hasError = true;
+											db.run("ROLLBACK");
+											res.status(500).json({
+												error: `Failed to insert pick value: ${err.message}`,
+											});
+											return;
+										}
+
+										insertCount++;
+
+										// If all inserts are complete, commit the transaction and respond
+										if (insertCount === values.length) {
+											db.run("COMMIT", (err) => {
+												if (err) {
+													res.status(500).json({
+														error: `Failed to commit transaction: ${err.message}`,
+													});
+													return;
+												}
+
+												res.status(201).json({
+													id: valuationId,
+													name: name,
+													table_name: tableName,
+													message:
+														"Valuation model created successfully",
+												});
+											});
+										}
+									}
+								);
+							});
+						}
+					);
+				});
+			}
+		);
 	});
 });
 

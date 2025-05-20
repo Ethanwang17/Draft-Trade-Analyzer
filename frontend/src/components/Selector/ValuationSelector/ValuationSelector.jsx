@@ -7,6 +7,11 @@ const ValuationSelector = ({ onChange, defaultValue = 1 }) => {
 	const [loading, setLoading] = useState(true);
 	const [selectedValuation, setSelectedValuation] = useState(defaultValue);
 
+	// Update selectedValuation when defaultValue prop changes
+	useEffect(() => {
+		setSelectedValuation(defaultValue);
+	}, [defaultValue]);
+
 	useEffect(() => {
 		const fetchValuations = async () => {
 			try {

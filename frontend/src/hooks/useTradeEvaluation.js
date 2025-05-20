@@ -61,6 +61,31 @@ export const useTradeEvaluation = (tradeData, pickValues) => {
 		return movedPicks;
 	};
 
+	// Helper function to get pick value, handling both numbered and future picks
+	const getPickValue = (pick) => {
+		if (!pickValues) return 0;
+
+		// For picks with a specific pick number
+		if (pick.pick_number && pickValues[pick.pick_number]) {
+			return pickValues[pick.pick_number];
+		}
+
+		// For future picks, try to get value by pick id
+		if (pick.id && pickValues[pick.id]) {
+			return pickValues[pick.id];
+		}
+
+		// For future picks, try to get value by year and round
+		if (pick.year && pick.round) {
+			const futureKey = `future_${pick.year}_${pick.round}`;
+			if (pickValues[futureKey]) {
+				return pickValues[futureKey];
+			}
+		}
+
+		return 0;
+	};
+
 	// Calculate team values based on pick movements
 	const calculateTeamValues = (team) => {
 		if (!tradeData)
@@ -81,15 +106,11 @@ export const useTradeEvaluation = (tradeData, pickValues) => {
 
 		// Calculate values using the fetched pick values
 		const outgoingValue = outgoingPicks.reduce((sum, pick) => {
-			return (
-				sum + (pick.pick_number && pickValues[pick.pick_number] ? pickValues[pick.pick_number] : 0)
-			);
+			return sum + getPickValue(pick);
 		}, 0);
 
 		const incomingValue = incomingPicks.reduce((sum, pick) => {
-			return (
-				sum + (pick.pick_number && pickValues[pick.pick_number] ? pickValues[pick.pick_number] : 0)
-			);
+			return sum + getPickValue(pick);
 		}, 0);
 
 		const netValue = incomingValue - outgoingValue;
@@ -134,8 +155,7 @@ export const useTradeEvaluation = (tradeData, pickValues) => {
 			team.picks.forEach((pick) => {
 				// Only count picks that have been traded (not with original team)
 				if (pick.originalTeamId !== team.teamId) {
-					totalTradeValue +=
-						pick.pick_number && pickValues[pick.pick_number] ? pickValues[pick.pick_number] : 0;
+					totalTradeValue += getPickValue(pick);
 				}
 			});
 		});
@@ -182,14 +202,14 @@ export const useTradeEvaluation = (tradeData, pickValues) => {
 		const outgoingWithInfo = teamMovedPicks.outgoing.map((pick) => ({
 			...pick,
 			toTeam: pick.currentTeamName,
-			value: pick.pick_number && pickValues[pick.pick_number] ? pickValues[pick.pick_number] : 0,
+			value: getPickValue(pick),
 		}));
 
 		// Transform incoming picks for proper display
 		const incomingWithInfo = teamMovedPicks.incoming.map((pick) => ({
 			...pick,
 			fromTeam: pick.originalTeamName,
-			value: pick.pick_number && pickValues[pick.pick_number] ? pickValues[pick.pick_number] : 0,
+			value: getPickValue(pick),
 		}));
 
 		return {

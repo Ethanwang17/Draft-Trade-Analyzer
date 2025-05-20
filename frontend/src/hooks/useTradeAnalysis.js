@@ -45,12 +45,22 @@ export const useTradeAnalysis = (initialData) => {
 
 	// Handle back to trade builder
 	const handleBackToTrade = () => {
+		// Make sure all picks have the current valuation when going back
+		const updatedTeamGroups = tradeData?.teamGroups.map((team) => ({
+			...team,
+			picks:
+				team.picks?.map((pick) => ({
+					...pick,
+					valuation: selectedValuation,
+				})) || [],
+		}));
+
 		// Always preserve state when clicking the back button
 		// The HomePage component will handle clearing state on page refresh
 		navigate('/home', {
 			state: {
 				preserveTradeState: true,
-				teamGroups: tradeData?.teamGroups,
+				teamGroups: updatedTeamGroups,
 				selectedValuation: selectedValuation,
 			},
 		});

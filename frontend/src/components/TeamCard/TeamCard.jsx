@@ -38,7 +38,6 @@ export const DraftPickOverlay = ({ content, teamLogo }) => {
 	);
 };
 
-
 // Droppable Team Container
 export const TeamPicksContainer = ({
 	id,
@@ -49,6 +48,7 @@ export const TeamPicksContainer = ({
 	teamId,
 	tradeData,
 	onResetPick,
+	selectedValuation,
 }) => {
 	const { setNodeRef } = useDroppable({
 		id,
@@ -77,7 +77,11 @@ export const TeamPicksContainer = ({
 			</div>
 
 			{/* Trade summary section */}
-			<TradeSummary tradeData={tradeSummary} onResetPick={onResetPick} />
+			<TradeSummary
+				tradeData={tradeSummary}
+				onResetPick={onResetPick}
+				selectedValuation={selectedValuation}
+			/>
 
 			<div className="team-picks-content">
 				{children}

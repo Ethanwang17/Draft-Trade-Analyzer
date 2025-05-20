@@ -100,6 +100,16 @@ const TradeBuilder = ({
 		return teamTradeData;
 	}, [teamGroups]);
 
+	// Get the current valuation model from the picks (use the first pick's valuation if available)
+	const selectedValuation = useMemo(() => {
+		for (const team of teamGroups) {
+			if (team.picks && team.picks.length > 0 && team.picks[0].valuation) {
+				return team.picks[0].valuation;
+			}
+		}
+		return 1; // Default to 1 if no picks found
+	}, [teamGroups]);
+
 	// Handle drag start
 	const handleDragStart = (event) => {
 		setActiveId(event.active.id);
@@ -356,6 +366,7 @@ const TradeBuilder = ({
 								teamId={team.teamId}
 								tradeData={team.teamId ? tradeData[team.teamId] : null}
 								onResetPick={resetPickToOriginalTeam}
+								selectedValuation={selectedValuation}
 							>
 								<SortableContext
 									items={team.picks.map((pick) => pick.id)}

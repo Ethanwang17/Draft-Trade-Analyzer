@@ -1,0 +1,47 @@
+.valuation-model-page {
+	padding: 20px;
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
+.selector-container {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+}
+
+.create-model-button {
+	margin-right: auto;
+}
+
+.chart-card {
+	margin-bottom: 24px;
+}
+
+.loading-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 400px;
+}
+
+.table-card {
+	margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+	.valuation-model-page {
+		padding: 10px;
+	}
+
+	.selector-container {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 12px;
+	}
+
+	.create-model-button {
+		margin-right: 0;
+	}
+}

@@ -21,8 +21,14 @@ const PickInfo = ({ pick, onResetPick, selectedValuation }) => {
 				<span className="trade-item-from">
 					{pick.fromTeam ? `from ${pick.fromTeam}` : pick.toTeam ? `to ${pick.toTeam}` : ''}
 				</span>
-				{pick.pick_number && (
+				{pick.pick_number ? (
 					<PickValueDisplay pickNumber={pick.pick_number} valuation={selectedValuation || 1} />
+				) : (
+					<PickValueDisplay
+						year={pick.year}
+						round={pick.round}
+						valuation={selectedValuation || 1}
+					/>
 				)}
 			</div>
 		</li>

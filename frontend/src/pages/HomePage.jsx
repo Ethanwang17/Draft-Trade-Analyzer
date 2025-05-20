@@ -128,7 +128,7 @@ function HomePage() {
 							// Format picks
 							const formattedPicks = picksData.map((pick) => ({
 								id: `pick-${pick.id}`,
-								content: `${pick.year} ${pick.round >= 1 && pick.round <= 7 ? roundWords[pick.round - 1] : `Round ${pick.round}`} Pick${pick.pick_number ? ` (#${pick.pick_number})` : ''}`,
+								content: `${pick.year} ${pick.round >= 1 && pick.round <= 7 ? roundWords[pick.round - 1] : `Round ${pick.round}`} Round Pick${pick.pick_number ? ` (#${pick.pick_number})` : ''}`,
 								pickId: pick.id,
 								year: pick.year,
 								round: pick.round,

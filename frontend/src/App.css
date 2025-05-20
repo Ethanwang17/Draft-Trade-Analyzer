@@ -62,13 +62,6 @@ body,
 	min-height: 100%;
 }
 
-.home-page-title {
-	font-size: 2rem;
-	font-weight: 700;
-	color: #333;
-	align-self: flex-start;
-}
-
 h1 {
 	margin-bottom: 1.5rem;
 	color: #333;
