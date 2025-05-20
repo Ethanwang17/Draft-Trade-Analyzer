@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Modal } from 'antd';
 import { useLocation } from 'react-router-dom';
-import TradeBuilder from '../components/TradeBuilder';
+import TradeBuilder from '../components/TradeBuilder/TradeBuilder';
 import TradeMenuBar from '../components/TradeMenuBar/TradeMenuBar';
 import { getTeamGroupClass, getTradeBuilderStyle } from '../utils/tradeUtils';
 import { sortPicks } from '../utils/pickSorter';
@@ -362,9 +362,7 @@ function HomePage() {
 
 	return (
 		<div className="home-page">
-			<h2 className="home-page-title">
-				Trade Builder
-			</h2>
+			<h2 className="home-page-title">Trade Builder</h2>
 
 			<TradeMenuBar
 				onAddTeam={handleAddTeam}

@@ -1,0 +1,52 @@
+/* TradeBuilder Styles */
+.trade-builder {
+	width: 100%;
+	max-width: min(90vw, 1400px);
+	margin: 0 auto;
+	background-color: #fff;
+	border-radius: 12px;
+	padding: 2.5rem;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+	transition: max-width 0.3s ease-in-out;
+}
+
+.action-container {
+	display: flex;
+	justify-content: center;
+	margin-bottom: 1.5rem;
+}
+
+.draft-picks-container {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 20px;
+	justify-content: center;
+}
+
+.team-picks-group {
+	flex: 1;
+	min-width: 250px;
+	max-width: 500px;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+	.trade-builder {
+		padding: 1.5rem;
+	}
+}
+
+/* Adding styles for traded picks and animations */
+
+.pick-resetting {
+	animation: highlight-pick 1s ease;
+}
+
+@keyframes highlight-pick {
+	0% {
+		background-color: rgba(144, 238, 144, 0.7);
+	}
+	100% {
+		background-color: transparent;
+	}
+}

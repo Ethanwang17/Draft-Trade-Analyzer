@@ -81,30 +81,6 @@ h1 {
 	letter-spacing: -0.5px;
 }
 
-.trade-builder {
-	width: 100%;
-	max-width: min(90vw, 1400px);
-	margin: 0 auto;
-	background-color: #fff;
-	border-radius: 12px;
-	padding: 2.5rem;
-	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-	transition: max-width 0.3s ease-in-out;
-}
-
-.action-container {
-	display: flex;
-	justify-content: center;
-	margin-bottom: 1.5rem;
-}
-
-/* Media Queries */
-@media (max-width: 768px) {
-	.trade-builder {
-		padding: 1.5rem;
-	}
-}
-
 /* Saved Trades Page Styles */
 .st-container {
 	padding: 20px;
@@ -115,7 +91,6 @@ h1 {
 	flex-direction: column;
 	align-items: center;
 }
-
 
 /* Analyze Trade Page Styles */
 .analyze-page {
