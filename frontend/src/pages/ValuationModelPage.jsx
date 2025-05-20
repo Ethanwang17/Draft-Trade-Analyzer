@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Card, Space, Typography, Spin, Alert, Button } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { Table, Card, Space, Typography, Spin, Alert, Button, Row, Col } from 'antd';
 import {
 	LineChart,
 	Line,
@@ -23,12 +22,11 @@ function ValuationModelPage() {
 	const [error, setError] = useState(null);
 	const [selectedValuation, setSelectedValuation] = useState(1);
 	const [xAxisTicks, setXAxisTicks] = useState([]);
-	const [isCreatingModel, setIsCreatingModel] = useState(false);
+	const [createMode, setCreateMode] = useState(false);
+	const [selectorKey, setSelectorKey] = useState(Date.now());
 
 	// Fetch pick values data
 	useEffect(() => {
-		if (isCreatingModel) return; // Don't fetch data in creation mode
-
 		const fetchPickValues = async () => {
 			try {
 				setLoading(true);
@@ -132,23 +130,10 @@ function ValuationModelPage() {
 		};
 
 		fetchPickValues();
-	}, [selectedValuation, isCreatingModel]);
+	}, [selectedValuation]);
 
 	const handleValuationChange = (value) => {
 		setSelectedValuation(value);
-	};
-
-	const handleCreateModel = () => {
-		setIsCreatingModel(true);
-	};
-
-	const handleCancelCreate = () => {
-		setIsCreatingModel(false);
-	};
-
-	const handleModelCreated = (modelId) => {
-		setIsCreatingModel(false);
-		setSelectedValuation(modelId);
 	};
 
 	// Table columns definition
@@ -176,22 +161,28 @@ function ValuationModelPage() {
 	return (
 		<div className="valuation-model-page">
 			<Space direction="vertical" size="large" style={{ width: '100%' }}>
-				<Title level={2}>Draft Pick Valuation Models</Title>
+				<div className="title-container">
+					<Title level={2}>Draft Pick Valuation Models</Title>
+					<Button type="primary" onClick={() => setCreateMode(!createMode)}>
+						{createMode ? 'Back to Models' : 'Create New Valuation Model'}
+					</Button>
+				</div>
 
-				{isCreatingModel ? (
-					<CreateValuationModel onCancel={handleCancelCreate} onSuccess={handleModelCreated} />
+				{createMode ? (
+					<CreateValuationModel
+						onCancel={() => setCreateMode(false)}
+						onModelCreated={(newId) => {
+							// switch back to view mode and refresh selector
+							setCreateMode(false);
+							setSelectedValuation(newId);
+							setSelectorKey(Date.now());
+						}}
+					/>
 				) : (
 					<>
 						<div className="selector-container">
-							<Button
-								type="primary"
-								icon={<PlusOutlined />}
-								onClick={handleCreateModel}
-								className="create-model-button"
-							>
-								Create New Model
-							</Button>
 							<ValuationSelector
+								key={selectorKey}
 								onChange={handleValuationChange}
 								defaultValue={selectedValuation}
 							/>

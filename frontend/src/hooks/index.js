@@ -2,6 +2,7 @@ export { useSavedTrades } from './useSavedTrades';
 export { useTradeDetails } from './useTradeDetails';
 export { useTradeDelete } from './useTradeDelete';
 export { useTradeUtils } from './useTradeUtils';
+export { useTradeFilters } from './useTradeFilters';
 
 // AnalyzeTrade hooks
 export { useTradeAnalysis } from './useTradeAnalysis';

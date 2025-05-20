@@ -6,13 +6,8 @@
 
 .selector-container {
 	display: flex;
-	justify-content: space-between;
-	align-items: center;
+	justify-content: flex-end;
 	margin-bottom: 20px;
-}
-
-.create-model-button {
-	margin-right: auto;
 }
 
 .chart-card {
@@ -30,18 +25,14 @@
 	margin-bottom: 24px;
 }
 
+.title-container {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
 @media (max-width: 768px) {
 	.valuation-model-page {
 		padding: 10px;
-	}
-
-	.selector-container {
-		flex-direction: column;
-		align-items: stretch;
-		gap: 12px;
-	}
-
-	.create-model-button {
-		margin-right: 0;
 	}
 }

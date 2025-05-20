@@ -412,161 +412,135 @@ app.get("/api/valuations", (req, res) => {
 	});
 });
 
-// Create a new valuation model
+// NEW ENDPOINT: Create a new valuation model
 app.post("/api/valuation-models", (req, res) => {
-	const {name, description, values} = req.body;
+	const {name, description, values, normalized} = req.body;
 
-	// Validate required fields
-	if (!name || !values || !Array.isArray(values) || values.length === 0) {
-		res.status(400).json({
-			error: "Missing required fields or invalid values array",
-		});
-		return;
+	// Basic validation
+	if (!name || typeof name !== "string" || name.trim() === "") {
+		return res.status(400).json({error: "Model name is required"});
 	}
 
-	// Check that all values have required fields
-	const validValues = values.every(
-		(val) =>
-			val &&
-			val.pick_position !== undefined &&
-			val.value !== undefined &&
-			val.normalized !== undefined
-	);
-
-	if (!validValues) {
-		res.status(400).json({
-			error: "All values must have pick_position, value, and normalized fields",
-		});
-		return;
+	if (!Array.isArray(values) || values.length === 0) {
+		return res.status(400).json({error: "Values array is required"});
 	}
 
-	// Start a transaction to ensure all operations complete or none do
-	db.serialize(() => {
-		db.run("BEGIN TRANSACTION");
+	// Ensure all values are numbers and positive
+	const numericValues = values.map((v) => Number(v));
+	if (numericValues.some((v) => isNaN(v) || v <= 0)) {
+		return res
+			.status(400)
+			.json({error: "All pick values must be positive numbers"});
+	}
 
-		// Check if the model name already exists
-		db.get(
-			"SELECT id FROM valuations WHERE name = ?",
-			[name],
-			(err, row) => {
-				if (err) {
-					db.run("ROLLBACK");
-					res.status(500).json({error: err.message});
-					return;
-				}
+	const firstValue = numericValues[0];
+	if (firstValue <= 0) {
+		return res
+			.status(400)
+			.json({error: "First pick value must be greater than zero"});
+	}
 
-				if (row) {
-					db.run("ROLLBACK");
-					res.status(409).json({
-						error: "Valuation model with this name already exists",
-					});
-					return;
-				}
+	// Check for unique model name
+	db.get(
+		"SELECT id FROM valuations WHERE LOWER(name) = LOWER(?)",
+		[name.trim()],
+		(err, existing) => {
+			if (err) {
+				return res.status(500).json({error: err.message});
+			}
 
-				// Create a new table name based on the model name (replace spaces and special chars with underscores)
-				const tableName = `pick_values_${name
-					.replace(/[^a-zA-Z0-9]/g, "_")
-					.toLowerCase()}`;
+			if (existing) {
+				return res
+					.status(400)
+					.json({error: "Model name must be unique"});
+			}
 
-				// Create the new table for the valuation model
-				const createTableSql = `
-				CREATE TABLE IF NOT EXISTS ${tableName} (
-					id INTEGER PRIMARY KEY AUTOINCREMENT,
-					pick_position INTEGER NOT NULL,
-					value REAL NOT NULL,
-					normalized REAL NOT NULL
-				)
-			`;
-
-				db.run(createTableSql, (err) => {
+			// Insert placeholder to get new ID
+			db.run(
+				"INSERT INTO valuations (name, table_name, description) VALUES (?, ?, ?)",
+				[name.trim(), "temp", description || null],
+				function (err) {
 					if (err) {
-						db.run("ROLLBACK");
-						res.status(500).json({
-							error: `Failed to create table: ${err.message}`,
-						});
-						return;
+						return res.status(500).json({error: err.message});
 					}
 
-					// Insert the new valuation model into the valuations table
+					const newId = this.lastID;
+					const tableName = `valuation_${newId}`;
+
+					// Update record with real table name
 					db.run(
-						"INSERT INTO valuations (name, table_name, description) VALUES (?, ?, ?)",
-						[
-							name,
-							tableName,
-							description || `Custom valuation model: ${name}`,
-						],
-						function (err) {
+						"UPDATE valuations SET table_name = ? WHERE id = ?",
+						[tableName, newId],
+						(err) => {
 							if (err) {
-								db.run("ROLLBACK");
-								res.status(500).json({
-									error: `Failed to insert valuation model: ${err.message}`,
-								});
-								return;
+								return res
+									.status(500)
+									.json({error: err.message});
 							}
 
-							const valuationId = this.lastID;
-
-							// Prepare to insert all pick values into the new table
-							const insertValueSql = `
-							INSERT INTO ${tableName} (pick_position, value, normalized)
-							VALUES (?, ?, ?)
-						`;
-
-							// Use a counter to track how many inserts have completed
-							let insertCount = 0;
-							let hasError = false;
-
-							// Insert each value
-							values.forEach((val) => {
-								db.run(
-									insertValueSql,
-									[
-										val.pick_position,
-										val.value,
-										val.normalized,
-									],
-									(err) => {
-										if (hasError) return; // Skip if we already have an error
-
-										if (err) {
-											hasError = true;
-											db.run("ROLLBACK");
-											res.status(500).json({
-												error: `Failed to insert pick value: ${err.message}`,
-											});
-											return;
-										}
-
-										insertCount++;
-
-										// If all inserts are complete, commit the transaction and respond
-										if (insertCount === values.length) {
-											db.run("COMMIT", (err) => {
-												if (err) {
-													res.status(500).json({
-														error: `Failed to commit transaction: ${err.message}`,
-													});
-													return;
-												}
-
-												res.status(201).json({
-													id: valuationId,
-													name: name,
-													table_name: tableName,
-													message:
-														"Valuation model created successfully",
-												});
-											});
-										}
+							// Create dynamic table
+							db.run(
+								`CREATE TABLE IF NOT EXISTS ${tableName} (
+									id INTEGER PRIMARY KEY AUTOINCREMENT,
+									pick_number INTEGER NOT NULL,
+									value REAL NOT NULL,
+									normalized REAL NOT NULL
+								)`,
+								[],
+								(err) => {
+									if (err) {
+										return res
+											.status(500)
+											.json({error: err.message});
 									}
-								);
-							});
+
+									// Insert values
+									const stmt = db.prepare(
+										`INSERT INTO ${tableName} (pick_number, value, normalized) VALUES (?, ?, ?)`
+									);
+
+									numericValues.forEach((val, idx) => {
+										const pickNumber = idx + 1;
+										// Use normalized values from request when available, otherwise calculate
+										const normalizedValue =
+											normalized &&
+											normalized[idx] !== undefined
+												? normalized[idx]
+												: Number(
+														(
+															(val / firstValue) *
+															100
+														).toFixed(2)
+												  );
+										stmt.run(
+											pickNumber,
+											val,
+											normalizedValue
+										);
+									});
+
+									stmt.finalize((err) => {
+										if (err) {
+											return res
+												.status(500)
+												.json({error: err.message});
+										}
+
+										return res.status(201).json({
+											id: newId,
+											name: name.trim(),
+											description: description || null,
+											table_name: tableName,
+										});
+									});
+								}
+							);
 						}
 					);
-				});
-			}
-		);
-	});
+				}
+			);
+		}
+	);
 });
 
 // Start the server
