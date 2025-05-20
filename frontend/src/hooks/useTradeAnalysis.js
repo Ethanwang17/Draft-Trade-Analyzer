@@ -45,6 +45,8 @@ export const useTradeAnalysis = (initialData) => {
 
 	// Handle back to trade builder
 	const handleBackToTrade = () => {
+		// Always preserve state when clicking the back button
+		// The HomePage component will handle clearing state on page refresh
 		navigate('/home', {
 			state: {
 				preserveTradeState: true,

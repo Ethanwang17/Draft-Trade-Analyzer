@@ -3,7 +3,7 @@ import { Card, Col } from 'antd';
 import TradeSummary from '../Summary/TradeSummary/TradeSummary';
 import './AnalysisTeamSummary.css';
 
-function AnalysisTeamSummary({ team, teamTradeData, onResetPick, colSize }) {
+function AnalysisTeamSummary({ team, teamTradeData, onResetPick, colSize, selectedValuation }) {
 	return (
 		<Col xs={24} sm={12} md={8} lg={colSize || 8}>
 			<Card
@@ -15,7 +15,12 @@ function AnalysisTeamSummary({ team, teamTradeData, onResetPick, colSize }) {
 				}
 				className="team-card"
 			>
-				<TradeSummary tradeData={teamTradeData} onResetPick={onResetPick} showNetValue={true} />
+				<TradeSummary
+					tradeData={teamTradeData}
+					onResetPick={onResetPick}
+					showNetValue={true}
+					selectedValuation={selectedValuation}
+				/>
 			</Card>
 		</Col>
 	);

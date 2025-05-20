@@ -9,10 +9,6 @@
 	gap: 5px;
 }
 
-.analyze-trade-badge.balanced {
-	background-color: #52c41a;
-}
-
 .analyze-trade-badge.slightly-favors {
 	/* background-color: #52c41a; */
 	background-color: #e5ffd8;

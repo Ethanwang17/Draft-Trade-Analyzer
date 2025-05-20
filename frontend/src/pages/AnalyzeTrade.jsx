@@ -99,6 +99,7 @@ function AnalyzeTrade() {
 								teamTradeData={teamTradeData}
 								onResetPick={handleResetPick}
 								colSize={colSize}
+								selectedValuation={selectedValuation}
 							/>
 						);
 					})}

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Modal } from 'antd';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import TradeBuilder from '../components/TradeBuilder/TradeBuilder';
 import TradeMenuBar from '../components/Layout/TradeMenuBar/TradeMenuBar';
 import { getTeamGroupClass, getTradeBuilderStyle } from '../utils/tradeUtils';
@@ -15,8 +15,20 @@ import {
 
 function HomePage() {
 	const location = useLocation();
+	const navigate = useNavigate();
 	const originalPicksRef = useRef({});
 	const [hasTradesMade, setHasTradesMade] = useState(false);
+
+	// Check if this is a page refresh
+	useEffect(() => {
+		// A clean page load/refresh won't have the referrer from the same site
+		const isPageRefresh = !document.referrer || !document.referrer.includes(window.location.origin);
+
+		// If it's a page refresh and we have state, clear it by re-navigating to home without state
+		if (isPageRefresh && location.state) {
+			navigate('/home', { replace: true, state: null });
+		}
+	}, [navigate, location]);
 
 	// Initialize with empty team groups or from location state if coming back from analyze page
 	const initialTeamGroups = (() => {

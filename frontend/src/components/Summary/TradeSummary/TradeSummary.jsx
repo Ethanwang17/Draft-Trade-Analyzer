@@ -3,7 +3,7 @@ import TradeReceiveSend from '../TradeReceiveSend/TradeReceiveSend';
 import SummaryNetValue from '../SummaryNetValue/SummaryNetValue';
 import './TradeSummary.css';
 
-const TradeSummary = ({ tradeData, onResetPick, showNetValue = false }) => {
+const TradeSummary = ({ tradeData, onResetPick, showNetValue = false, selectedValuation }) => {
 	const { outgoing = [], incoming = [] } = tradeData || {};
 
 	return (
@@ -14,6 +14,7 @@ const TradeSummary = ({ tradeData, onResetPick, showNetValue = false }) => {
 				picks={outgoing}
 				icon="↑"
 				onResetPick={onResetPick}
+				selectedValuation={selectedValuation}
 			/>
 
 			<TradeReceiveSend
@@ -22,6 +23,7 @@ const TradeSummary = ({ tradeData, onResetPick, showNetValue = false }) => {
 				picks={incoming}
 				icon="↓"
 				onResetPick={onResetPick}
+				selectedValuation={selectedValuation}
 			/>
 
 			{showNetValue && <SummaryNetValue picks={tradeData} />}

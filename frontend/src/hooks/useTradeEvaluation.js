@@ -124,7 +124,7 @@ export const useTradeEvaluation = (tradeData, pickValues) => {
 		const lowestValue = sortedTeams[sortedTeams.length - 1];
 
 		// Calculate the absolute difference between highest and lowest values
-		const valueDifference = Math.abs(highestValue.netValue - lowestValue.netValue);
+		const valueDifference = Math.abs(highestValue.netValue);
 
 		// Calculate the total value of all picks involved in the trade
 		let totalTradeValue = 0;
@@ -140,12 +140,21 @@ export const useTradeEvaluation = (tradeData, pickValues) => {
 			});
 		});
 
+		console.log('DEBUG percentageDifference calculation:');
+		console.log('sortedTeams:', sortedTeams);
+		console.log('highestValue:', highestValue);
+		console.log('lowestValue:', lowestValue);
+		console.log('valueDifference:', valueDifference);
+		console.log('totalTradeValue:', totalTradeValue);
+
 		// Calculate percentage as difference divided by total trade value
 		const percentageDifference =
 			totalTradeValue > 0 ? (valueDifference / totalTradeValue) * 100 : 0;
 
-		// Determine if the trade is balanced - use 20% as threshold
-		if (percentageDifference < 20) {
+		console.log('percentageDifference:', percentageDifference);
+
+		// Determine if the trade is balanced - use 10% as threshold
+		if (percentageDifference < 10) {
 			return {
 				status: 'slightlyFavors',
 				message: `Slightly Favors ${highestValue.name} (${Math.round(percentageDifference)}%)`,

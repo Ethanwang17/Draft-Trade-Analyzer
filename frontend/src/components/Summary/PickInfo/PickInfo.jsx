@@ -3,7 +3,7 @@ import { CloseOutlined } from '@ant-design/icons';
 import PickValueDisplay from '../PickValueDisplay/PickValueDisplay';
 import './PickInfo.css';
 
-const PickInfo = ({ pick, onResetPick }) => {
+const PickInfo = ({ pick, onResetPick, selectedValuation }) => {
 	return (
 		<li className="trade-summary-item">
 			<div className="trade-item-row">
@@ -22,7 +22,7 @@ const PickInfo = ({ pick, onResetPick }) => {
 					{pick.fromTeam ? `from ${pick.fromTeam}` : pick.toTeam ? `to ${pick.toTeam}` : ''}
 				</span>
 				{pick.pick_number && (
-					<PickValueDisplay pickNumber={pick.pick_number} valuation={pick.valuation || 1} />
+					<PickValueDisplay pickNumber={pick.pick_number} valuation={selectedValuation || 1} />
 				)}
 			</div>
 		</li>

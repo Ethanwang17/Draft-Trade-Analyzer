@@ -3,7 +3,14 @@ import PickInfo from '../PickInfo/PickInfo';
 import TradeSummaryTotal from '../TradeSummaryTotal/TradeSummaryTotal';
 import './TradeReceiveSend.css';
 
-const TradeReceiveSend = ({ title, direction, picks = [], icon, onResetPick }) => {
+const TradeReceiveSend = ({
+	title,
+	direction,
+	picks = [],
+	icon,
+	onResetPick,
+	selectedValuation,
+}) => {
 	return (
 		<div className={`trade-summary-section ${direction}`}>
 			<div className="trade-summary-header">
@@ -22,7 +29,12 @@ const TradeReceiveSend = ({ title, direction, picks = [], icon, onResetPick }) =
 					<>
 						<ul className="trade-list">
 							{picks.map((pick) => (
-								<PickInfo key={pick.id} pick={pick} onResetPick={onResetPick} />
+								<PickInfo
+									key={pick.id}
+									pick={pick}
+									onResetPick={onResetPick}
+									selectedValuation={selectedValuation}
+								/>
 							))}
 						</ul>
 						<TradeSummaryTotal picks={picks} direction={direction} />
