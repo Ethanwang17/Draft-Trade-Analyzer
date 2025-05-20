@@ -4,16 +4,16 @@ import { message } from 'antd';
  * Hook for deleting trades and handling related state updates
  * @param {Array} trades - Current trades array
  * @param {Function} setTrades - Function to update trades state
- * @param {String|null} expandedTradeId - ID of the currently expanded trade
- * @param {Function} setExpandedTradeId - Function to update expanded trade ID
+ * @param {Array} expandedTradeIds - IDs of the currently expanded trades
+ * @param {Function} setExpandedTradeIds - Function to update expanded trade IDs
  * @param {Function} setTradeDetails - Function to update trade details
  * @returns {Function} Function to delete a trade by ID
  */
 export const useTradeDelete = (
 	trades,
 	setTrades,
-	expandedTradeId,
-	setExpandedTradeId,
+	expandedTradeIds,
+	setExpandedTradeIds,
 	setTradeDetails
 ) => {
 	const deleteTrade = async (tradeId, event) => {
@@ -33,10 +33,16 @@ export const useTradeDelete = (
 			// Remove from local state
 			setTrades(trades.filter((trade) => trade.id !== tradeId));
 
-			// Clear details if the deleted trade was expanded
-			if (expandedTradeId === tradeId) {
-				setExpandedTradeId(null);
-				setTradeDetails(null);
+			// Remove from expanded trades if it was expanded
+			if (expandedTradeIds.includes(tradeId)) {
+				setExpandedTradeIds(expandedTradeIds.filter((id) => id !== tradeId));
+
+				// Update trade details by removing the deleted trade
+				setTradeDetails((prev) => {
+					const newDetails = { ...prev };
+					delete newDetails[tradeId];
+					return newDetails;
+				});
 			}
 
 			message.success('Trade deleted successfully');

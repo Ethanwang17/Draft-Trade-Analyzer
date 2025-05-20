@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Typography, Empty, Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import '../App.css';
@@ -17,22 +17,23 @@ const { Title } = Typography;
 function SavedTradesPage() {
 	const { trades, loading, setTrades } = useSavedTrades();
 	const {
-		expandedTradeId,
+		expandedTradeIds,
 		tradeDetails,
 		loadingDetails,
 		loadTradeDetails,
-		setExpandedTradeId,
+		setExpandedTradeIds,
 		setTradeDetails,
 	} = useTradeDetails();
 	const deleteTrade = useTradeDelete(
 		trades,
 		setTrades,
-		expandedTradeId,
-		setExpandedTradeId,
+		expandedTradeIds,
+		setExpandedTradeIds,
 		setTradeDetails
 	);
 	const { formatDate } = useTradeUtils();
 	const { filteredTrades, applyFilters, clearFilters } = useTradeFilters(trades);
+	const [selectedValuation, setSelectedValuation] = useState(1);
 
 	// Extract all teams from trades for the filter dropdown
 	const allTeams = useMemo(() => {
@@ -49,6 +50,10 @@ function SavedTradesPage() {
 		return Array.from(teamsMap.values());
 	}, [trades]);
 
+	const handleValuationChange = (value) => {
+		setSelectedValuation(value);
+	};
+
 	return (
 		<div className="st-container">
 			<Title level={2}>Saved Trade Concepts</Title>
@@ -62,19 +67,26 @@ function SavedTradesPage() {
 				<Empty description="No saved trades yet" />
 			) : (
 				<>
-					<FilterBar teams={allTeams} onApplyFilters={applyFilters} onClearFilters={clearFilters} />
+					<FilterBar
+						teams={allTeams}
+						onApplyFilters={applyFilters}
+						onClearFilters={clearFilters}
+						selectedValuation={selectedValuation}
+						onValuationChange={handleValuationChange}
+					/>
 
 					<div className="st-trades-list">
 						{filteredTrades.map((trade) => (
 							<SavedTradeCard
 								key={trade.id}
 								trade={trade}
-								expandedTradeId={expandedTradeId}
+								expandedTradeIds={expandedTradeIds}
 								loadingDetails={loadingDetails}
 								tradeDetails={tradeDetails}
 								deleteTrade={deleteTrade}
 								loadTradeDetails={loadTradeDetails}
 								formatDate={formatDate}
+								selectedValuation={selectedValuation}
 							/>
 						))}
 					</div>

@@ -1,31 +1,67 @@
-import React, { useState } from 'react';
-import { Row, Col, Select, Button, Tooltip } from 'antd';
-import { FilterOutlined, ClearOutlined } from '@ant-design/icons';
+import React, { useState, useEffect } from 'react';
+import { Row, Col, Select } from 'antd';
 import './FilterBar.css';
 
 const { Option } = Select;
 
-const FilterBar = ({ teams, onApplyFilters, onClearFilters }) => {
+const FilterBar = ({
+	teams,
+	onApplyFilters,
+	onClearFilters,
+	selectedValuation,
+	onValuationChange,
+}) => {
 	const [selectedTeams, setSelectedTeams] = useState([]);
 	const [sortOption, setSortOption] = useState('date_newest');
+	const [valuationModels, setValuationModels] = useState([]);
+	const [loading, setLoading] = useState(false);
 
-	const handleApplyFilters = () => {
+	// Fetch valuation models
+	useEffect(() => {
+		const fetchValuationModels = async () => {
+			try {
+				setLoading(true);
+				const response = await fetch('/api/valuations');
+				if (response.ok) {
+					const data = await response.json();
+					setValuationModels(data);
+				}
+			} catch (error) {
+				console.error('Error fetching valuation models:', error);
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		fetchValuationModels();
+	}, []);
+
+	// Auto-apply filters when any filter changes
+	useEffect(() => {
 		onApplyFilters({
 			teams: selectedTeams,
 			sortOption,
 		});
+	}, [selectedTeams, sortOption, onApplyFilters]);
+
+	const handleTeamChange = (values) => {
+		setSelectedTeams(values);
 	};
 
-	const handleClearFilters = () => {
-		setSelectedTeams([]);
-		setSortOption('date_newest');
-		onClearFilters();
+	const handleSortChange = (value) => {
+		setSortOption(value);
+	};
+
+	const handleValuationChange = (value) => {
+		if (onValuationChange) {
+			onValuationChange(value);
+		}
 	};
 
 	return (
 		<div className="filter-bar">
 			<Row gutter={[16, 16]} align="middle">
-				<Col xs={24} sm={24} md={12} lg={12} xl={12}>
+				<Col xs={24} sm={24} md={8} lg={8} xl={8}>
 					<div className="filter-item">
 						<label htmlFor="teams-filter">Team</label>
 						<Select
@@ -33,7 +69,7 @@ const FilterBar = ({ teams, onApplyFilters, onClearFilters }) => {
 							mode="multiple"
 							placeholder="Select teams"
 							value={selectedTeams}
-							onChange={setSelectedTeams}
+							onChange={handleTeamChange}
 							style={{ width: '100%' }}
 							allowClear
 						>
@@ -46,13 +82,13 @@ const FilterBar = ({ teams, onApplyFilters, onClearFilters }) => {
 					</div>
 				</Col>
 
-				<Col xs={24} sm={24} md={12} lg={12} xl={12}>
+				<Col xs={24} sm={12} md={8} lg={8} xl={8}>
 					<div className="filter-item">
 						<label htmlFor="sort-option">Sort By</label>
 						<Select
 							id="sort-option"
 							value={sortOption}
-							onChange={setSortOption}
+							onChange={handleSortChange}
 							style={{ width: '100%' }}
 						>
 							<Option value="date_newest">Date (Newest First)</Option>
@@ -61,17 +97,23 @@ const FilterBar = ({ teams, onApplyFilters, onClearFilters }) => {
 					</div>
 				</Col>
 
-				<Col xs={24} sm={24} md={24} lg={24} xl={24} className="filter-actions">
-					<Tooltip title="Apply filters">
-						<Button type="primary" icon={<FilterOutlined />} onClick={handleApplyFilters}>
-							Apply
-						</Button>
-					</Tooltip>
-					<Tooltip title="Clear filters">
-						<Button icon={<ClearOutlined />} onClick={handleClearFilters}>
-							Clear
-						</Button>
-					</Tooltip>
+				<Col xs={24} sm={12} md={8} lg={8} xl={8}>
+					<div className="filter-item">
+						<label htmlFor="valuation-model">Valuation Model</label>
+						<Select
+							id="valuation-model"
+							value={selectedValuation}
+							onChange={handleValuationChange}
+							style={{ width: '100%' }}
+							loading={loading}
+						>
+							{valuationModels.map((model) => (
+								<Option key={model.id} value={model.id}>
+									{model.name}
+								</Option>
+							))}
+						</Select>
+					</div>
 				</Col>
 			</Row>
 		</div>

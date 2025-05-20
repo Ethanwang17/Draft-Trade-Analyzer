@@ -6,40 +6,48 @@ import { message } from 'antd';
  * @returns {Object} Object containing trade details state and related functions
  */
 export const useTradeDetails = () => {
-	const [expandedTradeId, setExpandedTradeId] = useState(null);
-	const [tradeDetails, setTradeDetails] = useState(null);
-	const [loadingDetails, setLoadingDetails] = useState(false);
+	const [expandedTradeIds, setExpandedTradeIds] = useState([]);
+	const [tradeDetails, setTradeDetails] = useState({});
+	const [loadingDetails, setLoadingDetails] = useState({});
 
 	const loadTradeDetails = async (tradeId) => {
-		if (expandedTradeId === tradeId) {
-			setExpandedTradeId(null);
+		// Toggle expansion state
+		if (expandedTradeIds.includes(tradeId)) {
+			setExpandedTradeIds(expandedTradeIds.filter((id) => id !== tradeId));
 			return;
 		}
 
 		try {
-			setExpandedTradeId(tradeId);
-			setLoadingDetails(true);
+			// Add this trade ID to expanded IDs
+			setExpandedTradeIds([...expandedTradeIds, tradeId]);
 
-			const response = await fetch(`/api/saved-trades/${tradeId}`);
+			// Set loading state for this specific trade
+			setLoadingDetails((prev) => ({ ...prev, [tradeId]: true }));
 
-			if (!response.ok) {
-				throw new Error('Failed to fetch trade details');
+			// Only fetch if we don't already have the details
+			if (!tradeDetails[tradeId]) {
+				const response = await fetch(`/api/saved-trades/${tradeId}`);
+
+				if (!response.ok) {
+					throw new Error('Failed to fetch trade details');
+				}
+
+				const data = await response.json();
+				setTradeDetails((prev) => ({ ...prev, [tradeId]: data }));
 			}
-
-			const data = await response.json();
-			setTradeDetails(data);
 		} catch (error) {
 			console.error('Error loading trade details:', error);
 			message.error('Failed to load trade details');
-			setExpandedTradeId(null);
+			// Remove this ID from expanded IDs
+			setExpandedTradeIds(expandedTradeIds.filter((id) => id !== tradeId));
 		} finally {
-			setLoadingDetails(false);
+			setLoadingDetails((prev) => ({ ...prev, [tradeId]: false }));
 		}
 	};
 
 	return {
-		expandedTradeId,
-		setExpandedTradeId,
+		expandedTradeIds,
+		setExpandedTradeIds,
 		tradeDetails,
 		setTradeDetails,
 		loadingDetails,
