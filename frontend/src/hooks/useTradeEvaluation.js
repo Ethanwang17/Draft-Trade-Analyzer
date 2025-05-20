@@ -123,20 +123,32 @@ export const useTradeEvaluation = (tradeData, pickValues) => {
 		const highestValue = sortedTeams[0];
 		const lowestValue = sortedTeams[sortedTeams.length - 1];
 
-		const valueDifference = highestValue.netValue - lowestValue.netValue;
+		// Calculate the absolute difference between highest and lowest values
+		const valueDifference = Math.abs(highestValue.netValue - lowestValue.netValue);
 
-		// Determine if the trade is balanced
-		/*
-		if (valueDifference < 100) {
-			return {
-				status: 'balanced',
-				message: 'Balanced Trade',
-				iconType: CheckCircleOutlined,
-			};
-		} else*/ if (valueDifference < 300) {
+		// Calculate the total value of all picks involved in the trade
+		let totalTradeValue = 0;
+		tradeData.teamGroups.forEach((team) => {
+			if (!team.teamId || !team.picks) return;
+
+			team.picks.forEach((pick) => {
+				// Only count picks that have been traded (not with original team)
+				if (pick.originalTeamId !== team.teamId) {
+					totalTradeValue +=
+						pick.pick_number && pickValues[pick.pick_number] ? pickValues[pick.pick_number] : 0;
+				}
+			});
+		});
+
+		// Calculate percentage as difference divided by total trade value
+		const percentageDifference =
+			totalTradeValue > 0 ? (valueDifference / totalTradeValue) * 100 : 0;
+
+		// Determine if the trade is balanced - use 20% as threshold
+		if (percentageDifference < 20) {
 			return {
 				status: 'slightlyFavors',
-				message: `Slightly Favors ${highestValue.name}`,
+				message: `Slightly Favors ${highestValue.name} (${Math.round(percentageDifference)}%)`,
 				value: `+${Math.round(highestValue.netValue)}`,
 				iconType: CheckCircleOutlined,
 
@@ -145,7 +157,7 @@ export const useTradeEvaluation = (tradeData, pickValues) => {
 		} else {
 			return {
 				status: 'heavilyFavors',
-				message: `Heavily Favors ${highestValue.name}`,
+				message: `Heavily Favors ${highestValue.name} (${Math.round(percentageDifference)}%)`,
 				value: `+${Math.round(highestValue.netValue)}`,
 				iconType: CloseCircleOutlined,
 			};

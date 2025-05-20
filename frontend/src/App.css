@@ -81,6 +81,16 @@ h1 {
 	letter-spacing: -0.5px;
 }
 
+.reset-button {
+	background-color: #5b21b6; /* Purple background */
+	color: white; /* White text */
+	border: none; /* Remove border */
+}
+
+.reset-button:hover {
+	background-color: #4c1d99; /* Darker purple on hover */
+}
+
 /* Saved Trades Page Styles */
 .st-container {
 	padding: 20px;
@@ -123,9 +133,13 @@ h1 {
 	align-items: center;
 	font-weight: 500;
 	transition: all 0.2s;
+	color: #552583;
+	border-color: #552583;
 }
 
 .analyze-back-button:hover {
+	color: #7543a5 !important;
+	border-color: #7543a5 !important;
 	transform: translateX(-2px);
 	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
 }
@@ -136,10 +150,13 @@ h1 {
 	align-items: center;
 	font-weight: 500;
 	transition: all 0.2s;
+	background-color: #552583;
 }
 
 .save-trade-button:hover {
 	transform: translateY(-2px);
+	background-color: #7543a5 !important;
+	border-color: #7543a5 !important;
 	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
 }
 

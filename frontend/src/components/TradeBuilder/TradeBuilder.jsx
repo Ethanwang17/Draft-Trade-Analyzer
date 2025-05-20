@@ -18,6 +18,7 @@ import {
 import { DraftPick, DraftPickOverlay, TeamPicksContainer } from '../TeamCard/TeamCard';
 import TeamSelector from '../Selector/TeamSelector/TeamSelector';
 import './TradeBuilder.css';
+import { sortPicks } from '../../utils/pickSorter';
 
 const TradeBuilder = ({
 	teams,
@@ -181,7 +182,7 @@ const TradeBuilder = ({
 
 				newTeamGroups[destTeamIndex] = {
 					...newTeamGroups[destTeamIndex],
-					picks: [...newTeamGroups[destTeamIndex].picks, updatedSourceItem],
+					picks: sortPicks([...newTeamGroups[destTeamIndex].picks, updatedSourceItem]),
 				};
 			}
 			// If reordering within the same team and not dropping on the container
@@ -256,7 +257,7 @@ const TradeBuilder = ({
 					// Add the pick back to its original team
 					newTeamGroups[originalTeamIndex] = {
 						...newTeamGroups[originalTeamIndex],
-						picks: [...newTeamGroups[originalTeamIndex].picks, resetPick],
+						picks: sortPicks([...newTeamGroups[originalTeamIndex].picks, resetPick]),
 					};
 				}
 			});
@@ -313,7 +314,7 @@ const TradeBuilder = ({
 		// Add the pick back to its original team
 		newTeamGroups[originalTeamIndex] = {
 			...newTeamGroups[originalTeamIndex],
-			picks: [...newTeamGroups[originalTeamIndex].picks, resetPick],
+			picks: sortPicks([...newTeamGroups[originalTeamIndex].picks, resetPick]),
 		};
 
 		// Apply a brief animation class to highlight the returned pick
@@ -395,4 +396,4 @@ const TradeBuilder = ({
 	);
 };
 
-export default TradeBuilder; 
+export default TradeBuilder;

@@ -15,6 +15,7 @@ const TradeMenuBar = ({
 }) => {
 	return (
 		<div className="header-container">
+			<h2 className="header-title">Trade Builder</h2>
 			<div className="header-actions">
 				<div className="header-valuation-select">
 					<ValuationSelector onChange={onValuationChange} defaultValue={selectedValuation} />
@@ -30,7 +31,7 @@ const TradeMenuBar = ({
 					Reset Trades
 				</Button>
 				<Button
-					type="primary"
+					type="default"
 					icon={<PlusOutlined />}
 					onClick={onAddTeam}
 					disabled={disableAddTeam}

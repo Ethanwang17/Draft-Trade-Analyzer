@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { sortPicks } from '../utils/pickSorter';
 
 /**
  * Hook for trade reset functionality
@@ -108,10 +109,13 @@ export const useTradeReset = (
 				const originalPicks = originalPicksRef.current[group.teamId] || [];
 				return {
 					...group,
-					picks: [...originalPicks].map((pick) => ({
-						...pick,
-						className: '', // Explicitly remove any classes like traded-pick
-					})),
+					// Sort the picks to ensure they appear in the correct order
+					picks: sortPicks(
+						[...originalPicks].map((pick) => ({
+							...pick,
+							className: '', // Explicitly remove any classes like traded-pick
+						}))
+					),
 				};
 			}
 			// Otherwise return the group as is (empty)
@@ -130,12 +134,15 @@ export const useTradeReset = (
 			// Remove animation classes
 			const updatedGroups = resetTeamGroups.map((group) => ({
 				...group,
-				picks: group.picks.map((pick) => {
-					return {
-						...pick,
-						className: '', // Ensure no classes remain like traded-pick
-					};
-				}),
+				// Make sure picks remain sorted after animation
+				picks: sortPicks(
+					group.picks.map((pick) => {
+						return {
+							...pick,
+							className: '', // Ensure no classes remain like traded-pick
+						};
+					})
+				),
 			}));
 			updateTeamGroups(updatedGroups);
 

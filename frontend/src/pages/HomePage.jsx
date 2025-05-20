@@ -362,8 +362,6 @@ function HomePage() {
 
 	return (
 		<div className="home-page">
-			<h2 className="home-page-title">Trade Builder</h2>
-
 			<TradeMenuBar
 				onAddTeam={handleAddTeam}
 				onResetTrades={handleResetTrades}
@@ -394,6 +392,9 @@ function HomePage() {
 				onCancel={handleResetCancel}
 				okText="Reset"
 				cancelText="Cancel"
+				okButtonProps={{
+					style: { backgroundColor: '#5b21b6', borderColor: '#5b21b6' },
+				}}
 			>
 				<p>
 					This will reset all trades and return picks to their original teams. Are you sure you want

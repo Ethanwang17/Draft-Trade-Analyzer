@@ -1,6 +1,14 @@
 .load-trade-button {
 	margin-right: 8px;
-	background: #1890ff;
-	border-color: #1890ff;
-	font-weight: bold;
+	background: #e6e0ff;
+	border-color: #bfb8d8;
+	color: #5b21b6;
+	border-radius: 50px;
+}
+
+.load-trade-button:hover,
+.load-trade-button:focus {
+	background: #5b21b6 !important;
+	border-color: #5b21b6 !important;
+	color: #ffffff;
 }

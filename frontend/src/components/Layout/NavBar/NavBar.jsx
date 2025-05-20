@@ -49,7 +49,13 @@ const NavBar = ({ items, collapsed, setCollapsed }) => {
 			width={180}
 			collapsedWidth={80}
 		>
-			<div className="logo-container">{collapsed ? 'DTA' : 'Draft Trade Analyzer'}</div>
+			<div className="logo-container">
+				<img
+					src="lakersLogo.svg"
+					alt="Lakers Logo"
+					className={collapsed ? 'logo-small' : 'logo-large'}
+				/>
+			</div>
 			<Menu
 				mode="inline"
 				selectedKeys={[selectedKey]}
