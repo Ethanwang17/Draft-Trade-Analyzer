@@ -90,7 +90,7 @@ function RadarChart({ teams, calculateTeamValues, loading }) {
 		});
 
 		return metricsArray;
-		// eslint-disable-next-line react-hooks/exhaustive-deps
+		 
 	}, [teams, calculateTeamValues]);
 
 	// Filter metrics based on user selection

@@ -58,9 +58,7 @@ const PickValueDisplay = ({ pickNumber, year, round, valuation = 1 }) => {
 	return (
 		<span className="pick-value-display">
 			Value: <strong>{pickValue.value}</strong>
-			{isFuturePick && pickValue.depreciation && (
-				<span className="depreciation-info">*</span>
-			)}
+			{isFuturePick && pickValue.depreciation && <span className="depreciation-info">*</span>}
 		</span>
 	);
 };

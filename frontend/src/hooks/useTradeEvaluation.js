@@ -164,7 +164,6 @@ export const useTradeEvaluation = (tradeData, pickValues) => {
 		const percentageDifference =
 			totalTradeValue > 0 ? (valueDifference / totalTradeValue) * 100 : 0;
 
-
 		// Determine if the trade is balanced - use 5% as threshold
 		if (percentageDifference < 5) {
 			return {
