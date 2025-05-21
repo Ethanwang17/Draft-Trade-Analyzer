@@ -12,6 +12,7 @@ import AnalyzeHeader from '../components/Layout/AnalyzeHeader/AnalyzeHeader';
 import TradeBalanceBadge from '../components/TradeBalanceBadge/TradeBalanceBadge';
 import AnalysisTeamSummary from '../components/AnalysisTeamSummary/AnalysisTeamSummary';
 import SaveTradeModal from '../components/SaveTradeModal/SaveTradeModal';
+import RadarChart from '../components/RadarChart/RadarChart';
 
 const { Title, Text } = Typography;
 
@@ -104,6 +105,14 @@ function AnalyzeTrade() {
 						);
 					})}
 				</Row>
+
+				{/* Radar Chart Visualization */}
+				<Title level={4}>Radar Chart</Title>
+				<RadarChart
+					teams={teamsWithPicks}
+					calculateTeamValues={calculateTeamValues}
+					loading={valuesLoading}
+				/>
 			</div>
 
 			{/* Save Trade Modal */}

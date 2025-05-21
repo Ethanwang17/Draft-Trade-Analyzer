@@ -160,21 +160,13 @@ export const useTradeEvaluation = (tradeData, pickValues) => {
 			});
 		});
 
-		console.log('DEBUG percentageDifference calculation:');
-		console.log('sortedTeams:', sortedTeams);
-		console.log('highestValue:', highestValue);
-		console.log('lowestValue:', lowestValue);
-		console.log('valueDifference:', valueDifference);
-		console.log('totalTradeValue:', totalTradeValue);
-
 		// Calculate percentage as difference divided by total trade value
 		const percentageDifference =
 			totalTradeValue > 0 ? (valueDifference / totalTradeValue) * 100 : 0;
 
-		console.log('percentageDifference:', percentageDifference);
 
-		// Determine if the trade is balanced - use 10% as threshold
-		if (percentageDifference < 10) {
+		// Determine if the trade is balanced - use 5% as threshold
+		if (percentageDifference < 5) {
 			return {
 				status: 'slightlyFavors',
 				message: `Slightly Favors ${highestValue.name} (${Math.round(percentageDifference)}%)`,

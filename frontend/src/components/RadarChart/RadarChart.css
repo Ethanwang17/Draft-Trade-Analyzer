@@ -1,0 +1,37 @@
+.radarchart-card {
+	border: 1px solid #f0f0f0;
+	border-radius: 8px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.radar-chart-placeholder {
+	width: 100%;
+	padding: 60px 0;
+	text-align: center;
+	color: #8c8c8c;
+	font-size: 16px;
+	background-color: #fafafa;
+	border: 1px dashed #d9d9d9;
+	border-radius: 8px;
+}
+
+.radar-chart-controls {
+	margin-bottom: 16px;
+}
+
+.radar-chart-controls .ant-select {
+	border-radius: 6px !important;
+}
+
+.radar-chart-controls .ant-tag .anticon-close {
+	color: #333 !important;
+}
+
+.radar-chart-controls .radar-chart-select {
+	width: 100%;
+}
+
+.radar-chart-controls .radar-chart-tag {
+	margin-right: 4px;
+	color: #333;
+}
