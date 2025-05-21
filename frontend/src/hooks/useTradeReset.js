@@ -41,7 +41,6 @@ export const useTradeReset = (
 				);
 
 				if (hasNonOriginalPicks) {
-					console.log(`Team ${group.name} has picks from other teams`);
 					return true;
 				}
 
@@ -55,7 +54,6 @@ export const useTradeReset = (
 				// Check if any original picks are missing from this team
 				for (const id of originalPickIds) {
 					if (!currentPickIds.has(id)) {
-						console.log(`Team ${group.name} is missing original pick ${id}`);
 						return true;
 					}
 				}
@@ -63,7 +61,6 @@ export const useTradeReset = (
 				return false;
 			});
 
-			console.log('checkForTradesMade result:', hasTrades);
 			return hasTrades;
 		},
 		[originalPicksRef] // Stable dependency
@@ -71,14 +68,11 @@ export const useTradeReset = (
 
 	// Show reset confirmation modal
 	const showResetConfirmation = (teamGroups) => {
-		console.log('showResetConfirmation called, hasTradesMade:', hasTradesMade);
 		// Only show confirmation if trades have been made
 		if (hasTradesMade) {
-			console.log('Setting modal visible to true');
 			setResetModalVisible(true);
 		} else {
 			// If no trades have been made, just proceed with reset
-			console.log('No trades made, skipping modal');
 			performReset(teamGroups);
 		}
 	};

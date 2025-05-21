@@ -12,6 +12,9 @@ export const useTeamPicks = (initialTeamGroups, teams, onCheckForTradesMade) => 
 	const [teamGroups, setTeamGroups] = useState(initialTeamGroups);
 	const [selectedValuation, setSelectedValuation] = useState(1);
 
+	// Create a dependency value for team names
+	const teamNamesString = teamGroups.map((t) => t.name).join(',');
+
 	// Update team logo and fetch team picks when team selection changes
 	useEffect(() => {
 		const updateTeamsAndPicks = async () => {
@@ -109,7 +112,7 @@ export const useTeamPicks = (initialTeamGroups, teams, onCheckForTradesMade) => 
 		if (teams.length > 0) {
 			updateTeamsAndPicks();
 		}
-	}, [teamGroups.map((t) => t.name).join(','), teams, onCheckForTradesMade]);
+	}, [teamNamesString, teams, onCheckForTradesMade, teamGroups]);
 
 	// Handler for valuation change
 	const handleValuationChange = (valuationId) => {

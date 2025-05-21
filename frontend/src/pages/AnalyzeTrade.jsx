@@ -26,14 +26,15 @@ function AnalyzeTrade() {
 		setTradeData,
 		selectedValuation,
 		setSelectedValuation,
-		valuationModels,
 		handleBackToTrade,
 	} = useTradeAnalysis(location.state);
 
 	const { pickValues, valuesLoading } = usePickValues(tradeData, selectedValuation);
 
-	const { findMovedPicks, calculateTeamValues, evaluateTrade, prepareTeamTradeData } =
-		useTradeEvaluation(tradeData, pickValues);
+	const { calculateTeamValues, evaluateTrade, prepareTeamTradeData } = useTradeEvaluation(
+		tradeData,
+		pickValues
+	);
 
 	const { saveModalVisible, setSaveModalVisible, tradeName, setTradeName, saveTrade } =
 		useTradeSave();

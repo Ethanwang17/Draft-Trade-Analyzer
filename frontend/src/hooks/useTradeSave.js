@@ -69,8 +69,6 @@ export const useTradeSave = () => {
 		}
 
 		try {
-			console.log('Saving trade with picks:', tradedPicks);
-
 			// Prepare the trade data with all teams
 			const saveData = {
 				teams: tradeData.teamGroups

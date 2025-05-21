@@ -139,12 +139,11 @@ export const useTradeEvaluation = (tradeData, pickValues) => {
 				};
 			});
 
-		// Find the team with highest and lowest net values
+		// Find the team with highest net values
 		const sortedTeams = [...teamValues].sort((a, b) => b.netValue - a.netValue);
 		const highestValue = sortedTeams[0];
-		const lowestValue = sortedTeams[sortedTeams.length - 1];
 
-		// Calculate the absolute difference between highest and lowest values
+		// Calculate the absolute difference between highest value
 		const valueDifference = Math.abs(highestValue.netValue);
 
 		// Calculate the total value of all picks involved in the trade

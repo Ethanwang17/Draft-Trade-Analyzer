@@ -5,13 +5,7 @@ import TradeBuilder from '../components/TradeBuilder/TradeBuilder';
 import TradeMenuBar from '../components/Layout/TradeMenuBar/TradeMenuBar';
 import { getTeamGroupClass, getTradeBuilderStyle } from '../utils/tradeUtils';
 import { sortPicks } from '../utils/pickSorter';
-import {
-	useTeamManagement,
-	useTradeReset,
-	useTeamPicks,
-	useTradeAnalyzer,
-	useTradeSave,
-} from '../hooks';
+import { useTeamManagement, useTradeReset, useTradeAnalyzer } from '../hooks';
 
 function HomePage() {
 	const location = useLocation();
@@ -63,7 +57,6 @@ function HomePage() {
 	const checkForTradesMadeAndUpdateState = (groups, checkFn) => {
 		if (!checkFn) return false;
 		const hasTrades = checkFn(groups);
-		console.log('Trade status changed:', hasTrades);
 		setHasTradesMade(hasTrades);
 		return hasTrades;
 	};
@@ -71,6 +64,9 @@ function HomePage() {
 	// Define state for teamGroups directly
 	const [teamGroups, setTeamGroups] = useState(initialTeamGroups);
 	const [selectedValuation, setSelectedValuation] = useState(1);
+
+	// Create a dependency value for team names
+	const teamNamesString = teamGroups.map((t) => t.name).join(',');
 
 	// Get reset functionality, now with direct access to setTeamGroups
 	const {
@@ -174,11 +170,10 @@ function HomePage() {
 		};
 
 		updateTeamsAndPicks();
-	}, [teams, teamGroups.map((t) => t.name).join(','), selectedValuation]);
+	}, [teams, teamNamesString, selectedValuation, checkForTradesMade]);
 
 	// Other hooks
 	const { handleAnalyzeTrade } = useTradeAnalyzer();
-	const { tradeName, setTradeName, saveTrade } = useTradeSave();
 
 	// Function to update team groups (used by TradeBuilder)
 	const updateTeamGroups = (newTeamGroups) => {
@@ -353,14 +348,12 @@ function HomePage() {
 	// Initial check for trades
 	useEffect(() => {
 		if (checkForTradesMade && teamGroups.length > 0) {
-			console.log('Initial check for trades');
 			const hasTrades = checkForTradesMade(teamGroups);
 			setHasTradesMade(hasTrades);
 		}
-	}, [checkForTradesMade, teamGroups]);
+	}, [checkForTradesMade, teamGroups, handleValuationChange]);
 
 	const handleResetTrades = () => {
-		console.log('Reset trades clicked. Has trades made:', hasTradesMade);
 		showResetConfirmation(teamGroups);
 	};
 

@@ -90,7 +90,6 @@ function RadarChart({ teams, calculateTeamValues, loading }) {
 		});
 
 		return metricsArray;
-		 
 	}, [teams, calculateTeamValues]);
 
 	// Filter metrics based on user selection

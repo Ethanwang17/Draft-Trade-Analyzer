@@ -3,7 +3,7 @@ import './TradeSummaryTotal.css';
 
 const TradeSummaryTotal = ({ picks, direction }) => {
 	const [totalValue, setTotalValue] = useState(null);
-	const [loading, setLoading] = useState(false);
+	const [loading] = useState(false);
 
 	useEffect(() => {
 		if (!picks || picks.length === 0) {

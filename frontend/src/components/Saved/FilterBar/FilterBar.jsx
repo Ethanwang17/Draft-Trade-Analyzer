@@ -4,13 +4,7 @@ import './FilterBar.css';
 
 const { Option } = Select;
 
-const FilterBar = ({
-	teams,
-	onApplyFilters,
-	onClearFilters,
-	selectedValuation,
-	onValuationChange,
-}) => {
+const FilterBar = ({ teams, onApplyFilters, selectedValuation, onValuationChange }) => {
 	const [selectedTeams, setSelectedTeams] = useState([]);
 	const [sortOption, setSortOption] = useState('date_newest');
 	const [valuationModels, setValuationModels] = useState([]);

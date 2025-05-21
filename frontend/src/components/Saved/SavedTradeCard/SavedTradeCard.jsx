@@ -100,17 +100,6 @@ function SavedTradeCard({
 		}
 	}, [expandedTradeIds, loadingDetails, tradeDetails, trade.id]);
 
-	// Fetch pick values when tradeDetails or valuation model changes
-	useEffect(() => {
-		if (
-			expandedTradeIds.includes(trade.id) &&
-			!loadingDetails[trade.id] &&
-			tradeDetails[trade.id]
-		) {
-			fetchPickValues();
-		}
-	}, [tradeDetails, selectedValuation, expandedTradeIds, trade.id, loadingDetails]);
-
 	// Fetch values for all picks
 	const fetchPickValues = async () => {
 		if (!tradeDetails[trade.id] || !tradeDetails[trade.id].picksByTeam) return;
@@ -162,6 +151,17 @@ function SavedTradeCard({
 		setPickValues(pickData);
 		setLoadingValues(false);
 	};
+
+	// Fetch pick values when tradeDetails or valuation model changes
+	useEffect(() => {
+		if (
+			expandedTradeIds.includes(trade.id) &&
+			!loadingDetails[trade.id] &&
+			tradeDetails[trade.id]
+		) {
+			fetchPickValues();
+		}
+	}, [tradeDetails, selectedValuation, expandedTradeIds, trade.id, loadingDetails]);
 
 	// Transform pick data for a specific team to the format expected by TradeSummary
 	const formatPicksForTeam = (teamId) => {

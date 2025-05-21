@@ -172,7 +172,6 @@ h1 {
 	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-/* Additional AnalyzeTrade Styles */
 .analyze-loading-container {
 	display: flex;
 	justify-content: center;
@@ -242,5 +241,45 @@ h1 {
 	.analysis-section {
 		padding: 16px;
 		margin-bottom: 24px;
+	}
+}
+
+/* Valuation Model Page Styles */
+.valuation-model-page {
+	padding: 20px;
+	max-width: 1200px;
+	margin: 0 auto;
+}
+
+.selector-container {
+	display: flex;
+	justify-content: flex-end;
+	margin-bottom: 20px;
+}
+
+.chart-card {
+	margin-bottom: 24px;
+}
+
+.loading-container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 400px;
+}
+
+.table-card {
+	margin-bottom: 24px;
+}
+
+.title-container {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+@media (max-width: 768px) {
+	.valuation-model-page {
+		padding: 10px;
 	}
 }

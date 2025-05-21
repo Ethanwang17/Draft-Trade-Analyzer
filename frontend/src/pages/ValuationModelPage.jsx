@@ -12,7 +12,6 @@ import {
 } from 'recharts';
 import ValuationSelector from '../components/Selector/ValuationSelector/ValuationSelector';
 import CreateValuationModel from '../components/CreateValuationModel/CreateValuationModel';
-import './ValuationModelPage.css';
 
 const { Title } = Typography;
 

@@ -9,7 +9,6 @@ import { useState, useEffect } from 'react';
 export const usePickValues = (tradeData, selectedValuation) => {
 	const [pickValues, setPickValues] = useState({});
 	const [valuesLoading, setValuesLoading] = useState(false);
-	const currentYear = new Date().getFullYear();
 
 	// Fetch pick values for all picks
 	useEffect(() => {

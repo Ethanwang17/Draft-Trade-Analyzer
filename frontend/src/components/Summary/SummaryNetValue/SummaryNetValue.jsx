@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './SummaryNetValue.css';
 
-const SummaryNetValue = ({ picks, direction }) => {
+const SummaryNetValue = ({ picks }) => {
 	const [incomingValue, setIncomingValue] = useState(0);
 	const [outgoingValue, setOutgoingValue] = useState(0);
-	const [loading, setLoading] = useState(false);
+	const [loading] = useState(false);
 
 	// Calculate incoming and outgoing values
 	useEffect(() => {
