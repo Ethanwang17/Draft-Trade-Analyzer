@@ -50,7 +50,7 @@ function initializeDatabase() {
   )`);
 
 	// Create Draft Pick Values table
-	db.run(`CREATE TABLE IF NOT EXISTS pick_values (
+	db.run(`CREATE TABLE IF NOT EXISTS valuation_1 (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     pick_position INTEGER NOT NULL,
     value REAL NOT NULL,
@@ -138,7 +138,7 @@ function initializeDatabase() {
 				[
 					1,
 					"Standard",
-					"pick_values",
+					"valuation_1",
 					"Default valuation model based on historical draft value",
 				],
 				(err) => {
@@ -216,7 +216,7 @@ app.get("/api/teams/:teamId/picks", (req, res) => {
 // Pick Values API Routes
 app.get("/api/pick-values", (req, res) => {
 	db.all(
-		"SELECT * FROM pick_values ORDER BY pick_position",
+		"SELECT * FROM valuation_1 ORDER BY pick_position",
 		[],
 		(err, rows) => {
 			if (err) {
@@ -250,7 +250,7 @@ app.get("/api/pick-value/:pickNumber/:valuation", (req, res) => {
 
 			const tableName = valuationRow.table_name;
 			const columnName =
-				tableName === "pick_values" ? "pick_position" : "pick_number";
+				tableName === "valuation_1" ? "pick_position" : "pick_number";
 
 			// Now query the appropriate table with the right column name
 			const valueSql = `
@@ -298,7 +298,7 @@ app.get("/api/pick-value/:pickNumber", (req, res) => {
 
 			const tableName = valuationRow.table_name;
 			const columnName =
-				tableName === "pick_values" ? "pick_position" : "pick_number";
+				tableName === "valuation_1" ? "pick_position" : "pick_number";
 
 			// Now query the appropriate table with the right column name
 			const valueSql = `
@@ -354,7 +354,7 @@ app.get("/api/future-pick-value/:year/:round/:valuation", (req, res) => {
 
 			const tableName = valuationRow.table_name;
 			const columnName =
-				tableName === "pick_values" ? "pick_position" : "pick_number";
+				tableName === "valuation_1" ? "pick_position" : "pick_number";
 
 			// Calculate average value for the specified round
 			const roundRangeSql = `
