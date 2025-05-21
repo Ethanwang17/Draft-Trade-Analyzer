@@ -10,6 +10,10 @@ export const useTradeSave = () => {
 	const [tradeName, setTradeName] = useState('');
 
 	const saveTrade = async (tradeData) => {
+		if (!tradeName) {
+			message.error('Trade Name is required');
+			return false;
+		}
 		if (!tradeData || !tradeData.teamGroups) {
 			message.error('No trade data available');
 			return false;
@@ -77,7 +81,7 @@ export const useTradeSave = () => {
 						id: typeof team.teamId === 'string' ? parseInt(team.teamId) : team.teamId,
 						name: team.name,
 					})),
-				trade_name: tradeName || null,
+				trade_name: tradeName,
 				picks: tradedPicks,
 				valuation_model_id: tradeData.selectedValuation || 1,
 			};

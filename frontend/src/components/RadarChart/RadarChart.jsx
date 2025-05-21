@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import { Card, Select, Tag } from 'antd';
 import {
 	RadarChart as ReRadarChart,
@@ -10,6 +10,7 @@ import {
 	Tooltip,
 	Legend,
 } from 'recharts';
+import { useSelectedAxes, useChartData, useTagRender } from '../../hooks';
 import './RadarChart.css';
 
 /**
@@ -21,92 +22,24 @@ import './RadarChart.css';
  * - loading: boolean indicating if required data is still fetching
  */
 function RadarChart({ teams, calculateTeamValues, loading }) {
-	// Color palette for teams
-	const colors = ['#0074D9', '#FF4136', '#2ECC40', '#FF851B'];
-
-	// Axis options definition with colors assigned
-	const axisOptions = [
-		{ value: 'Total Incoming Value', label: 'Total Incoming Value', color: '#D5F3E5' },
-		{ value: 'Total Outgoing Value', label: 'Total Outgoing Value', color: '#CDC1FF' },
-		{ value: '# of Incoming Picks', label: '# of Incoming Picks', color: '#FFF5BA' },
-		{ value: '# of Outgoing Picks', label: '# of Outgoing Picks', color: '#D6F0FF' },
-		{ value: 'Net Pick Value', label: 'Net Pick Value', color: '#FADADD' },
-	];
-
-	// Selected axes state – default all
-	const [selectedAxes, setSelectedAxes] = useState(axisOptions.map((o) => o.value));
-
-	// Handle selection change
-	const handleAxisChange = (values) => {
-		setSelectedAxes(values);
-	};
-
-	// Custom tag renderer for the Select component
-	const tagRender = (props) => {
-		const { label, value, closable, onClose } = props;
-		const option = axisOptions.find((opt) => opt.value === value);
-		const color = option ? option.color : '#1677ff';
-
-		const onPreventMouseDown = (event) => {
-			event.preventDefault();
-			event.stopPropagation();
-		};
-
-		return (
-			<Tag
-				color={color}
-				onMouseDown={onPreventMouseDown}
-				closable={closable}
-				onClose={onClose}
-				className="radar-chart-tag"
-			>
-				{label}
-			</Tag>
-		);
-	};
-
-	// Prepare radar chart data structure (memoized for perf)
-	const baseMetrics = useMemo(() => {
-		if (!teams || teams.length === 0) {
-			return [];
-		}
-
-		const metricsArray = [
-			{ metric: 'Total Incoming Value' },
-			{ metric: 'Total Outgoing Value' },
-			{ metric: '# of Incoming Picks' },
-			{ metric: '# of Outgoing Picks' },
-			{ metric: 'Net Pick Value' },
-		];
-
-		teams.forEach((team) => {
-			const values = calculateTeamValues(team);
-
-			metricsArray[0][team.name] = Math.round(values.incomingValue);
-			metricsArray[1][team.name] = Math.round(values.outgoingValue);
-			metricsArray[2][team.name] = values.incomingPicks.length;
-			metricsArray[3][team.name] = values.outgoingPicks.length;
-			metricsArray[4][team.name] = Math.round(values.netValue);
-		});
-
-		return metricsArray;
-	}, [teams, calculateTeamValues]);
-
-	// Filter metrics based on user selection
-	const chartData = useMemo(
-		() => baseMetrics.filter((metricObj) => selectedAxes.includes(metricObj.metric)),
-		[baseMetrics, selectedAxes]
+	// Use custom hooks to manage radar chart state and behavior
+	const { axisOptions, selectedAxes, handleAxisChange } = useSelectedAxes();
+	const { colors, chartData, hasEnoughAxes, hasTeams } = useChartData(
+		teams,
+		calculateTeamValues,
+		selectedAxes
 	);
+	const getTagProps = useTagRender(axisOptions);
 
 	// Render UI based on loading state and data availability
 	let chartContent;
 	if (loading) {
 		chartContent = <div className="radar-chart-placeholder">Loading chart</div>;
-	} else if (!teams || teams.length === 0) {
+	} else if (!hasTeams) {
 		chartContent = (
 			<div className="radar-chart-placeholder">No trade data available to analyze.</div>
 		);
-	} else if (selectedAxes.length < 3) {
+	} else if (!hasEnoughAxes) {
 		chartContent = (
 			<div className="radar-chart-placeholder">
 				Please select at least 3 axes to display the chart.
@@ -152,7 +85,10 @@ function RadarChart({ teams, calculateTeamValues, loading }) {
 					<Select
 						mode="multiple"
 						allowClear
-						tagRender={tagRender}
+						tagRender={(props) => {
+							const tagProps = getTagProps(props);
+							return <Tag {...tagProps} />;
+						}}
 						value={selectedAxes}
 						options={axisOptions}
 						onChange={handleAxisChange}

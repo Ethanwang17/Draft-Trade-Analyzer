@@ -232,6 +232,10 @@ h1 {
 	margin-bottom: 24px;
 }
 
+.radar-chart-title {
+	margin-top: 24px;
+}
+
 /* Responsive adjustments for analyze page */
 @media (max-width: 768px) {
 	.analyze-page {

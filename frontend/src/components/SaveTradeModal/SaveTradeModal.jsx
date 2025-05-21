@@ -12,7 +12,7 @@ function SaveTradeModal({ visible, tradeName, setTradeName, onSave, onCancel }) 
 			okText="Save"
 			cancelText="Cancel"
 		>
-			<p>Enter a name for this trade (optional):</p>
+			<p>Enter a name for this trade:</p>
 			<Input
 				placeholder="Trade Name"
 				value={tradeName}

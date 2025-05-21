@@ -108,7 +108,9 @@ function AnalyzeTrade() {
 				</Row>
 
 				{/* Radar Chart Visualization */}
-				<Title level={4}>Radar Chart</Title>
+				<Title className="radar-chart-title" level={4}>
+					Radar Chart
+				</Title>
 				<RadarChart
 					teams={teamsWithPicks}
 					calculateTeamValues={calculateTeamValues}

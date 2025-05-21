@@ -14,7 +14,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
 // Database setup
-const dbPath = path.resolve(__dirname, "database.db");
+const dbFile = process.env.DB_FILE || path.join(__dirname, "database.db");
+const dbPath = path.resolve(dbFile);
 const db = new sqlite3.Database(
 	dbPath,
 	sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,

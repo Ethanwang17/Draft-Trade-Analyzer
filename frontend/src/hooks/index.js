@@ -16,3 +16,8 @@ export { useTeamManagement } from './useTeamManagement';
 export { useTradeReset } from './useTradeReset';
 export { useTeamPicks } from './useTeamPicks';
 export { useTradeAnalyzer } from './useTradeAnalyzer';
+
+// RadarChart hooks
+export { useSelectedAxes } from './useSelectedAxes';
+export { useChartData } from './useChartData';
+export { useTagRender } from './useTagRender';
