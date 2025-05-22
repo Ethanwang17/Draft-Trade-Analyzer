@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Space, Typography, Spin, Alert, Button } from 'antd';
 import ValuationSelector from '../components/Selector/ValuationSelector/ValuationSelector';
 import CreateValuationModel from '../components/CreateValuationModel/CreateValuationModel';
-import ValuationChart from '../components/ValuationChart/ValuationChart';
-import ValuationTable from '../components/ValuationTable/ValuationTable';
+import ValuationChart from '../components/DataVisuals/ValuationChart/ValuationChart';
+import ValuationTable from '../components/DataVisuals/ValuationTable/ValuationTable';
 import { useValuationData } from '../hooks';
 
 const { Title } = Typography;

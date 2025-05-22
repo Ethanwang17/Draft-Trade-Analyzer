@@ -12,7 +12,7 @@ import AnalyzeHeader from '../components/Layout/AnalyzeHeader/AnalyzeHeader';
 import TradeBalanceBadge from '../components/TradeBalanceBadge/TradeBalanceBadge';
 import AnalysisTeamSummary from '../components/AnalysisTeamSummary/AnalysisTeamSummary';
 import SaveTradeModal from '../components/SaveTradeModal/SaveTradeModal';
-import RadarChart from '../components/RadarChart/RadarChart';
+import RadarChart from '../components/DataVisuals/RadarChart/RadarChart';
 
 const { Title, Text } = Typography;
 

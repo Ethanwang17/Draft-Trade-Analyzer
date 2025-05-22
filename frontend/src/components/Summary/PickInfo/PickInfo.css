@@ -65,3 +65,25 @@
 	color: #ff4d4f;
 	background-color: rgba(255, 77, 79, 0.1);
 }
+
+.pick-value-display {
+	display: inline-block;
+	font-size: 0.8rem;
+	color: #555;
+	margin-left: 8px;
+	font-weight: 400;
+}
+
+.pick-value-loading {
+	display: inline-block;
+	margin-left: 8px;
+	font-size: 0.8rem;
+	color: #999;
+}
+
+.depreciation-info {
+	font-size: 0.75rem;
+	color: #f56c6c;
+	margin-left: 1px;
+	font-style: italic;
+}
