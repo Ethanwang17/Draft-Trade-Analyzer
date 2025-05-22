@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, Select, Tag } from 'antd';
 import {
 	RadarChart as ReRadarChart,
@@ -10,8 +10,81 @@ import {
 	Tooltip,
 	Legend,
 } from 'recharts';
-import { useSelectedAxes, useChartData, useTagRender } from '../../hooks';
+// import { useSelectedAxes, useChartData, useTagRender } from '../../hooks'; removed
 import './RadarChart.css';
+
+// Directly integrate useSelectedAxes logic
+function useSelectedAxes() {
+	const axisOptions = [
+		{ value: 'Total Incoming Value', label: 'Total Incoming Value', color: '#D5F3E5' },
+		{ value: 'Total Outgoing Value', label: 'Total Outgoing Value', color: '#CDC1FF' },
+		{ value: '# of Incoming Picks', label: '# of Incoming Picks', color: '#FFF5BA' },
+		{ value: '# of Outgoing Picks', label: '# of Outgoing Picks', color: '#D6F0FF' },
+		{ value: 'Net Pick Value', label: 'Net Pick Value', color: '#FADADD' },
+	];
+	const [selectedAxes, setSelectedAxes] = useState(axisOptions.map((o) => o.value));
+	const handleAxisChange = (values) => {
+		setSelectedAxes(values);
+	};
+	return { axisOptions, selectedAxes, setSelectedAxes, handleAxisChange };
+}
+
+// Directly integrate useChartData logic
+function useChartData(teams, calculateTeamValues, selectedAxes) {
+	const colors = ['#0074D9', '#FF4136', '#2ECC40', '#FF851B'];
+	const baseMetrics = useMemo(() => {
+		if (!teams || teams.length === 0) {
+			return [];
+		}
+		const metricsArray = [
+			{ metric: 'Total Incoming Value' },
+			{ metric: 'Total Outgoing Value' },
+			{ metric: '# of Incoming Picks' },
+			{ metric: '# of Outgoing Picks' },
+			{ metric: 'Net Pick Value' },
+		];
+		teams.forEach((team) => {
+			const values = calculateTeamValues(team);
+			metricsArray[0][team.name] = Math.round(values.incomingValue);
+			metricsArray[1][team.name] = Math.round(values.outgoingValue);
+			metricsArray[2][team.name] = values.incomingPicks.length;
+			metricsArray[3][team.name] = values.outgoingPicks.length;
+			metricsArray[4][team.name] = Math.round(values.netValue);
+		});
+		return metricsArray;
+	}, [teams, calculateTeamValues]);
+	const chartData = useMemo(
+		() => baseMetrics.filter((metricObj) => selectedAxes.includes(metricObj.metric)),
+		[baseMetrics, selectedAxes]
+	);
+	return {
+		colors,
+		chartData,
+		hasEnoughAxes: selectedAxes.length >= 3,
+		hasTeams: teams && teams.length > 0,
+	};
+}
+
+// Directly integrate useTagRender logic
+function useTagRender(axisOptions) {
+	return (props) => {
+		const { label, value, closable, onClose } = props;
+		const option = axisOptions.find((opt) => opt.value === value);
+		const color = option ? option.color : '#1677ff';
+		const onPreventMouseDown = (event) => {
+			event.preventDefault();
+			event.stopPropagation();
+		};
+		return {
+			color,
+			onMouseDown: onPreventMouseDown,
+			closable,
+			onClose,
+			className: 'radar-chart-tag',
+			children: label,
+		};
+	};
+}
 
 /**
  * RadarChart component visualizes key trade metrics for each team involved.

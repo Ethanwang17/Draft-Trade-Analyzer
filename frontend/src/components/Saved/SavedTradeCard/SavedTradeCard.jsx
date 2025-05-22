@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Typography, Button, Spin } from 'antd';
 import { DeleteOutlined, SwapOutlined, LoadingOutlined } from '@ant-design/icons';
-import SavedTeamPicksTrade from '../SavedTeamPicksTrade/SavedTeamPicksTrade';
 import LoadTradeButton from '../../LoadTradeButton/LoadTradeButton';
 import SavedTeamDisplay from '../SavedTeamDisplay/SavedTeamDisplay';
 import TradeSummary from '../../Summary/TradeSummary/TradeSummary';

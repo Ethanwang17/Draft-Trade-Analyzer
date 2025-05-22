@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Space, Typography, Spin, Alert, Button } from 'antd';
 import ValuationSelector from '../components/Selector/ValuationSelector/ValuationSelector';
 import CreateValuationModel from '../components/CreateValuationModel/CreateValuationModel';

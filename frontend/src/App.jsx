@@ -56,9 +56,7 @@ function App() {
 		<ConfigProvider
 			theme={{
 				token: {
-					borderRadius: 50,
 					colorPrimary: '#5b21b6',
-
 				},
 			}}
 		>
