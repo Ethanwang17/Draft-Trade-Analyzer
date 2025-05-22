@@ -359,25 +359,147 @@ async function seedDatabase() {
 		}
 		console.log(`Seeded ${pickValues.length} valuation_1 values`);
 
-		// Create simple data for valuation_2 and valuation_3 (just examples)
+		// Insert specific valuation_2 data
 		console.log("Seeding valuation_2 values...");
-		for (let i = 1; i <= 60; i++) {
-			const value = Math.round(5000 / i);
-			const normalized = Math.round((value / 5000) * 100 * 100) / 100;
+		const valuation2Data = [
+			{pick_number: 1, value: 778, normalized: 100},
+			{pick_number: 2, value: 729, normalized: 93.7},
+			{pick_number: 3, value: 682, normalized: 87.66},
+			{pick_number: 4, value: 637, normalized: 81.88},
+			{pick_number: 5, value: 594, normalized: 76.35},
+			{pick_number: 6, value: 553, normalized: 71.08},
+			{pick_number: 7, value: 514, normalized: 66.07},
+			{pick_number: 8, value: 477, normalized: 61.31},
+			{pick_number: 9, value: 443, normalized: 56.94},
+			{pick_number: 10, value: 411, normalized: 52.83},
+			{pick_number: 11, value: 381, normalized: 48.97},
+			{pick_number: 12, value: 353, normalized: 45.37},
+			{pick_number: 13, value: 327, normalized: 42.03},
+			{pick_number: 14, value: 302, normalized: 38.82},
+			{pick_number: 15, value: 279, normalized: 35.86},
+			{pick_number: 16, value: 258, normalized: 33.16},
+			{pick_number: 17, value: 241, normalized: 30.98},
+			{pick_number: 18, value: 228, normalized: 29.31},
+			{pick_number: 19, value: 216, normalized: 27.76},
+			{pick_number: 20, value: 206, normalized: 26.48},
+			{pick_number: 21, value: 197, normalized: 25.32},
+			{pick_number: 22, value: 188, normalized: 24.16},
+			{pick_number: 23, value: 178, normalized: 22.88},
+			{pick_number: 24, value: 168, normalized: 21.59},
+			{pick_number: 25, value: 158, normalized: 20.31},
+			{pick_number: 26, value: 149, normalized: 19.15},
+			{pick_number: 27, value: 141, normalized: 18.12},
+			{pick_number: 28, value: 133, normalized: 17.1},
+			{pick_number: 29, value: 126, normalized: 16.2},
+			{pick_number: 30, value: 119, normalized: 15.3},
+			{pick_number: 31, value: 112, normalized: 14.4},
+			{pick_number: 32, value: 106, normalized: 13.62},
+			{pick_number: 33, value: 100, normalized: 12.85},
+			{pick_number: 34, value: 95, normalized: 12.21},
+			{pick_number: 35, value: 91, normalized: 11.7},
+			{pick_number: 36, value: 86, normalized: 11.05},
+			{pick_number: 37, value: 82, normalized: 10.54},
+			{pick_number: 38, value: 78, normalized: 10.03},
+			{pick_number: 39, value: 74, normalized: 9.51},
+			{pick_number: 40, value: 71, normalized: 9.13},
+			{pick_number: 41, value: 68, normalized: 8.74},
+			{pick_number: 42, value: 66, normalized: 8.48},
+			{pick_number: 43, value: 64, normalized: 8.23},
+			{pick_number: 44, value: 61, normalized: 7.84},
+			{pick_number: 45, value: 58, normalized: 7.46},
+			{pick_number: 46, value: 55, normalized: 7.07},
+			{pick_number: 47, value: 52, normalized: 6.68},
+			{pick_number: 48, value: 49, normalized: 6.3},
+			{pick_number: 49, value: 47, normalized: 6.04},
+			{pick_number: 50, value: 44, normalized: 5.66},
+			{pick_number: 51, value: 42, normalized: 5.4},
+			{pick_number: 52, value: 39, normalized: 5.01},
+			{pick_number: 53, value: 37, normalized: 4.76},
+			{pick_number: 54, value: 34, normalized: 4.37},
+			{pick_number: 55, value: 31, normalized: 3.98},
+			{pick_number: 56, value: 28, normalized: 3.6},
+			{pick_number: 57, value: 26, normalized: 3.34},
+			{pick_number: 58, value: 23, normalized: 2.96},
+			{pick_number: 59, value: 20, normalized: 2.57},
+			{pick_number: 60, value: 17, normalized: 2.19},
+		];
+
+		for (const item of valuation2Data) {
 			await execute(
 				"INSERT INTO valuation_2 (pick_number, value, normalized) VALUES ($1, $2, $3)",
-				[i, value, normalized]
+				[item.pick_number, item.value, item.normalized]
 			);
 		}
 		console.log("Seeded valuation_2 values");
 
 		console.log("Seeding valuation_3 values...");
-		for (let i = 1; i <= 60; i++) {
-			const value = Math.round(6000 / Math.pow(i, 1.05));
-			const normalized = Math.round((value / 6000) * 100 * 100) / 100;
+		const valuation3Data = [
+			{pick_number: 1, value: 57138, normalized: 100},
+			{pick_number: 2, value: 47758, normalized: 83.58},
+			{pick_number: 3, value: 42271, normalized: 73.98},
+			{pick_number: 4, value: 38378, normalized: 67.17},
+			{pick_number: 5, value: 35358, normalized: 61.88},
+			{pick_number: 6, value: 32891, normalized: 57.56},
+			{pick_number: 7, value: 30805, normalized: 53.91},
+			{pick_number: 8, value: 28998, normalized: 50.75},
+			{pick_number: 9, value: 27404, normalized: 47.96},
+			{pick_number: 10, value: 25978, normalized: 45.47},
+			{pick_number: 11, value: 24688, normalized: 43.21},
+			{pick_number: 12, value: 23511, normalized: 41.15},
+			{pick_number: 13, value: 22427, normalized: 39.25},
+			{pick_number: 14, value: 21425, normalized: 37.5},
+			{pick_number: 15, value: 20491, normalized: 35.86},
+			{pick_number: 16, value: 19618, normalized: 34.33},
+			{pick_number: 17, value: 18797, normalized: 32.9},
+			{pick_number: 18, value: 18024, normalized: 31.54},
+			{pick_number: 19, value: 17292, normalized: 30.26},
+			{pick_number: 20, value: 16598, normalized: 29.05},
+			{pick_number: 21, value: 15938, normalized: 27.89},
+			{pick_number: 22, value: 15308, normalized: 26.79},
+			{pick_number: 23, value: 14706, normalized: 25.74},
+			{pick_number: 24, value: 14131, normalized: 24.73},
+			{pick_number: 25, value: 13578, normalized: 23.76},
+			{pick_number: 26, value: 13047, normalized: 22.83},
+			{pick_number: 27, value: 12537, normalized: 21.94},
+			{pick_number: 28, value: 12045, normalized: 21.08},
+			{pick_number: 29, value: 11570, normalized: 20.25},
+			{pick_number: 30, value: 11111, normalized: 19.45},
+			{pick_number: 31, value: 10667, normalized: 18.67},
+			{pick_number: 32, value: 10237, normalized: 17.92},
+			{pick_number: 33, value: 9821, normalized: 17.19},
+			{pick_number: 34, value: 9417, normalized: 16.48},
+			{pick_number: 35, value: 9025, normalized: 15.8},
+			{pick_number: 36, value: 8644, normalized: 15.13},
+			{pick_number: 37, value: 8273, normalized: 14.48},
+			{pick_number: 38, value: 7912, normalized: 13.85},
+			{pick_number: 39, value: 7560, normalized: 13.23},
+			{pick_number: 40, value: 7218, normalized: 12.63},
+			{pick_number: 41, value: 6884, normalized: 12.05},
+			{pick_number: 42, value: 6558, normalized: 11.48},
+			{pick_number: 43, value: 6239, normalized: 10.92},
+			{pick_number: 44, value: 5928, normalized: 10.37},
+			{pick_number: 45, value: 5624, normalized: 9.84},
+			{pick_number: 46, value: 5326, normalized: 9.32},
+			{pick_number: 47, value: 5035, normalized: 8.81},
+			{pick_number: 48, value: 4751, normalized: 8.31},
+			{pick_number: 49, value: 4471, normalized: 7.82},
+			{pick_number: 50, value: 4198, normalized: 7.35},
+			{pick_number: 51, value: 3930, normalized: 6.88},
+			{pick_number: 52, value: 3667, normalized: 6.42},
+			{pick_number: 53, value: 3410, normalized: 5.97},
+			{pick_number: 54, value: 3157, normalized: 5.53},
+			{pick_number: 55, value: 2908, normalized: 5.09},
+			{pick_number: 56, value: 2664, normalized: 4.66},
+			{pick_number: 57, value: 2425, normalized: 4.24},
+			{pick_number: 58, value: 2190, normalized: 3.83},
+			{pick_number: 59, value: 1958, normalized: 3.43},
+			{pick_number: 60, value: 1731, normalized: 3.03},
+		];
+
+		for (const item of valuation3Data) {
 			await execute(
 				"INSERT INTO valuation_3 (pick_number, value, normalized) VALUES ($1, $2, $3)",
-				[i, value, normalized]
+				[item.pick_number, item.value, item.normalized]
 			);
 		}
 		console.log("Seeded valuation_3 values");
@@ -386,35 +508,25 @@ async function seedDatabase() {
 		console.log("Seeding valuation models...");
 		await execute(
 			"INSERT INTO valuations (id, name, table_name, description) VALUES ($1, $2, $3, $4)",
-			[
-				1,
-				"Standard",
-				"valuation_1",
-				"Default valuation model based on historical draft value",
-			]
+			[1, "Pelton 2017", "valuation_1", "ESPN model from 2017"]
 		);
 
 		await execute(
 			"INSERT INTO valuations (id, name, table_name, description) VALUES ($1, $2, $3, $4)",
-			[2, "Linear", "valuation_2", "Simple linear depreciation model"]
+			[2, "Restifo 2016", "valuation_2", "Data-Driven Sports model"]
 		);
 
 		await execute(
 			"INSERT INTO valuations (id, name, table_name, description) VALUES ($1, $2, $3, $4)",
-			[
-				3,
-				"Exponential",
-				"valuation_3",
-				"Exponential depreciation model for greater drop-off",
-			]
+			[3, "Custom", "valuation_3", "User-defined values"]
 		);
 		console.log("Seeded valuation models");
 
-		// Create draft picks for each team (2024-2026)
+		// Create draft picks for each team (2025-2031)
 		console.log("Seeding draft picks...");
 		const teams_data = await query("SELECT id FROM teams ORDER BY id");
 
-		const years = [2024, 2025, 2026];
+		const years = [2025, 2026, 2027, 2028, 2029, 2030, 2031];
 		const rounds = [1, 2];
 
 		for (const year of years) {
