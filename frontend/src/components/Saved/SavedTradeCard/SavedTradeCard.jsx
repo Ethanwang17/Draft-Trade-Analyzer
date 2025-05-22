@@ -136,7 +136,7 @@ function SavedTradeCard({
 			const promise = fetch(apiUrl)
 				.then((res) => (res.ok ? res.json() : { value: 0 }))
 				.then((data) => {
-					pickData[pickId] = data.value;
+					pickData[pickId] = parseFloat(data.value) || 0;
 				})
 				.catch((err) => {
 					console.error(`Error fetching value for pick ${pickId}:`, err);
