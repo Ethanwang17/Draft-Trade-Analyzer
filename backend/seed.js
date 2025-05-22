@@ -533,11 +533,17 @@ async function seedDatabase() {
 			for (const round of rounds) {
 				let pickNumber = (round - 1) * 30 + 1;
 				for (const team of teams_data) {
+					// Set pick_number to NULL for years greater than 2025
+					const pickNum = year > 2025 ? null : pickNumber;
+
 					await execute(
 						"INSERT INTO draft_picks (team_id, year, round, pick_number) VALUES ($1, $2, $3, $4)",
-						[team.id, year, round, pickNumber]
+						[team.id, year, round, pickNum]
 					);
-					pickNumber++;
+
+					if (year <= 2025) {
+						pickNumber++;
+					}
 				}
 			}
 		}
