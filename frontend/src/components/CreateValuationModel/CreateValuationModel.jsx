@@ -5,7 +5,7 @@ import './CreateValuationModel.css';
 const { TextArea } = Input;
 const { Title } = Typography;
 
-// Helper to compute normalized values
+// Helper to compute normalized values as a percentage of the first pick's value
 const computeNormalized = (values) => {
 	if (!values || values.length === 0) return [];
 	const first = values[0]?.value || 0;
@@ -23,7 +23,7 @@ const CreateValuationModel = ({ onCancel, onModelCreated }) => {
 	const [error, setError] = useState(null);
 	const [loading, setLoading] = useState(true);
 
-	// Fetch pick positions to build initial rows
+	// Fetch all draft pick positions and initialize rows with default values
 	useEffect(() => {
 		const fetchPicks = async () => {
 			try {
@@ -51,6 +51,7 @@ const CreateValuationModel = ({ onCancel, onModelCreated }) => {
 		fetchPicks();
 	}, []);
 
+	// Update a single value in the table and recompute normalization
 	const handleValueChange = (value, record) => {
 		const newRows = rows.map((row) =>
 			row.key === record.key ? { ...row, value: value || 0 } : row
@@ -58,6 +59,7 @@ const CreateValuationModel = ({ onCancel, onModelCreated }) => {
 		setRows(computeNormalized(newRows));
 	};
 
+	// Define table columns: Pick #, Value (editable), Normalized (computed)
 	const columns = [
 		{
 			title: 'Pick #',
@@ -88,6 +90,7 @@ const CreateValuationModel = ({ onCancel, onModelCreated }) => {
 		},
 	];
 
+	// Validate inputs and send POST request to create new valuation model
 	const handleSave = async () => {
 		setError(null);
 
@@ -137,6 +140,7 @@ const CreateValuationModel = ({ onCancel, onModelCreated }) => {
 		);
 	}
 
+	// Render form for entering model name, description, and pick values
 	return (
 		<div className="create-valuation-wrapper">
 			<Space direction="vertical" style={{ width: '100%' }} size="large">

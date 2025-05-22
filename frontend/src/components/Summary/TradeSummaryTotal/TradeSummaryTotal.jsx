@@ -11,7 +11,7 @@ const TradeSummaryTotal = ({ picks, direction }) => {
 			return;
 		}
 
-		// Calculate total value from the pre-calculated values
+		// Calculate the total value of picks (incoming or outgoing)
 		const total = picks.reduce((sum, pick) => {
 			// Parse pick.value to ensure it's a number
 			return sum + (parseFloat(pick.value) || 0);
@@ -20,15 +20,17 @@ const TradeSummaryTotal = ({ picks, direction }) => {
 		setTotalValue(total);
 	}, [picks]);
 
+	// Display a loading indicator if calculation is pending
 	if (loading) {
 		return <div className="trade-summary-value-loading">Calculating...</div>;
 	}
 
+	// Skip rendering if value is zero or null
 	if (totalValue === null || totalValue === 0) {
 		return null;
 	}
 
-	// Display a green + for receiving and a red - for giving
+	// Use + or - prefix depending on trade direction
 	const prefix =
 		direction === 'incoming' ? (
 			<span className="value-prefix positive">+</span>

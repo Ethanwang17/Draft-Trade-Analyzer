@@ -13,6 +13,7 @@ const TeamSelector = ({
 	onRemoveTeam,
 	totalTeams,
 }) => {
+	// Display team selection dropdown with optional remove button
 	return (
 		<div className="team-select">
 			<div className="team-select-header">
@@ -33,13 +34,14 @@ const TeamSelector = ({
 				onChange={onChange}
 				className="team-dropdown"
 				disabled={loading}
-				showSearch
+				showSearch // Enable text search within the dropdown options
 				placeholder="Select Team"
 				optionFilterProp="children"
 				filterOption={(input, option) =>
 					(option?.label ?? '').toLowerCase().includes(input.toLowerCase())
 				}
 				options={teams
+					// Filter out teams already selected (except the one currently selected)
 					.filter((dbTeam) => !selectedTeams.includes(dbTeam.name) || dbTeam.name === teamName)
 					.map((dbTeam) => ({
 						value: dbTeam.name,

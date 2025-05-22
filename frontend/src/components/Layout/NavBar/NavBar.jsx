@@ -11,19 +11,20 @@ import './NavBar.css';
 
 const { Sider } = Layout;
 
+// Collapsible sidebar navigation with icons and labels
 const NavBar = ({ items, collapsed, setCollapsed }) => {
 	const navigate = useNavigate();
 	const location = useLocation();
 
-	// Get the current path to determine which menu item should be selected
+	// Determine current page path for highlighting selected menu item
 	const selectedKey = location.pathname;
 
-	// Handle menu item click
+	// Handle sidebar navigation to selected route
 	const handleMenuClick = ({ key }) => {
 		navigate(key);
 	};
 
-	// Map navigation items to Ant Design Menu items
+	// Dynamically assign icons to menu items based on label
 	const menuItems = items.map((item) => {
 		// Determine the icon based on the label
 		let icon;

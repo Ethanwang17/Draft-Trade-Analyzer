@@ -1,5 +1,7 @@
+// React and Ant Design imports for UI elements and hooks
 import React, { useState } from 'react';
 import { Space, Typography, Spin, Alert, Button } from 'antd';
+// Custom component imports
 import ValuationSelector from '../components/Selector/ValuationSelector/ValuationSelector';
 import CreateValuationModel from '../components/CreateValuationModel/CreateValuationModel';
 import ValuationChart from '../components/DataVisuals/ValuationChart/ValuationChart';
@@ -9,18 +11,24 @@ import { useValuationData } from '../hooks';
 const { Title } = Typography;
 
 function ValuationModelPage() {
+	// State for currently selected valuation model ID
 	const [selectedValuation, setSelectedValuation] = useState(1);
+
+	// State to toggle between viewing models and creating a new model
 	const [createMode, setCreateMode] = useState(false);
+
+	// Unique key to force remounting of the selector when a new model is created
 	const [selectorKey, setSelectorKey] = useState(Date.now());
 
-	// Use the custom hook for data fetching
+	// Custom hook to fetch data for the selected valuation model
 	const { pickValues, loading, error, xAxisTicks } = useValuationData(selectedValuation);
 
+	// Handler for when a user selects a different valuation model
 	const handleValuationChange = (value) => {
 		setSelectedValuation(value);
 	};
 
-	// Table columns definition
+	// Define columns for the valuation table
 	const columns = [
 		{
 			title: 'Pick Number',
@@ -56,13 +64,14 @@ function ValuationModelPage() {
 					</Button>
 				</div>
 
+				{/* Conditionally render create mode or valuation view */}
 				{createMode ? (
 					<CreateValuationModel
 						onCancel={() => setCreateMode(false)}
 						onModelCreated={(newId) => {
 							setCreateMode(false);
 							setSelectedValuation(newId);
-							setSelectorKey(Date.now());
+							setSelectorKey(Date.now()); // Reset key to refresh selector
 						}}
 					/>
 				) : (
@@ -75,8 +84,10 @@ function ValuationModelPage() {
 							/>
 						</div>
 
+						{/* Show error message if data fetching fails */}
 						{error && <Alert type="error" message={error} banner />}
 
+						{/* Show loading spinner or valuation chart/table */}
 						{loading ? (
 							<div className="loading-container">
 								<Spin size="large" />
@@ -84,7 +95,6 @@ function ValuationModelPage() {
 						) : (
 							<>
 								<ValuationChart pickValues={pickValues} xAxisTicks={xAxisTicks} />
-
 								<ValuationTable pickValues={pickValues} columns={columns} />
 							</>
 						)}

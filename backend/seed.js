@@ -1,9 +1,10 @@
+// Recreate and initialize all tables used in the app
 const path = require("path");
 const {db, query, execute, getOne} = require("./db");
 
 console.log(`Using database type: postgres for seeding`);
 
-// Initialize database tables
+// Recreate and initialize all tables used in the app
 async function initializeDatabase() {
 	console.log("Creating database tables if they don't exist...");
 
@@ -99,9 +100,10 @@ async function initializeDatabase() {
 	await seedDatabase();
 }
 
+// Seed team, draft pick, and valuation data
 async function seedDatabase() {
 	try {
-		// Clear existing data
+		// Clear all previous data before inserting fresh seed data
 		await execute("DELETE FROM saved_trade_picks");
 		await execute("DELETE FROM saved_trade_teams");
 		await execute("DELETE FROM saved_trades");
@@ -112,7 +114,7 @@ async function seedDatabase() {
 		await execute("DELETE FROM draft_picks");
 		await execute("DELETE FROM teams");
 
-		// Seed NBA Teams
+		// Seed historical NBA teams and logos
 		const teams = [
 			// Atlantic Division (Eastern Conference)
 			{
@@ -286,6 +288,7 @@ async function seedDatabase() {
 		}
 		console.log(`Seeded ${teams.length} teams`);
 
+		// Insert base pick valuation tables and custom valuation models
 		// Updated Draft Pick Values
 		const pickValues = [
 			{pick_position: 1, value: 4000, normalized: 100.0},
@@ -522,7 +525,7 @@ async function seedDatabase() {
 		);
 		console.log("Seeded valuation models");
 
-		// Create draft picks for each team (2025-2031)
+		// Populate draft picks for each team from 2025 to 2031
 		console.log("Seeding draft picks...");
 		const teams_data = await query("SELECT id FROM teams ORDER BY id");
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { sortPicks } from '../../utils/pickSorter';
 
 /**
- * Hook for managing team picks and their state
+ * Hook to manage pick loading and valuation updates based on team selection
  * @param {Array} initialTeamGroups - Initial team groups state
  * @param {Array} teams - Available teams data
  * @param {Function} onCheckForTradesMade - Function to check for trades made
@@ -12,10 +12,10 @@ export const useTeamPicks = (initialTeamGroups, teams, onCheckForTradesMade) => 
 	const [teamGroups, setTeamGroups] = useState(initialTeamGroups);
 	const [selectedValuation, setSelectedValuation] = useState(1);
 
-	// Create a dependency value for team names
+	// Create a stable string to track team name changes (used in dependency array)
 	const teamNamesString = teamGroups.map((t) => t.name).join(',');
 
-	// Update team logo and fetch team picks when team selection changes
+	// Effect that runs whenever team names or team list changes to refetch picks
 	useEffect(() => {
 		const updateTeamsAndPicks = async () => {
 			if (!teams || teams.length === 0) return;
@@ -34,8 +34,7 @@ export const useTeamPicks = (initialTeamGroups, teams, onCheckForTradesMade) => 
 						teamId: selectedTeam.id,
 					};
 
-					// If team ID changed or if picks are currently empty (for initial load for a pre-selected team)
-					// and selectedTeam.id is valid
+					// Fetch picks from API if team has changed or has no picks loaded
 					if (
 						selectedTeam.id &&
 						(selectedTeam.id !== group.teamId ||
@@ -58,7 +57,7 @@ export const useTeamPicks = (initialTeamGroups, teams, onCheckForTradesMade) => 
 								'Seventh',
 							];
 
-							// Transform picks data to the format expected by the UI
+							// Map and format pick data to UI-ready structure
 							const formattedPicks = picksData.map((pick) => ({
 								id: `pick-${pick.id}`,
 								content: `${pick.year} ${pick.round >= 1 && pick.round <= 7 ? roundWords[pick.round - 1] : `Round ${pick.round}`} Pick${pick.pick_number ? ` (#${pick.pick_number})` : ''}`,
@@ -95,7 +94,7 @@ export const useTeamPicks = (initialTeamGroups, teams, onCheckForTradesMade) => 
 				}
 			}
 
-			// Update team groups with sorted picks
+			// After updating picks, sort and commit to state, then update trade status
 			const sortedTeamGroups = updatedTeamGroupsLocal.map((group) => ({
 				...group,
 				picks: sortPicks(group.picks),
@@ -114,7 +113,7 @@ export const useTeamPicks = (initialTeamGroups, teams, onCheckForTradesMade) => 
 		}
 	}, [teamNamesString, teams, onCheckForTradesMade, teamGroups]);
 
-	// Handler for valuation change
+	// Update all picks’ valuation model when changed by user
 	const handleValuationChange = (valuationId) => {
 		setSelectedValuation(valuationId);
 
@@ -130,7 +129,7 @@ export const useTeamPicks = (initialTeamGroups, teams, onCheckForTradesMade) => 
 		setTeamGroups(updatedTeamGroups);
 	};
 
-	// Helper function to update team groups with sorted picks
+	// Utility to apply sorted team group updates and re-check trade status
 	const updateTeamGroups = (newTeamGroups) => {
 		const sortedTeamGroups = newTeamGroups.map((group) => ({
 			...group,

@@ -1,30 +1,24 @@
 import { useState } from 'react';
 import { message } from 'antd';
 
-/**
- * Hook for managing trade details
- * @returns {Object} Object containing trade details state and related functions
- */
+// Hook for managing which trade cards are expanded and fetching details from the backend
 export const useTradeDetails = () => {
 	const [expandedTradeIds, setExpandedTradeIds] = useState([]);
 	const [tradeDetails, setTradeDetails] = useState({});
 	const [loadingDetails, setLoadingDetails] = useState({});
 
 	const loadTradeDetails = async (tradeId) => {
-		// Toggle expansion state
+		// Collapse card if already expanded, otherwise proceed to expand and possibly fetch data
 		if (expandedTradeIds.includes(tradeId)) {
 			setExpandedTradeIds(expandedTradeIds.filter((id) => id !== tradeId));
 			return;
 		}
 
 		try {
-			// Add this trade ID to expanded IDs
 			setExpandedTradeIds([...expandedTradeIds, tradeId]);
-
-			// Set loading state for this specific trade
 			setLoadingDetails((prev) => ({ ...prev, [tradeId]: true }));
 
-			// Only fetch if we don't already have the details
+			// Fetch trade details from API only if they are not already loaded
 			if (!tradeDetails[tradeId]) {
 				const response = await fetch(`/api/saved-trades/${tradeId}`);
 
@@ -37,8 +31,8 @@ export const useTradeDetails = () => {
 			}
 		} catch (error) {
 			console.error('Error loading trade details:', error);
+			// On error, show user feedback and revert expansion state
 			message.error('Failed to load trade details');
-			// Remove this ID from expanded IDs
 			setExpandedTradeIds(expandedTradeIds.filter((id) => id !== tradeId));
 		} finally {
 			setLoadingDetails((prev) => ({ ...prev, [tradeId]: false }));

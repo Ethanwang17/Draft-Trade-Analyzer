@@ -1,8 +1,9 @@
+// Load environment variables for database connection
 const {Pool} = require("pg");
 const path = require("path");
 require("dotenv").config(); // Load environment variables from .env file
 
-// Environment variables for configuration
+// Load environment variables for database connection
 const PG_HOST = process.env.PG_HOST || "localhost";
 const PG_PORT = process.env.PG_PORT || 5432;
 const PG_DATABASE = process.env.PG_DATABASE || "draft_trade_analyzer";
@@ -13,7 +14,7 @@ console.log(
 	`Database configuration: PG_HOST=${PG_HOST}, PG_USER=${PG_USER}, PG_DATABASE=${PG_DATABASE}`
 );
 
-// PostgreSQL connection
+// Create PostgreSQL connection pool using config
 const db = new Pool({
 	host: PG_HOST,
 	port: PG_PORT,
@@ -31,9 +32,7 @@ db.connect((err) => {
 	}
 });
 
-// Helper functions for database operations
-
-// Run a query with optional parameters
+// Helper to run SELECT queries and return all rows
 async function query(sql, params = []) {
 	try {
 		const result = await db.query(sql, params);
@@ -43,7 +42,7 @@ async function query(sql, params = []) {
 	}
 }
 
-// Run a query that doesn't return rows (INSERT, UPDATE, DELETE)
+// Helper to run write queries (INSERT, UPDATE, DELETE)
 async function execute(sql, params = []) {
 	try {
 		return await db.query(sql, params);
@@ -52,7 +51,7 @@ async function execute(sql, params = []) {
 	}
 }
 
-// Get a single row
+// Helper to fetch a single row
 async function getOne(sql, params = []) {
 	try {
 		const result = await db.query(sql, params);
@@ -62,7 +61,7 @@ async function getOne(sql, params = []) {
 	}
 }
 
-// Close database connection
+// Gracefully close database connection
 function close() {
 	return db.end();
 }

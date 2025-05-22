@@ -10,7 +10,7 @@ const FilterBar = ({ teams, onApplyFilters, selectedValuation, onValuationChange
 	const [valuationModels, setValuationModels] = useState([]);
 	const [loading, setLoading] = useState(false);
 
-	// Fetch valuation models
+	// Fetch list of available valuation models from backend on mount
 	useEffect(() => {
 		const fetchValuationModels = async () => {
 			try {
@@ -30,7 +30,7 @@ const FilterBar = ({ teams, onApplyFilters, selectedValuation, onValuationChange
 		fetchValuationModels();
 	}, []);
 
-	// Auto-apply filters when any filter changes
+	// Apply filters (team + sort) whenever one changes
 	useEffect(() => {
 		onApplyFilters({
 			teams: selectedTeams,
@@ -38,6 +38,7 @@ const FilterBar = ({ teams, onApplyFilters, selectedValuation, onValuationChange
 		});
 	}, [selectedTeams, sortOption, onApplyFilters]);
 
+	// Team dropdown supports multi-select with clear option
 	const handleTeamChange = (values) => {
 		setSelectedTeams(values);
 	};
@@ -46,6 +47,7 @@ const FilterBar = ({ teams, onApplyFilters, selectedValuation, onValuationChange
 		setSortOption(value);
 	};
 
+	// Valuation dropdown allows choosing a model for display and evaluation
 	const handleValuationChange = (value) => {
 		if (onValuationChange) {
 			onValuationChange(value);

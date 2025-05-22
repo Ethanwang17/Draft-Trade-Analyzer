@@ -43,7 +43,7 @@ const TradeBuilder = ({
 		})
 	);
 
-	// Find the active item for the drag overlay
+	// Hook to get active dragged item details from teamGroups
 	const activeItem = useMemo(() => {
 		if (!activeId) return null;
 
@@ -55,7 +55,7 @@ const TradeBuilder = ({
 		return null;
 	}, [activeId, teamGroups]);
 
-	// Calculate outgoing picks for each team
+	// Builds a map of incoming and outgoing picks per team for trade summary
 	const tradeData = useMemo(() => {
 		// Create a map to store each team's outgoing and incoming picks
 		const teamTradeData = {};
@@ -100,7 +100,7 @@ const TradeBuilder = ({
 		return teamTradeData;
 	}, [teamGroups]);
 
-	// Get the current valuation model from the picks (use the first pick's valuation if available)
+	// Determine selected valuation model from first available pick
 	const selectedValuation = useMemo(() => {
 		for (const team of teamGroups) {
 			if (team.picks && team.picks.length > 0 && team.picks[0].valuation) {
@@ -110,12 +110,12 @@ const TradeBuilder = ({
 		return 1; // Default to 1 if no picks found
 	}, [teamGroups]);
 
-	// Handle drag start
+	// Handle start of a drag event
 	const handleDragStart = (event) => {
 		setActiveId(event.active.id);
 	};
 
-	// Handle drag end
+	// Handle end of a drag event, updating pick locations or order
 	const handleDragEnd = (event) => {
 		const { active, over } = event;
 
@@ -282,7 +282,7 @@ const TradeBuilder = ({
 		setTeamGroups(newTeamGroups);
 	};
 
-	// Reset a specific pick to its original team
+	// Reset a specific pick to its original team and update class styling
 	const resetPickToOriginalTeam = (pickId) => {
 		// Find which team currently has this pick
 		let currentTeamIndex = -1;

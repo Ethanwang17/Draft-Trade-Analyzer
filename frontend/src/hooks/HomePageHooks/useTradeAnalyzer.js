@@ -2,13 +2,13 @@ import { useNavigate } from 'react-router-dom';
 import { message } from 'antd';
 
 /**
- * Hook for trade analysis navigation
+ * Hook to handle trade validation and navigation to analysis page
  * @returns {Object} Functions for trade analysis
  */
 export const useTradeAnalyzer = () => {
 	const navigate = useNavigate();
 
-	// Validate trade data before analyzing
+	// Ensure at least two valid teams are selected before analyzing trade
 	const validateTrade = (teamGroups) => {
 		// Check if we have at least two teams with valid IDs
 		const validTeams = teamGroups.filter((team) => team.teamId && team.name !== '');
@@ -21,7 +21,7 @@ export const useTradeAnalyzer = () => {
 		return true;
 	};
 
-	// Check if trades have been made
+	// Check if any trades have been made before proceeding to analysis
 	const checkTradesMade = (hasTradesMade) => {
 		if (!hasTradesMade) {
 			message.warning('No trades have been made yet');
@@ -30,7 +30,7 @@ export const useTradeAnalyzer = () => {
 		return true;
 	};
 
-	// Handle analyzing the trade
+	// Navigate to analysis page with selected valuation and current teamGroups
 	const handleAnalyzeTrade = (teamGroups, selectedValuation, hasTradesMade) => {
 		// Validate trade data
 		if (!validateTrade(teamGroups)) {

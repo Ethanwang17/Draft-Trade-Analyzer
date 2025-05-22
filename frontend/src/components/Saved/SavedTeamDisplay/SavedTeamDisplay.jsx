@@ -1,4 +1,5 @@
 import React from 'react';
+// Display a team's logo and name for use in SavedTradeCard
 import { Typography } from 'antd';
 import './SavedTeamDisplay.css';
 

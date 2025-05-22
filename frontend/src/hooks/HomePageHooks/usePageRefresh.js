@@ -7,17 +7,22 @@ import { useLocation, useNavigate } from 'react-router-dom';
  *
  * This prevents stale trade data from lingering in the Home page after a hard refresh.
  */
+// Hook to detect and handle full-page refreshes to prevent stale navigation state
 export const usePageRefresh = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
 
 	useEffect(() => {
-		// A clean page load/refresh will not have a referrer from the same site
-		const isPageRefresh = !document.referrer || !document.referrer.includes(window.location.origin);
+		// On mount, check if on Home page and forcibly clear navigation state
+		// Always clear trade state on initial page load or refresh
+		// This ensures trade data won't persist after a page refresh
+		const clearStateOnRefresh = () => {
+			// This will run on every initial mount/page load
+			if (location.pathname === '/home') {
+				navigate('/home', { replace: true, state: null });
+			}
+		};
 
-		// If this is a page refresh and location.state exists, clear it by navigating to /home
-		if (isPageRefresh && location.state) {
-			navigate('/home', { replace: true, state: null });
-		}
-	}, [navigate, location]);
+		clearStateOnRefresh();
+	}, [navigate, location.pathname]);
 };

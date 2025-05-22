@@ -4,6 +4,7 @@ import { PlusOutlined, UndoOutlined, BarChartOutlined, SaveOutlined } from '@ant
 import ValuationSelector from '../../Selector/ValuationSelector/ValuationSelector';
 import './TradeMenuBar.css';
 
+// Main header bar for the Trade Builder view, includes action buttons
 const TradeMenuBar = ({
 	onAddTeam,
 	onResetTrades,
@@ -18,8 +19,10 @@ const TradeMenuBar = ({
 			<h2 className="header-title">Trade Builder</h2>
 			<div className="header-actions">
 				<div className="header-valuation-select">
+					{/* Dropdown selector for valuation models */}
 					<ValuationSelector onChange={onValuationChange} defaultValue={selectedValuation} />
 				</div>
+				{/* Reset button clears all trades and reverts picks to original teams */}
 				<Button
 					type="default"
 					icon={<UndoOutlined />}
@@ -30,6 +33,7 @@ const TradeMenuBar = ({
 				>
 					Reset Trades
 				</Button>
+				{/* Add Team button allows adding another team slot to the builder */}
 				<Button
 					type="default"
 					icon={<PlusOutlined />}
@@ -40,6 +44,7 @@ const TradeMenuBar = ({
 				>
 					Add Team
 				</Button>
+				{/* Analyze Trade button navigates to the analysis view */}
 				<Button
 					type="primary"
 					icon={<BarChartOutlined />}

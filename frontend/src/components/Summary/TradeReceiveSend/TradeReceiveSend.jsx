@@ -14,6 +14,7 @@ const TradeReceiveSend = ({
 }) => {
 	return (
 		<div className={`trade-summary-section ${direction}`}>
+			{/* Header shows trade direction title and icon */}
 			<div className="trade-summary-header">
 				<div className="header-left">
 					<span className="trade-direction-icon">{icon}</span>
@@ -28,6 +29,7 @@ const TradeReceiveSend = ({
 			<div className="trade-summary-content">
 				{picks.length > 0 ? (
 					<>
+						{/* Show list of picks using PickInfo component, followed by total value */}
 						<ul className="trade-list">
 							{picks.map((pick) => (
 								<PickInfo
@@ -42,6 +44,7 @@ const TradeReceiveSend = ({
 						<TradeSummaryTotal picks={picks} direction={direction} />
 					</>
 				) : (
+					// Fallback message when no picks are present
 					<div className="trade-empty-message">No picks {direction}</div>
 				)}
 			</div>

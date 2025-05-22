@@ -6,7 +6,7 @@ const SummaryNetValue = ({ picks }) => {
 	const [outgoingValue, setOutgoingValue] = useState(0);
 	const [loading] = useState(false);
 
-	// Calculate incoming and outgoing values
+	// Compute total incoming and outgoing value and derive net result
 	useEffect(() => {
 		if (!picks || !picks.incoming || !picks.outgoing) {
 			setIncomingValue(0);
@@ -30,6 +30,7 @@ const SummaryNetValue = ({ picks }) => {
 	const isPositive = netValue > 0;
 	const isNeutral = netValue === 0;
 
+	// Display net value with color-coded styling based on positive/neutral/negative
 	return (
 		<div className="summary-net-value">
 			<div className="net-value-label">Net Value:</div>

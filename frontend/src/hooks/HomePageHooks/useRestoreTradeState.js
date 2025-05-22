@@ -14,6 +14,8 @@ import { useLocation } from 'react-router-dom';
  * This hook handles rebuilding the `originalPicksRef`, re-applying the valuation model and
  * recalculating the "trades made" indicator so that all functionality continues to work.
  */
+
+// Hook to restore Home page state after returning from the Analyze page
 export const useRestoreTradeState = ({
 	handleValuationChange,
 	originalPicksRef,
@@ -23,13 +25,14 @@ export const useRestoreTradeState = ({
 	const location = useLocation();
 
 	useEffect(() => {
+		// Check if the navigation state includes a request to preserve trade data
 		if (location.state?.preserveTradeState) {
-			// Restore the valuation model that was active on the Analyze page
+			// Apply the previously selected valuation model to the UI
 			if (location.state.selectedValuation) {
 				handleValuationChange(location.state.selectedValuation);
 			}
 
-			// Rebuild original picks cache & determine if trades exist
+			// Reconstruct the original picks mapping for each team so reset can function
 			if (location.state.teamGroups) {
 				const teams = location.state.teamGroups.filter((team) => team.teamId);
 
@@ -51,7 +54,7 @@ export const useRestoreTradeState = ({
 					}
 				});
 
-				// Update trade-made indicator based on restored state
+				// Update trade status indicator based on the restored team groups
 				checkForTradesMadeAndUpdateState(location.state.teamGroups, checkForTradesMade);
 			}
 		}

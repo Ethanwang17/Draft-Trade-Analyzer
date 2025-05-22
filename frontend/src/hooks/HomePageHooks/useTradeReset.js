@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { sortPicks } from '../../utils/pickSorter';
 
 /**
- * Hook for trade reset functionality
+ * Hook for managing the reset functionality and tracking if trades occurred
  * @param {Object} originalPicksRef - Reference to original picks for each team
  * @param {Function} updateTeamGroups - Function to update team groups
  * @param {Boolean} externalHasTradesMade - External state for tracking if trades have been made
@@ -23,7 +23,11 @@ export const useTradeReset = (
 	const hasTradesMade = externalHasTradesMade !== null ? externalHasTradesMade : localHasTradesMade;
 	const setHasTradesMade = externalSetHasTradesMade || setLocalHasTradesMade;
 
-	// Check if any picks have been moved from their original teams
+	/**
+	 * Determine if a team has gained/lost picks compared to original state
+	 * @param {Array} currentGroups - Current state of team groups
+	 * @returns {Boolean} Whether any trades have been made
+	 */
 	const checkForTradesMade = useCallback(
 		(currentGroups) => {
 			if (!currentGroups) {
@@ -66,7 +70,10 @@ export const useTradeReset = (
 		[originalPicksRef] // Stable dependency
 	);
 
-	// Show reset confirmation modal
+	/**
+	 * Prompt user with a confirmation modal if trades exist
+	 * @param {Array} teamGroups - Current team groups for potential reset
+	 */
 	const showResetConfirmation = (teamGroups) => {
 		// Only show confirmation if trades have been made
 		if (hasTradesMade) {
@@ -88,7 +95,10 @@ export const useTradeReset = (
 		setResetModalVisible(false);
 	};
 
-	// Perform the actual reset
+	/**
+	 * Reset all team picks to their original state, including sorting and animations
+	 * @param {Array} teamGroups - Current team groups to reset
+	 */
 	const performReset = (teamGroups) => {
 		// If no trades have been made, no need to reset
 		if (!hasTradesMade) return;
@@ -122,7 +132,9 @@ export const useTradeReset = (
 		// Update the team groups
 		updateTeamGroups(resetTeamGroups);
 
-		// Reset animation state after animation completes
+		/**
+		 * After reset, ensure state reflects no trades and clears any pick styling
+		 */
 		setTimeout(() => {
 			setIsResetting(false);
 			// Remove animation classes

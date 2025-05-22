@@ -1,6 +1,9 @@
+// React and library imports
 import React from 'react';
 import { Typography, Row, Spin, Alert } from 'antd';
 import { useLocation } from 'react-router-dom';
+
+// Import custom hooks for analysis, valuation, evaluation, and saving
 import {
 	useTradeAnalysis,
 	usePickValues,
@@ -8,6 +11,8 @@ import {
 	useTradeSave,
 	usePick,
 } from '../hooks';
+
+// Import custom components for analysis layout and UI
 import AnalyzeHeader from '../components/Layout/AnalyzeHeader/AnalyzeHeader';
 import TradeBalanceBadge from '../components/TradeBalanceBadge/TradeBalanceBadge';
 import AnalysisTeamSummary from '../components/AnalysisTeamSummary/AnalysisTeamSummary';
@@ -19,7 +24,7 @@ const { Title, Text } = Typography;
 function AnalyzeTrade() {
 	const location = useLocation();
 
-	// Use custom hooks
+	// Initialize analysis state from navigation state
 	const {
 		loading,
 		tradeData,
@@ -29,28 +34,33 @@ function AnalyzeTrade() {
 		handleBackToTrade,
 	} = useTradeAnalysis(location.state);
 
+	// Fetch pick values based on selected valuation model
 	const { pickValues, valuesLoading } = usePickValues(tradeData, selectedValuation);
 
+	// Functions to calculate team value summaries and evaluate trade balance
 	const { calculateTeamValues, evaluateTrade, prepareTeamTradeData } = useTradeEvaluation(
 		tradeData,
 		pickValues
 	);
 
+	// Modal state and save logic for persisting trade
 	const { saveModalVisible, setSaveModalVisible, tradeName, setTradeName, saveTrade } =
 		useTradeSave();
 
+	// Handler to allow resetting individual picks to their original teams
 	const { handleResetPick } = usePick(tradeData, setTradeData);
 
-	// Handle saving the trade
+	// Trigger saving the trade
 	const handleSaveTrade = async () => {
 		await saveTrade(tradeData);
 	};
 
-	// Handle valuation model change
+	// Handle user selection of a different valuation model
 	const handleValuationChange = (value) => {
 		setSelectedValuation(value);
 	};
 
+	// Loading state while trade data is being processed
 	if (loading) {
 		return (
 			<div className="analyze-loading-container">
@@ -59,15 +69,20 @@ function AnalyzeTrade() {
 		);
 	}
 
+	// Show error if no trade data was found
 	if (!tradeData) {
 		return <Alert message="No trade data found" type="error" />;
 	}
 
+	// Evaluate overall trade balance result
 	const tradeBalance = evaluateTrade();
+
+	// Filter out only active teams involved in the trade
 	const teamsWithPicks = tradeData.teamGroups.filter((team) => team.teamId);
 
 	return (
 		<div className="analyze-page">
+			{/* Header with back button, valuation selector, and save button */}
 			<AnalyzeHeader
 				selectedValuation={selectedValuation}
 				onValuationChange={handleValuationChange}
@@ -75,6 +90,7 @@ function AnalyzeTrade() {
 				onSaveClick={() => setSaveModalVisible(true)}
 			/>
 
+			{/* Title and trade balance badge */}
 			<div className="analyze-title-container">
 				<Title level={2}>Trade Analysis</Title>
 
@@ -86,7 +102,7 @@ function AnalyzeTrade() {
 				/>
 			</div>
 
-			{/* Trade Summary Components - One per team */}
+			{/* Trade summary breakdown for each team */}
 			<div className="analysis-section">
 				<Title level={4}>Trade Summary by Team</Title>
 				<Row gutter={[16, 16]} justify="space-between">
@@ -118,7 +134,7 @@ function AnalyzeTrade() {
 				/>
 			</div>
 
-			{/* Save Trade Modal */}
+			{/* Modal to save trade with custom name */}
 			<SaveTradeModal
 				visible={saveModalVisible}
 				tradeName={tradeName}

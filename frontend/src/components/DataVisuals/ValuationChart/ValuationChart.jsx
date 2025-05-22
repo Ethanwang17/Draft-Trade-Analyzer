@@ -1,4 +1,5 @@
 import React from 'react';
+// Line chart showing draft pick values vs. pick number
 import { Card } from 'antd';
 import {
 	LineChart,
@@ -21,6 +22,7 @@ function ValuationChart({ pickValues, xAxisTicks }) {
 					<XAxis
 						dataKey="pickNumber"
 						type="number"
+						// X-axis: Pick Number, Y-axis: Assigned Value
 						label={{ value: 'Pick Number', position: 'insideBottom', offset: -5 }}
 						domain={['dataMin', 'dataMax']}
 						allowDataOverflow={true}
@@ -28,6 +30,7 @@ function ValuationChart({ pickValues, xAxisTicks }) {
 						ticks={xAxisTicks}
 					/>
 					<YAxis label={{ value: 'Value', angle: -90, position: 'insideLeft' }} />
+					{/* Use tooltip to show precise value on hover */}
 					<Tooltip formatter={(value) => parseFloat(value).toFixed(2)} />
 					<Legend />
 					<Line

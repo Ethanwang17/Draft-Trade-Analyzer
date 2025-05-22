@@ -26,7 +26,7 @@ function SavedTradeCard({
 	const [isExpanded, setIsExpanded] = useState(false);
 	const [contentVisible, setContentVisible] = useState(false);
 
-	// Handle expansion state changes
+	// Determine if this card is expanded or collapsed based on external state
 	useEffect(() => {
 		const isCardExpanded = expandedTradeIds.includes(trade.id);
 		if (isCardExpanded) {
@@ -40,7 +40,7 @@ function SavedTradeCard({
 		}
 	}, [expandedTradeIds, trade.id]);
 
-	// Create a structure for trade evaluation
+	// Construct the teamGroups structure used by the evaluation hook from raw trade data
 	const getTradeDataForEvaluation = useCallback(() => {
 		if (!tradeDetails || !tradeDetails[trade.id] || !tradeDetails[trade.id].picksByTeam)
 			return null;
@@ -107,7 +107,7 @@ function SavedTradeCard({
 		}
 	}, [expandedTradeIds, loadingDetails, tradeDetails, trade.id]);
 
-	// Fetch values for all picks
+	// Fetch all draft pick values used for evaluation, deduplicated by ID
 	const fetchPickValues = useCallback(async () => {
 		if (!tradeDetails[trade.id] || !tradeDetails[trade.id].picksByTeam) return;
 
@@ -177,7 +177,7 @@ function SavedTradeCard({
 		fetchPickValues,
 	]);
 
-	// Transform pick data for a specific team to the format expected by TradeSummary
+	// Format pick data into TradeSummary-friendly shape with team logos and values
 	const formatPicksForTeam = (teamId) => {
 		if (
 			!tradeDetails[trade.id] ||
@@ -230,6 +230,7 @@ function SavedTradeCard({
 					<Title level={4}>{trade.trade_name || `Trade #${trade.id}`}</Title>
 					<Text type="secondary">{formatDate(trade.created_at)}</Text>
 				</div>
+				{/* Only render the balance badge once values and details are loaded */}
 				{isExpanded &&
 					contentVisible &&
 					!loadingDetails[trade.id] &&

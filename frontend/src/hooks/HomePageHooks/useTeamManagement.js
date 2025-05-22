@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 /**
- * Hook for team management functionality
+ * Hook to fetch available teams and provide functions for adding/removing teams
  * @param {Array} initialTeamGroups - Initial team groups
  * @param {Function} updateTeamGroups - Function to update team groups
  * @returns {Object} Team management functions and state
@@ -10,7 +10,7 @@ export const useTeamManagement = (initialTeamGroups, updateTeamGroups) => {
 	const [teams, setTeams] = useState([]);
 	const [loading, setLoading] = useState(true);
 
-	// Fetch teams from the API
+	// Fetch list of all NBA teams from the backend on mount
 	useEffect(() => {
 		const fetchTeams = async () => {
 			try {
@@ -30,7 +30,7 @@ export const useTeamManagement = (initialTeamGroups, updateTeamGroups) => {
 		fetchTeams();
 	}, []);
 
-	// Add a new team (maximum 4 teams)
+	// Add a new team group to the list if under the 4-team max
 	const addTeam = (teamGroups) => {
 		if (teamGroups.length >= 4) return;
 
@@ -47,7 +47,7 @@ export const useTeamManagement = (initialTeamGroups, updateTeamGroups) => {
 		]);
 	};
 
-	// Remove a team and renumber remaining teams
+	// Remove a team, return traded picks, and reassign IDs for remaining teams
 	const removeTeam = (teamGroups, teamId) => {
 		// Don't allow removing if only 2 teams remain
 		if (teamGroups.length <= 2) return;
@@ -68,7 +68,7 @@ export const useTeamManagement = (initialTeamGroups, updateTeamGroups) => {
 			return;
 		}
 
-		// Handle picks before removing the team
+		// Restore picks from removed team to original owners and clear traded styling
 		let updatedTeamGroups = [...teamGroups];
 
 		// 1. Find picks that belonged to the team being removed but are now with other teams

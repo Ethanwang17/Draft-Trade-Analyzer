@@ -5,7 +5,7 @@ import { CSS } from '@dnd-kit/utilities';
 import TradeSummary from '../Summary/TradeSummary/TradeSummary';
 import './TeamCard.css';
 
-// Draft Pick component
+// Sortable draft pick that supports drag-and-drop with visual feedback
 export const DraftPick = ({ id, content, teamLogo, className }) => {
 	const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
 
@@ -28,7 +28,7 @@ export const DraftPick = ({ id, content, teamLogo, className }) => {
 	);
 };
 
-// Draft Pick Overlay
+// Overlay used when a pick is being dragged
 export const DraftPickOverlay = ({ content, teamLogo }) => {
 	return (
 		<div className="draft-pick draft-pick-overlay">
@@ -38,7 +38,7 @@ export const DraftPickOverlay = ({ content, teamLogo }) => {
 	);
 };
 
-// Droppable Team Container
+// Droppable container for team picks, displays trade summary and pick slots
 export const TeamPicksContainer = ({
 	id,
 	teamLogo,
@@ -54,7 +54,7 @@ export const TeamPicksContainer = ({
 		id,
 	});
 
-	// Use trade data if provided, otherwise calculate basic info
+	// Memoized trade summary to avoid recalculating on every render
 	const tradeSummary = React.useMemo(() => {
 		if (tradeData) {
 			return {
@@ -63,7 +63,7 @@ export const TeamPicksContainer = ({
 			};
 		}
 
-		// Fallback to basic calculation (incoming only)
+		// Fallback summary: only show incoming picks from other teams
 		const incoming = picks.filter((pick) => pick.originalTeamId && pick.originalTeamId !== teamId);
 
 		return { incoming, outgoing: [] };

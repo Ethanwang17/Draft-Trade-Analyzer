@@ -3,6 +3,7 @@ import TradeReceiveSend from '../TradeReceiveSend/TradeReceiveSend';
 import SummaryNetValue from '../SummaryNetValue/SummaryNetValue';
 import './TradeSummary.css';
 
+// Component that displays both incoming and outgoing picks for a trade
 const TradeSummary = ({
 	tradeData,
 	onResetPick,
@@ -34,6 +35,7 @@ const TradeSummary = ({
 				showRemoveIcon={showRemoveIcon}
 			/>
 
+			{/* Conditionally show net value summary if enabled */}
 			{showNetValue && <SummaryNetValue picks={tradeData} />}
 		</div>
 	);

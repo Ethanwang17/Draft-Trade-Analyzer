@@ -4,16 +4,18 @@ import { EditOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import './LoadTradeButton.css';
 
+// Button that loads a saved trade and navigates to the Home page with state
 function LoadTradeButton({ tradeId }) {
 	const navigate = useNavigate();
 
 	const handleLoadTrade = async (e) => {
 		if (e) {
+			// Prevent event bubbling to avoid triggering parent click handlers
 			e.stopPropagation(); // Prevent card expansion when clicking the button
 		}
 
 		try {
-			// Fetch full trade data to reconstruct the trade builder state
+			// Fetch trade details and pass them as navigation state to reconstruct UI
 			const response = await fetch(`/api/trades/${tradeId}/full`);
 
 			if (!response.ok) {

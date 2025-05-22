@@ -13,7 +13,7 @@ import {
 // import { useSelectedAxes, useChartData, useTagRender } from '../../hooks'; removed
 import './RadarChart.css';
 
-// Directly integrate useSelectedAxes logic
+// Hook to manage which axes are selected in the radar chart
 function useSelectedAxes() {
 	const axisOptions = [
 		{ value: 'Total Incoming Value', label: 'Total Incoming Value', color: '#D5F3E5' },
@@ -29,7 +29,7 @@ function useSelectedAxes() {
 	return { axisOptions, selectedAxes, setSelectedAxes, handleAxisChange };
 }
 
-// Directly integrate useChartData logic
+// Hook to prepare chart data for each selected metric and team
 function useChartData(teams, calculateTeamValues, selectedAxes) {
 	const colors = ['#0074D9', '#FF4136', '#2ECC40', '#FF851B'];
 	const baseMetrics = useMemo(() => {
@@ -65,7 +65,7 @@ function useChartData(teams, calculateTeamValues, selectedAxes) {
 	};
 }
 
-// Directly integrate useTagRender logic
+// Hook to customize tag rendering with axis-specific colors
 function useTagRender(axisOptions) {
 	return (props) => {
 		const { label, value, closable, onClose } = props;
@@ -104,7 +104,7 @@ function RadarChart({ teams, calculateTeamValues, loading }) {
 	);
 	const getTagProps = useTagRender(axisOptions);
 
-	// Render UI based on loading state and data availability
+	// Show placeholder text based on loading state or invalid selection
 	let chartContent;
 	if (loading) {
 		chartContent = <div className="radar-chart-placeholder">Loading chart</div>;
@@ -119,6 +119,7 @@ function RadarChart({ teams, calculateTeamValues, loading }) {
 			</div>
 		);
 	} else {
+		// Render radar chart for each team across selected metrics
 		chartContent = (
 			<ResponsiveContainer width="100%" height={400}>
 				<ReRadarChart data={chartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>

@@ -12,6 +12,7 @@ const ValuationSelector = ({ onChange, defaultValue = 1 }) => {
 		setSelectedValuation(defaultValue);
 	}, [defaultValue]);
 
+	// Load available valuation models from the API on mount
 	useEffect(() => {
 		const fetchValuations = async () => {
 			try {
@@ -32,6 +33,7 @@ const ValuationSelector = ({ onChange, defaultValue = 1 }) => {
 		fetchValuations();
 	}, []);
 
+	// Update local selected valuation and notify parent component when changed
 	const handleChange = (value) => {
 		setSelectedValuation(value);
 		if (onChange) {
@@ -39,7 +41,7 @@ const ValuationSelector = ({ onChange, defaultValue = 1 }) => {
 		}
 	};
 
-	// Get the name of the selected valuation
+	// Find the display name of the currently selected valuation model
 	const getSelectedValuationName = () => {
 		const selected = valuations.find((v) => v.id === selectedValuation);
 		return selected ? selected.name : '';

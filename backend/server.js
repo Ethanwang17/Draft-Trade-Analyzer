@@ -1,14 +1,15 @@
+// Express app and middleware configuration
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const path = require("path");
 const {db, query, execute, getOne, DB_TYPE} = require("./db");
 
-// Initialize express app
+// Express app and middleware configuration
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// CORS configuration
+// CORS setup to allow specific frontend domains
 const allowedOrigins = [
 	"http://localhost:5173", // Local development
 	"https://draft-trade-analyzer.vercel.app", // Production Vercel URL
@@ -38,7 +39,7 @@ const corsOptions = {
 	credentials: true,
 };
 
-// Helper function to convert round number to ordinal (1 -> 1st, 2 -> 2nd, etc.)
+// Helper to convert numbers to ordinal strings (e.g., 1 -> 1st)
 function getOrdinalRound(round) {
 	const suffixes = ["th", "st", "nd", "rd"];
 	const suffix =
@@ -48,7 +49,7 @@ function getOrdinalRound(round) {
 	return round + suffix;
 }
 
-// Middleware
+// Express middleware
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
@@ -56,7 +57,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 // Database setup
 console.log(`Using PostgreSQL database`);
 
-// Initialize database tables
+// Define and initialize PostgreSQL tables for application entities
 async function initializeDatabase() {
 	console.log("Initializing database tables...");
 
@@ -163,7 +164,7 @@ app.get("/", (req, res) => {
 	res.json({message: "Welcome to the NBA Draft Trade Analyzer API"});
 });
 
-// Teams API Routes
+// API endpoint: Fetch all teams
 app.get("/api/teams", async (req, res) => {
 	try {
 		const rows = await query("SELECT * FROM teams ORDER BY name");
@@ -173,7 +174,7 @@ app.get("/api/teams", async (req, res) => {
 	}
 });
 
-// Draft Picks API Routes
+// API endpoint: Fetch all draft picks
 app.get("/api/draft-picks", async (req, res) => {
 	try {
 		const sql = `
@@ -191,7 +192,7 @@ app.get("/api/draft-picks", async (req, res) => {
 	}
 });
 
-// Get picks by team ID
+// API endpoint: Get draft picks by team ID
 app.get("/api/teams/:teamId/picks", async (req, res) => {
 	try {
 		const teamId = req.params.teamId;
@@ -212,7 +213,7 @@ app.get("/api/teams/:teamId/picks", async (req, res) => {
 	}
 });
 
-// Pick Values API Routes
+// API endpoint: Get pick values for default or specific valuation models
 app.get("/api/pick-values", async (req, res) => {
 	try {
 		const rows = await query(
@@ -225,6 +226,7 @@ app.get("/api/pick-values", async (req, res) => {
 });
 
 // Get pick value based on pick number and valuation model
+// API endpoint: Get pick values for default or specific valuation models
 app.get("/api/pick-value/:pickNumber/:valuation", async (req, res) => {
 	try {
 		const pickNumber = req.params.pickNumber;
@@ -264,6 +266,7 @@ app.get("/api/pick-value/:pickNumber/:valuation", async (req, res) => {
 });
 
 // Get pick value with default valuation model (1)
+// API endpoint: Get pick values for default or specific valuation models
 app.get("/api/pick-value/:pickNumber", async (req, res) => {
 	try {
 		const pickNumber = req.params.pickNumber;
@@ -302,7 +305,7 @@ app.get("/api/pick-value/:pickNumber", async (req, res) => {
 	}
 });
 
-// Get round average pick value for future picks
+// API endpoint: Estimate future pick value with depreciation
 app.get("/api/future-pick-value/:year/:round/:valuation", async (req, res) => {
 	try {
 		const year = parseInt(req.params.year);
@@ -371,7 +374,7 @@ app.get("/api/future-pick-value/:year/:round/:valuation", async (req, res) => {
 	}
 });
 
-// Get all valuation models
+// API endpoint: Get all valuation models
 app.get("/api/valuations", async (req, res) => {
 	try {
 		const rows = await query("SELECT * FROM valuations ORDER BY id");
@@ -381,7 +384,7 @@ app.get("/api/valuations", async (req, res) => {
 	}
 });
 
-// NEW ENDPOINT: Create a new valuation model
+// API endpoint: Create new valuation model with dynamic table
 app.post("/api/valuation-models", async (req, res) => {
 	try {
 		const {name, description, values, normalized} = req.body;
@@ -476,7 +479,7 @@ app.post("/api/valuation-models", async (req, res) => {
 	}
 });
 
-// Start the server after initializing the database
+// Start server after DB init and gracefully shut down on SIGINT
 initializeDatabase()
 	.then(() => {
 		app.listen(PORT, () => {
@@ -488,7 +491,6 @@ initializeDatabase()
 		process.exit(1);
 	});
 
-// Handle application shutdown
 process.on("SIGINT", async () => {
 	try {
 		await close();
@@ -500,7 +502,7 @@ process.on("SIGINT", async () => {
 	}
 });
 
-// Saved Trades API Routes
+// API endpoint: Get, load, save, and delete saved trades
 
 // Get all saved trades
 app.get("/api/saved-trades", async (req, res) => {

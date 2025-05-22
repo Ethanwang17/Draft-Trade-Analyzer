@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { sortPicks } from '../../utils/pickSorter';
 
 /**
- * Hook that synchronises the selected teams with their draft picks.
+ * Hook to sync selected teams with their draft picks when teams or valuation change
  *
  * It updates the Home page `teamGroups` state whenever:
  *   – the list of fetched `teams` changes
@@ -19,8 +19,7 @@ export const useTeamsAndPicks = ({
 	checkForTradesMade,
 	checkForTradesMadeAndUpdateState,
 }) => {
-	// Create a stable string of the chosen team names. This is cheaper than doing
-	// a deep comparison of `teamGroups` in the effect dependency array.
+	// Create a stable string to track team name changes (used in dependency array)
 	const teamNamesString = teamGroups.map((t) => t.name).join(',');
 
 	useEffect(() => {
@@ -41,7 +40,7 @@ export const useTeamsAndPicks = ({
 						teamId: selectedTeam.id,
 					};
 
-					// (Re-)fetch picks when the team changes or if no picks have been loaded yet
+					// Fetch picks from API if team has changed or has no picks loaded
 					if (
 						selectedTeam.id &&
 						(selectedTeam.id !== group.teamId ||
@@ -64,7 +63,7 @@ export const useTeamsAndPicks = ({
 								'Seventh',
 							];
 
-							// Format the API response so it matches the structure expected by the UI
+							// Map and format pick data to UI-ready structure
 							const formattedPicks = picksData.map((pick) => ({
 								id: `pick-${pick.id}`,
 								content: `${pick.year} ${
@@ -103,7 +102,7 @@ export const useTeamsAndPicks = ({
 				}
 			}
 
-			// Always keep picks sorted before committing to state
+			// After updating picks, sort and commit to state, then update trade status
 			const sortedTeamGroups = updatedTeamGroupsLocal.map((group) => ({
 				...group,
 				picks: sortPicks(group.picks),
@@ -111,7 +110,7 @@ export const useTeamsAndPicks = ({
 
 			setTeamGroups(sortedTeamGroups);
 
-			// Recalculate the \"trades made\" indicator
+			// Recalculate the "trades made" indicator
 			if (checkForTradesMadeAndUpdateState) {
 				checkForTradesMadeAndUpdateState(sortedTeamGroups, checkForTradesMade);
 			}

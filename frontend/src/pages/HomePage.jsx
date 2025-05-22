@@ -1,10 +1,15 @@
+// React and library imports
 import React, { useRef, useState } from 'react';
 import { Modal } from 'antd';
 import { useLocation } from 'react-router-dom';
+
+// Component and utility imports
 import TradeBuilder from '../components/TradeBuilder/TradeBuilder';
 import TradeMenuBar from '../components/Layout/TradeMenuBar/TradeMenuBar';
 import { getTeamGroupClass, getTradeBuilderStyle } from '../utils/tradeUtils';
 import { sortPicks } from '../utils/pickSorter';
+
+// Custom hook imports
 import {
 	useTeamManagement,
 	useTradeReset,
@@ -17,42 +22,28 @@ import {
 
 function HomePage() {
 	const location = useLocation();
-	const originalPicksRef = useRef({});
-	const [hasTradesMade, setHasTradesMade] = useState(false);
+	const originalPicksRef = useRef({}); // Store original picks for reset/restore
+	const [hasTradesMade, setHasTradesMade] = useState(false); // Tracks if trades have occurred
 
-	// Handle full page refreshes
+	// Handle refreshes to avoid stale state
 	usePageRefresh();
 
-	// Initialize with empty team groups or from location state if coming back from analyze page
+	// Set initial team groups, potentially restoring from Analyze page state
 	const initialTeamGroups = (() => {
-		// Check if we have state passed from analyze page
 		if (location.state?.preserveTradeState && location.state?.teamGroups) {
-			// If we do, use that state
 			return location.state.teamGroups;
 		}
-		// Otherwise use default initialization
+		// Default: two empty team slots
 		return [
-			{
-				id: 1,
-				name: '',
-				logo: '',
-				picks: [],
-				teamId: null,
-			},
-			{
-				id: 2,
-				name: '',
-				logo: '',
-				picks: [],
-				teamId: null,
-			},
+			{ id: 1, name: '', logo: '', picks: [], teamId: null },
+			{ id: 2, name: '', logo: '', picks: [], teamId: null },
 		];
 	})();
 
-	// Get teams first
-	const { teams, loading } = useTeamManagement(initialTeamGroups, null); // Pass null for now
+	// Fetch team data
+	const { teams, loading } = useTeamManagement(initialTeamGroups, null);
 
-	// Helper function to check for trades
+	// Check if trades have been made and update UI state
 	const checkForTradesMadeAndUpdateState = (groups, checkFn) => {
 		if (!checkFn) return false;
 		const hasTrades = checkFn(groups);
@@ -60,11 +51,10 @@ function HomePage() {
 		return hasTrades;
 	};
 
-	// Define state for teamGroups directly
 	const [teamGroups, setTeamGroups] = useState(initialTeamGroups);
 	const [selectedValuation, setSelectedValuation] = useState(1);
 
-	// Reset-related behaviour (modal & state helpers)
+	// Manage reset modal and reset behavior
 	const {
 		isResetting,
 		resetModalVisible,
@@ -74,7 +64,7 @@ function HomePage() {
 		handleResetCancel,
 	} = useTradeReset(originalPicksRef, setTeamGroups, hasTradesMade, setHasTradesMade);
 
-	// Synchronise team & pick data
+	// Syncs pick and team data (updates when valuation changes or picks are traded)
 	useTeamsAndPicks({
 		teams,
 		teamGroups,
@@ -85,26 +75,22 @@ function HomePage() {
 		checkForTradesMadeAndUpdateState,
 	});
 
-	// Other hooks
+	// Get function to run analysis
 	const { handleAnalyzeTrade } = useTradeAnalyzer();
 
-	// Function to update team groups (used by TradeBuilder)
+	// Sorts and updates team groups when changes are made
 	const updateTeamGroups = (newTeamGroups) => {
-		// Apply sorting to each team's picks
 		const sortedTeamGroups = newTeamGroups.map((group) => ({
 			...group,
 			picks: sortPicks(group.picks),
 		}));
-
 		setTeamGroups(sortedTeamGroups);
 		checkForTradesMadeAndUpdateState(sortedTeamGroups, checkForTradesMade);
 	};
 
-	// Handle valuation change
+	// Update picks to reflect selected valuation model
 	const handleValuationChange = (valuationId) => {
 		setSelectedValuation(valuationId);
-
-		// Update the valuation for all picks and apply sorting
 		const updatedTeamGroups = teamGroups.map((group) => ({
 			...group,
 			picks: sortPicks(
@@ -114,91 +100,51 @@ function HomePage() {
 				}))
 			),
 		}));
-
 		setTeamGroups(updatedTeamGroups);
 	};
 
-	// Handle adding a team
+	// Add a new team slot (up to 4 allowed)
 	const handleAddTeam = () => {
 		if (teamGroups.length >= 4) return;
-
 		const newId = teamGroups.length + 1;
-		updateTeamGroups([
-			...teamGroups,
-			{
-				id: newId,
-				name: '',
-				logo: '',
-				picks: [],
-				teamId: null,
-			},
-		]);
+		updateTeamGroups([...teamGroups, { id: newId, name: '', logo: '', picks: [], teamId: null }]);
 	};
 
-	// Handle removing a team
+	// Remove a team and return traded picks to original owners
 	const handleRemoveTeam = (teamId) => {
-		// Don't allow removing if only 2 teams remain
 		if (teamGroups.length <= 2) return;
-
-		// Find the team being removed
 		const teamToRemove = teamGroups.find((team) => team.id === teamId);
 
 		if (!teamToRemove || !teamToRemove.teamId) {
-			// If the team doesn't exist or doesn't have a team ID (not selected), just remove it
 			const newTeamGroups = teamGroups
 				.filter((team) => team.id !== teamId)
-				.map((team, index) => ({
-					...team,
-					id: index + 1, // Renumber teams starting from 1
-				}));
-
+				.map((team, index) => ({ ...team, id: index + 1 }));
 			updateTeamGroups(newTeamGroups);
 			return;
 		}
 
-		// Handle picks before removing the team
 		let updatedTeamGroups = [...teamGroups];
 
-		// 1. Find picks that belonged to the team being removed but are now with other teams
-		// and return them to their original teams
+		// Return picks that belong to the removed team but are held by others
 		updatedTeamGroups = updatedTeamGroups.map((group) => {
-			// Skip the team being removed
 			if (group.id === teamId) return group;
-
-			// For each team, check if they have picks that belonged to the team being removed
-			const picksToReturn = group.picks.filter(
-				(pick) => pick.originalTeamId === teamToRemove.teamId
-			);
-
-			// If no picks to return, no changes needed for this team
+			const picksToReturn = group.picks.filter((pick) => pick.originalTeamId === teamToRemove.teamId);
 			if (picksToReturn.length === 0) return group;
-
-			// Remove the picks that belonged to the team being removed
 			return {
 				...group,
 				picks: group.picks.filter((pick) => pick.originalTeamId !== teamToRemove.teamId),
 			};
 		});
 
-		// 2. Find picks from other teams that the removed team had
-		// and return those picks to their original teams
+		// Return picks that the removed team holds but belong to others
 		const picksToReturn = teamToRemove.picks.filter(
 			(pick) => pick.originalTeamId !== teamToRemove.teamId
 		);
 
 		picksToReturn.forEach((pick) => {
-			const originalTeamGroup = updatedTeamGroups.find(
-				(group) => group.teamId === pick.originalTeamId
-			);
-
+			const originalTeamGroup = updatedTeamGroups.find((group) => group.teamId === pick.originalTeamId);
 			if (originalTeamGroup) {
-				// Reset the className (remove traded-pick class) before returning to original team
-				const resetPick = {
-					...pick,
-					className: '', // Remove traded-pick class
-				};
-
-				// Add the pick back to its original team
+				const resetPick = { ...pick, className: '' };
 				const teamIndex = updatedTeamGroups.findIndex((group) => group.id === originalTeamGroup.id);
 				updatedTeamGroups[teamIndex] = {
 					...originalTeamGroup,
@@ -207,18 +153,14 @@ function HomePage() {
 			}
 		});
 
-		// 3. Remove the team and renumber the remaining teams
 		updatedTeamGroups = updatedTeamGroups
 			.filter((team) => team.id !== teamId)
-			.map((team, index) => ({
-				...team,
-				id: index + 1, // Renumber teams starting from 1
-			}));
+			.map((team, index) => ({ ...team, id: index + 1 }));
 
 		updateTeamGroups(updatedTeamGroups);
 	};
 
-	// Restore state when navigating back from Analyze page
+	// Restore trade state from navigation
 	useRestoreTradeState({
 		handleValuationChange,
 		originalPicksRef,
@@ -226,20 +168,14 @@ function HomePage() {
 		checkForTradesMade,
 	});
 
-	// Perform initial trade status calculation
+	// Run initial trade check on mount
 	useInitialTradeCheck({ teamGroups, checkForTradesMade, setHasTradesMade });
 
-	const handleResetTrades = () => {
-		showResetConfirmation(teamGroups);
-	};
-
-	const handleModalResetConfirm = () => {
-		handleResetConfirm(teamGroups);
-	};
-
-	const handleAnalyze = () => {
+	// UI callbacks for reset and analyze
+	const handleResetTrades = () => showResetConfirmation(teamGroups);
+	const handleModalResetConfirm = () => handleResetConfirm(teamGroups);
+	const handleAnalyze = () =>
 		handleAnalyzeTrade(teamGroups, selectedValuation, hasTradesMade);
-	};
 
 	return (
 		<div className="home-page">
@@ -253,6 +189,7 @@ function HomePage() {
 				onAnalyze={handleAnalyze}
 			/>
 
+			{/* Trade builder area */}
 			<div className="trade-builder" style={getTradeBuilderStyle(teamGroups.length)}>
 				<TradeBuilder
 					teams={teams}
@@ -265,7 +202,7 @@ function HomePage() {
 				/>
 			</div>
 
-			{/* Reset Confirmation Modal */}
+			{/* Modal to confirm reset action */}
 			<Modal
 				title="Reset Trades"
 				open={resetModalVisible}
@@ -277,10 +214,7 @@ function HomePage() {
 					style: { backgroundColor: '#5b21b6', borderColor: '#5b21b6' },
 				}}
 			>
-				<p>
-					This will reset all trades and return picks to their original teams. Are you sure you want
-					to continue?
-				</p>
+				<p>This will reset all trades and return picks to their original teams. Are you sure you want to continue?</p>
 			</Modal>
 		</div>
 	);

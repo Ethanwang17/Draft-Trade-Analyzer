@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import { message } from 'antd';
 
-/**
- * Hook for fetching all saved trades
- * @returns {Object} Object containing trades data and loading state
- */
+// Hook to retrieve all saved trades on component mount and expose loading state
 export const useSavedTrades = () => {
 	const [trades, setTrades] = useState([]);
 	const [loading, setLoading] = useState(true);
 
+	// Fetch saved trades from the backend and update the trades state
 	const fetchSavedTrades = async () => {
 		try {
 			setLoading(true);
@@ -28,9 +26,11 @@ export const useSavedTrades = () => {
 		}
 	};
 
+	// Called once after component mount to initiate trade fetch
 	useEffect(() => {
 		fetchSavedTrades();
 	}, []);
 
+	// Return relevant trade data, loading flag, setter, and refresh function for consumers
 	return { trades, loading, setTrades, refreshTrades: fetchSavedTrades };
 };

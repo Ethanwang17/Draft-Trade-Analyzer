@@ -1,32 +1,51 @@
 .header-container {
 	width: 100%;
 	text-align: center;
-	margin-bottom: 3rem;
+	margin-bottom: 2rem;
 	padding: 2rem 0;
 	position: relative;
+	display: flex;
+	flex-direction: column;
 }
 
 .header-title {
-	position: absolute;
-	top: 0.9rem;
-	left: 1rem;
-	margin: 0;
+	position: static;
+	margin: 0 0 1.5rem 0;
 	font-size: 2.5rem;
 	font-weight: 600;
 }
 
 .header-actions {
-	position: absolute;
-	top: 2rem;
-	right: 1rem;
+	position: static;
 	display: flex;
+	flex-wrap: wrap;
 	gap: 12px;
 	align-items: center;
+	justify-content: center;
+	width: 100%;
 }
 
 .header-valuation-select {
 	margin-right: 10px;
 	min-width: 240px;
+}
+
+@media (min-width: 992px) {
+	.header-container {
+		flex-direction: row;
+		align-items: center;
+		justify-content: space-between;
+		padding: 2rem 1rem;
+	}
+
+	.header-title {
+		margin: 0;
+	}
+
+	.header-actions {
+		justify-content: flex-end;
+		width: auto;
+	}
 }
 
 .reset-trades-button:hover:not(:disabled) {
@@ -56,4 +75,25 @@
 .add-team-button:hover:not(:disabled) {
 	border-color: #e6e0ff !important;
 	color: #5b21b6 !important;
+}
+
+@media (max-width: 768px) {
+	.header-valuation-select {
+		width: 100%;
+		margin-right: 0;
+		margin-bottom: 10px;
+	}
+
+	.header-actions {
+		gap: 8px;
+	}
+
+	.analyze-button,
+	.reset-trades-button,
+	.add-team-button {
+		flex: 1;
+		min-width: 0;
+		padding: 8px;
+		font-size: 0.9rem;
+	}
 }

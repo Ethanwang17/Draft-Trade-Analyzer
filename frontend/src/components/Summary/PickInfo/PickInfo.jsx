@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { CloseOutlined } from '@ant-design/icons';
 import './PickInfo.css';
 
+// Fetch pick value dynamically based on pick number or future pick info
 const PickValueDisplay = ({ pickNumber, year, round, valuation = 1 }) => {
 	const [pickValue, setPickValue] = useState(null);
 	const [loading, setLoading] = useState(false);
@@ -41,6 +42,7 @@ const PickValueDisplay = ({ pickNumber, year, round, valuation = 1 }) => {
 			});
 	}, [pickNumber, year, round, valuation]);
 
+	// Render loading state or skip if no value is found
 	if (loading) {
 		return <span className="pick-value-loading">--</span>;
 	}
@@ -59,6 +61,7 @@ const PickValueDisplay = ({ pickNumber, year, round, valuation = 1 }) => {
 	);
 };
 
+// Main pick item display with team logo, content, and remove button
 const PickInfo = ({ pick, onResetPick, selectedValuation, showRemoveIcon = true }) => {
 	return (
 		<li className="trade-summary-item">
@@ -75,6 +78,7 @@ const PickInfo = ({ pick, onResetPick, selectedValuation, showRemoveIcon = true 
 					</button>
 				)}
 			</div>
+			{/* Show source/destination and pick value below main row */}
 			<div className="trade-item-details">
 				<span className="trade-item-from">
 					{pick.fromTeam ? `from ${pick.fromTeam}` : pick.toTeam ? `to ${pick.toTeam}` : ''}
