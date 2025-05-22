@@ -13,7 +13,8 @@ const TradeSummaryTotal = ({ picks, direction }) => {
 
 		// Calculate total value from the pre-calculated values
 		const total = picks.reduce((sum, pick) => {
-			return sum + (pick.value || 0);
+			// Parse pick.value to ensure it's a number
+			return sum + (parseFloat(pick.value) || 0);
 		}, 0);
 
 		setTotalValue(total);
@@ -39,7 +40,7 @@ const TradeSummaryTotal = ({ picks, direction }) => {
 		<div className={`trade-summary-value ${direction}`}>
 			<span>Total Value:</span>
 			<strong>
-				{prefix} {totalValue.toFixed(1)}
+				{prefix} {Number(totalValue).toFixed(1)}
 			</strong>
 		</div>
 	);

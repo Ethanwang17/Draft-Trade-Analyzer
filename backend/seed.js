@@ -1,236 +1,116 @@
-const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
+const {db, query, execute, getOne} = require("./db");
 
-// Connect to the database
-const dbFile = process.env.DB_FILE || path.join(__dirname, "database.db");
-const dbPath = path.resolve(dbFile);
-const db = new sqlite3.Database(dbPath, (err) => {
-	if (err) {
-		console.error("Error opening database", err.message);
-		return;
-	}
-	console.log("Connected to the SQLite database for seeding");
-	initializeDatabase();
-});
+console.log(`Using database type: postgres for seeding`);
 
 // Initialize database tables
-function initializeDatabase() {
+async function initializeDatabase() {
 	console.log("Creating database tables if they don't exist...");
 
 	// Create Teams table
-	db.run(
-		`CREATE TABLE IF NOT EXISTS teams (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
+	await execute(`CREATE TABLE IF NOT EXISTS teams (
+		id SERIAL PRIMARY KEY,
 		name TEXT NOT NULL,
 		abbreviation TEXT NOT NULL,
 		logo TEXT
-	)`,
-		(err) => {
-			if (err) {
-				console.error("Error creating teams table", err.message);
-				return;
-			}
-			console.log("Teams table is ready");
+	)`);
+	console.log("Teams table is ready");
 
-			// Create Draft Picks table with valuation column
-			db.run(
-				`CREATE TABLE IF NOT EXISTS draft_picks (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			team_id INTEGER,
-			year INTEGER NOT NULL,
-			round INTEGER NOT NULL,
-			pick_number INTEGER,
-			valuation INTEGER DEFAULT 1,
-			FOREIGN KEY (team_id) REFERENCES teams (id)
-		)`,
-				(err) => {
-					if (err) {
-						console.error(
-							"Error creating draft_picks table",
-							err.message
-						);
-						return;
-					}
-					console.log("Draft Picks table is ready");
+	// Create Draft Picks table with valuation column
+	await execute(`CREATE TABLE IF NOT EXISTS draft_picks (
+		id SERIAL PRIMARY KEY,
+		team_id INTEGER,
+		year INTEGER NOT NULL,
+		round INTEGER NOT NULL,
+		pick_number INTEGER,
+		valuation INTEGER DEFAULT 1,
+		FOREIGN KEY (team_id) REFERENCES teams (id)
+	)`);
+	console.log("Draft Picks table is ready");
 
-					// Create Valuations table
-					db.run(
-						`CREATE TABLE IF NOT EXISTS valuations (
-					id INTEGER PRIMARY KEY AUTOINCREMENT,
-					name TEXT NOT NULL,
-					table_name TEXT NOT NULL,
-					description TEXT
-				)`,
-						(err) => {
-							if (err) {
-								console.error(
-									"Error creating valuations table",
-									err.message
-								);
-								return;
-							}
-							console.log("Valuations table is ready");
+	// Create Valuations table
+	await execute(`CREATE TABLE IF NOT EXISTS valuations (
+		id SERIAL PRIMARY KEY,
+		name TEXT NOT NULL,
+		table_name TEXT NOT NULL,
+		description TEXT
+	)`);
+	console.log("Valuations table is ready");
 
-							// Create valuation_1 table (previously pick_values)
-							db.run(
-								`CREATE TABLE IF NOT EXISTS valuation_1 (
-						pick_position INTEGER PRIMARY KEY,
-						value REAL NOT NULL,
-						normalized REAL NOT NULL
-					)`,
-								(err) => {
-									if (err) {
-										console.error(
-											"Error creating valuation_1 table",
-											err.message
-										);
-										return;
-									}
-									console.log("Valuation_1 table is ready");
+	// Create valuation_1 table (previously pick_values)
+	await execute(`CREATE TABLE IF NOT EXISTS valuation_1 (
+		pick_position INTEGER PRIMARY KEY,
+		value NUMERIC NOT NULL,
+		normalized NUMERIC NOT NULL
+	)`);
+	console.log("Valuation_1 table is ready");
 
-									// Create valuation_2 table
-									db.run(
-										`CREATE TABLE IF NOT EXISTS valuation_2 (
-								pick_number INTEGER PRIMARY KEY,
-								value INTEGER,
-								normalized REAL
-							)`,
-										(err) => {
-											if (err) {
-												console.error(
-													"Error creating valuation_2 table",
-													err.message
-												);
-												return;
-											}
-											console.log(
-												"Valuation_2 table is ready"
-											);
+	// Create valuation_2 table
+	await execute(`CREATE TABLE IF NOT EXISTS valuation_2 (
+		pick_number INTEGER PRIMARY KEY,
+		value INTEGER,
+		normalized NUMERIC
+	)`);
+	console.log("Valuation_2 table is ready");
 
-											// Create valuation_3 table
-											db.run(
-												`CREATE TABLE IF NOT EXISTS valuation_3 (
-										pick_number INTEGER PRIMARY KEY,
-										value INTEGER,
-										normalized REAL
-									)`,
-												(err) => {
-													if (err) {
-														console.error(
-															"Error creating valuation_3 table",
-															err.message
-														);
-														return;
-													}
-													console.log(
-														"Valuation_3 table is ready"
-													);
+	// Create valuation_3 table
+	await execute(`CREATE TABLE IF NOT EXISTS valuation_3 (
+		pick_number INTEGER PRIMARY KEY,
+		value INTEGER,
+		normalized NUMERIC
+	)`);
+	console.log("Valuation_3 table is ready");
 
-													// Create Saved Trades table
-													db.run(
-														`CREATE TABLE IF NOT EXISTS saved_trades (
-												id INTEGER PRIMARY KEY AUTOINCREMENT,
-												created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-												trade_name TEXT,
-												valuation_model_id INTEGER DEFAULT 1 REFERENCES valuations(id)
-											)`,
-														(err) => {
-															if (err) {
-																console.error(
-																	"Error creating saved_trades table",
-																	err.message
-																);
-																return;
-															}
-															console.log(
-																"Saved Trades table is ready"
-															);
+	// Create Saved Trades table
+	await execute(`CREATE TABLE IF NOT EXISTS saved_trades (
+		id SERIAL PRIMARY KEY,
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		trade_name TEXT,
+		valuation_model_id INTEGER DEFAULT 1 REFERENCES valuations(id)
+	)`);
+	console.log("Saved Trades table is ready");
 
-															// Create Saved Trade Teams table
-															db.run(
-																`CREATE TABLE IF NOT EXISTS saved_trade_teams (
-														id INTEGER PRIMARY KEY AUTOINCREMENT,
-														saved_trade_id INTEGER NOT NULL,
-														team_id INTEGER NOT NULL,
-														team_order INTEGER NOT NULL, 
-														FOREIGN KEY (saved_trade_id) REFERENCES saved_trades (id),
-														FOREIGN KEY (team_id) REFERENCES teams (id)
-													)`,
-																(err) => {
-																	if (err) {
-																		console.error(
-																			"Error creating saved_trade_teams table",
-																			err.message
-																		);
-																		return;
-																	}
-																	console.log(
-																		"Saved Trade Teams table is ready"
-																	);
+	// Create Saved Trade Teams table
+	await execute(`CREATE TABLE IF NOT EXISTS saved_trade_teams (
+		id SERIAL PRIMARY KEY,
+		saved_trade_id INTEGER NOT NULL,
+		team_id INTEGER NOT NULL,
+		team_order INTEGER NOT NULL, 
+		FOREIGN KEY (saved_trade_id) REFERENCES saved_trades (id),
+		FOREIGN KEY (team_id) REFERENCES teams (id)
+	)`);
+	console.log("Saved Trade Teams table is ready");
 
-																	// Create Saved Trade Picks table
-																	db.run(
-																		`CREATE TABLE IF NOT EXISTS saved_trade_picks (
-																id INTEGER PRIMARY KEY AUTOINCREMENT,
-																saved_trade_id INTEGER NOT NULL,
-																draft_pick_id INTEGER NOT NULL,
-																sending_team_id INTEGER NOT NULL,
-																receiving_team_id INTEGER NOT NULL,
-																FOREIGN KEY (saved_trade_id) REFERENCES saved_trades (id),
-																FOREIGN KEY (draft_pick_id) REFERENCES draft_picks (id),
-																FOREIGN KEY (sending_team_id) REFERENCES teams (id),
-																FOREIGN KEY (receiving_team_id) REFERENCES teams (id)
-															)`,
-																		(
-																			err
-																		) => {
-																			if (
-																				err
-																			) {
-																				console.error(
-																					"Error creating saved_trade_picks table",
-																					err.message
-																				);
-																				return;
-																			}
-																			console.log(
-																				"Saved Trade Picks table is ready"
-																			);
+	// Create Saved Trade Picks table
+	await execute(`CREATE TABLE IF NOT EXISTS saved_trade_picks (
+		id SERIAL PRIMARY KEY,
+		saved_trade_id INTEGER NOT NULL,
+		draft_pick_id INTEGER NOT NULL,
+		sending_team_id INTEGER NOT NULL,
+		receiving_team_id INTEGER NOT NULL,
+		FOREIGN KEY (saved_trade_id) REFERENCES saved_trades (id),
+		FOREIGN KEY (draft_pick_id) REFERENCES draft_picks (id),
+		FOREIGN KEY (sending_team_id) REFERENCES teams (id),
+		FOREIGN KEY (receiving_team_id) REFERENCES teams (id)
+	)`);
+	console.log("Saved Trade Picks table is ready");
 
-																			// Start seeding data after tables are created
-																			seedDatabase();
-																		}
-																	);
-																}
-															);
-														}
-													);
-												}
-											);
-										}
-									);
-								}
-							);
-						}
-					);
-				}
-			);
-		}
-	);
+	// Start seeding data after tables are created
+	await seedDatabase();
 }
 
 async function seedDatabase() {
 	try {
 		// Clear existing data
-		await run("DELETE FROM saved_trade_picks");
-		await run("DELETE FROM saved_trade_teams");
-		await run("DELETE FROM saved_trades");
-		await run("DELETE FROM valuation_3");
-		await run("DELETE FROM valuation_2");
-		await run("DELETE FROM valuation_1");
-		await run("DELETE FROM valuations");
-		await run("DELETE FROM draft_picks");
-		await run("DELETE FROM teams");
+		await execute("DELETE FROM saved_trade_picks");
+		await execute("DELETE FROM saved_trade_teams");
+		await execute("DELETE FROM saved_trades");
+		await execute("DELETE FROM valuation_3");
+		await execute("DELETE FROM valuation_2");
+		await execute("DELETE FROM valuation_1");
+		await execute("DELETE FROM valuations");
+		await execute("DELETE FROM draft_picks");
+		await execute("DELETE FROM teams");
 
 		// Seed NBA Teams
 		const teams = [
@@ -399,8 +279,8 @@ async function seedDatabase() {
 
 		console.log("Seeding teams...");
 		for (const team of teams) {
-			await run(
-				"INSERT INTO teams (name, abbreviation, logo) VALUES (?, ?, ?)",
+			await execute(
+				"INSERT INTO teams (name, abbreviation, logo) VALUES ($1, $2, $3)",
 				[team.name, team.abbreviation, team.logo]
 			);
 		}
@@ -472,8 +352,8 @@ async function seedDatabase() {
 
 		console.log("Seeding valuation_1 values...");
 		for (const pick of pickValues) {
-			await run(
-				"INSERT INTO valuation_1 (pick_position, value, normalized) VALUES (?, ?, ?)",
+			await execute(
+				"INSERT INTO valuation_1 (pick_position, value, normalized) VALUES ($1, $2, $3)",
 				[pick.pick_position, pick.value, pick.normalized]
 			);
 		}
@@ -484,8 +364,8 @@ async function seedDatabase() {
 		for (let i = 1; i <= 60; i++) {
 			const value = Math.round(5000 / i);
 			const normalized = Math.round((value / 5000) * 100 * 100) / 100;
-			await run(
-				"INSERT INTO valuation_2 (pick_number, value, normalized) VALUES (?, ?, ?)",
+			await execute(
+				"INSERT INTO valuation_2 (pick_number, value, normalized) VALUES ($1, $2, $3)",
 				[i, value, normalized]
 			);
 		}
@@ -495,103 +375,70 @@ async function seedDatabase() {
 		for (let i = 1; i <= 60; i++) {
 			const value = Math.round(6000 / Math.pow(i, 1.05));
 			const normalized = Math.round((value / 6000) * 100 * 100) / 100;
-			await run(
-				"INSERT INTO valuation_3 (pick_number, value, normalized) VALUES (?, ?, ?)",
+			await execute(
+				"INSERT INTO valuation_3 (pick_number, value, normalized) VALUES ($1, $2, $3)",
 				[i, value, normalized]
 			);
 		}
 		console.log("Seeded valuation_3 values");
 
-		// Seed valuation models
-		const valuations = [
-			{
-				id: 1,
-				name: "Standard",
-				table_name: "valuation_1",
-				description:
-					"Default valuation model based on historical draft value",
-			},
-			{
-				id: 2,
-				name: "Conservative",
-				table_name: "valuation_2",
-				description: "Values picks more conservatively",
-			},
-			{
-				id: 3,
-				name: "Aggressive",
-				table_name: "valuation_3",
-				description: "Values top picks more aggressively",
-			},
-		];
-
+		// Add valuation models
 		console.log("Seeding valuation models...");
-		for (const valuation of valuations) {
-			await run(
-				"INSERT INTO valuations (id, name, table_name, description) VALUES (?, ?, ?, ?)",
-				[
-					valuation.id,
-					valuation.name,
-					valuation.table_name,
-					valuation.description,
-				]
-			);
+		await execute(
+			"INSERT INTO valuations (id, name, table_name, description) VALUES ($1, $2, $3, $4)",
+			[
+				1,
+				"Standard",
+				"valuation_1",
+				"Default valuation model based on historical draft value",
+			]
+		);
+
+		await execute(
+			"INSERT INTO valuations (id, name, table_name, description) VALUES ($1, $2, $3, $4)",
+			[2, "Linear", "valuation_2", "Simple linear depreciation model"]
+		);
+
+		await execute(
+			"INSERT INTO valuations (id, name, table_name, description) VALUES ($1, $2, $3, $4)",
+			[
+				3,
+				"Exponential",
+				"valuation_3",
+				"Exponential depreciation model for greater drop-off",
+			]
+		);
+		console.log("Seeded valuation models");
+
+		// Create draft picks for each team (2024-2026)
+		console.log("Seeding draft picks...");
+		const teams_data = await query("SELECT id FROM teams ORDER BY id");
+
+		const years = [2024, 2025, 2026];
+		const rounds = [1, 2];
+
+		for (const year of years) {
+			for (const round of rounds) {
+				let pickNumber = (round - 1) * 30 + 1;
+				for (const team of teams_data) {
+					await execute(
+						"INSERT INTO draft_picks (team_id, year, round, pick_number) VALUES ($1, $2, $3, $4)",
+						[team.id, year, round, pickNumber]
+					);
+					pickNumber++;
+				}
+			}
 		}
-		console.log(`Seeded ${valuations.length} valuation models`);
+		console.log("Seeded draft picks");
 
-		// Seed some draft picks for the current year
-		const currentYear = new Date().getFullYear();
-		console.log(`Seeding draft picks for ${currentYear}...`);
-
-		// Generate picks for each team for the current year
-		for (let teamId = 1; teamId <= teams.length; teamId++) {
-			// First round pick
-			await run(
-				"INSERT INTO draft_picks (team_id, year, round, pick_number, valuation) VALUES (?, ?, ?, ?, ?)",
-				[teamId, currentYear, 1, teamId, 1]
-			);
-
-			// Second round pick
-			await run(
-				"INSERT INTO draft_picks (team_id, year, round, pick_number, valuation) VALUES (?, ?, ?, ?, ?)",
-				[teamId, currentYear, 2, teamId + 30, 1]
-			);
-		}
-
-		// Add future picks for next year (without pick numbers)
-		for (let teamId = 1; teamId <= teams.length; teamId++) {
-			// First round pick next year
-			await run(
-				"INSERT INTO draft_picks (team_id, year, round, valuation) VALUES (?, ?, ?, ?)",
-				[teamId, currentYear + 1, 1, 1]
-			);
-
-			// Second round pick next year
-			await run(
-				"INSERT INTO draft_picks (team_id, year, round, valuation) VALUES (?, ?, ?, ?)",
-				[teamId, currentYear + 1, 2, 1]
-			);
-		}
-
-		console.log(`Seeded draft picks for ${teams.length} teams`);
-
-		console.log("Database seeding completed successfully!");
+		console.log("Database seeding completed successfully");
 	} catch (error) {
 		console.error("Error seeding database:", error);
-	} finally {
-		db.close();
 	}
 }
 
-// Helper function to wrap db.run in a promise
-function run(sql, params = []) {
-	return new Promise((resolve, reject) => {
-		db.run(sql, params, function (err) {
-			if (err) {
-				reject(err);
-				return;
-			}
-			resolve(this);
-		});
-	});
-}
+// Run the initialization
+initializeDatabase().catch((err) => {
+	console.error("Database initialization failed:", err);
+	process.exit(1);
+});
