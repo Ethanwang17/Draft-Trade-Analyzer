@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { sortPicks } from '../utils/pickSorter';
+import { sortPicks } from '../../utils/pickSorter';
 
 /**
  * Hook for trade reset functionality

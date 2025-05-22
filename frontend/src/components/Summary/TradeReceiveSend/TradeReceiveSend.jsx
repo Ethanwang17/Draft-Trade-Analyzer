@@ -10,6 +10,7 @@ const TradeReceiveSend = ({
 	icon,
 	onResetPick,
 	selectedValuation,
+	showRemoveIcon,
 }) => {
 	return (
 		<div className={`trade-summary-section ${direction}`}>
@@ -34,6 +35,7 @@ const TradeReceiveSend = ({
 									pick={pick}
 									onResetPick={onResetPick}
 									selectedValuation={selectedValuation}
+									showRemoveIcon={showRemoveIcon}
 								/>
 							))}
 						</ul>

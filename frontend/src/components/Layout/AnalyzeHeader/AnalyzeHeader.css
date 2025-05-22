@@ -17,28 +17,36 @@
 }
 
 .analyze-back-button {
-	border-radius: 4px;
 	display: flex;
 	align-items: center;
 	font-weight: 500;
 	transition: all 0.2s;
+	color: #5b21b6;
+	border-color: #5b21b6;
 }
 
 .analyze-back-button:hover {
+	color: #9765e9 !important;
+	border-color: #9765e9 !important;
 	transform: translateX(-2px);
 	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
 }
 
 .save-trade-button {
-	border-radius: 4px;
 	display: flex;
 	align-items: center;
 	font-weight: 500;
 	transition: all 0.2s;
+	background: #e6e0ff;
+	border-color: #bfb8d8;
+	color: #5b21b6;
 }
 
 .save-trade-button:hover {
 	transform: translateY(-2px);
+	background: #5b21b6 !important;
+	border-color: #5b21b6 !important;
+	color: #ffffff;
 	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
 }
 

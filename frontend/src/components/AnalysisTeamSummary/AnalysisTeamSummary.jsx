@@ -20,6 +20,7 @@ function AnalysisTeamSummary({ team, teamTradeData, onResetPick, colSize, select
 					onResetPick={onResetPick}
 					showNetValue={true}
 					selectedValuation={selectedValuation}
+					showRemoveIcon={false}
 				/>
 			</Card>
 		</Col>

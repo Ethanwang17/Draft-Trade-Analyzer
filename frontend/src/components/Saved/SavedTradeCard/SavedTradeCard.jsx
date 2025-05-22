@@ -5,7 +5,7 @@ import SavedTeamPicksTrade from '../SavedTeamPicksTrade/SavedTeamPicksTrade';
 import LoadTradeButton from '../../LoadTradeButton/LoadTradeButton';
 import SavedTeamDisplay from '../SavedTeamDisplay/SavedTeamDisplay';
 import TradeSummary from '../../Summary/TradeSummary/TradeSummary';
-import { useTradeEvaluation } from '../../../hooks/useTradeEvaluation';
+import { useTradeEvaluation } from '../../../hooks/AnalyzeTradeHooks/useTradeEvaluation';
 import TradeBalanceBadge from '../../TradeBalanceBadge/TradeBalanceBadge';
 import './SavedTradeCard.css';
 
@@ -287,6 +287,7 @@ function SavedTradeCard({
 															tradeData={formatPicksForTeam(team.id)}
 															showNetValue={true}
 															selectedValuation={selectedValuation}
+															showRemoveIcon={false}
 														/>
 													</div>
 												)}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { sortPicks } from '../utils/pickSorter';
+import { sortPicks } from '../../utils/pickSorter';
 
 /**
  * Hook for managing team picks and their state
