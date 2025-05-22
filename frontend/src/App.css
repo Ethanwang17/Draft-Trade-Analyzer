@@ -85,10 +85,10 @@ h1 {
 }
 
 /* Saved Trades Page Styles */
-.st-container {
+.saved-trade-container {
 	padding: 20px;
 }
-.st-trades-list {
+.saved-trade-list {
 	margin-top: 20px;
 	display: flex;
 	flex-direction: column;

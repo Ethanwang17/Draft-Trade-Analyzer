@@ -1,5 +1,5 @@
 /* SavedTradeCard styles */
-.st-trade-card {
+.saved-trade-card {
 	margin-bottom: 16px;
 	border-radius: 8px;
 	width: 98%;
@@ -7,53 +7,59 @@
 	margin-left: auto;
 	margin-right: auto;
 	transition: all 0.3s ease-in-out;
-	overflow: hidden;
+	overflow: visible;
 	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+	height: auto;
 }
 
-.st-trade-card:hover {
+.saved-trade-card:hover {
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.st-trade-card.expanded {
+.saved-trade-card.expanded {
 	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
-.st-trade-header {
+.saved-trade-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	margin-bottom: 16px;
 }
 
-.st-trade-teams {
+.saved-trade-teams {
 	display: flex;
 	align-items: flex-start;
 	justify-content: space-around;
-	flex-wrap: nowrap;
+	flex-wrap: wrap;
 	gap: 15px;
 	width: 100%;
 	padding: 0 5%;
+	height: auto;
+	min-height: fit-content;
 }
 
-.st-team {
+.saved-trade-team {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	flex: 0 0 auto;
 	width: 220px;
 	transition: all 0.3s ease-in-out;
+	height: auto;
 }
 
-.st-team-details {
+.saved-trade-team-details {
 	width: 100%;
 	margin-top: 16px;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	max-height: none !important;
+	height: auto;
 }
 
-.st-team-picks-inline {
+.saved-trade-team-picks-inline {
 	width: 100%;
 	margin-top: 16px;
 	display: flex;
@@ -65,7 +71,7 @@
 		transform 0.3s ease;
 }
 
-.st-trade-direction {
+.saved-trade-direction {
 	display: flex;
 	align-items: center;
 	align-self: center;
@@ -74,11 +80,11 @@
 	width: 30px;
 }
 
-.st-swap-icon {
+.saved-trade-icon {
 	font-size: 20px;
 }
 
-.st-loading-details {
+.saved-trade-loading {
 	display: flex;
 	justify-content: center;
 	padding: 20px;
@@ -86,17 +92,17 @@
 }
 
 /* Team count specific styles */
-.team-count-2 .st-team {
+.team-count-2 .saved-trade-team {
 	width: 300px;
 }
 
-.team-count-3 .st-team {
+.team-count-3 .saved-trade-team {
 	width: 250px;
 }
 
-.team-count-4 .st-team,
-.team-count-5 .st-team,
-.team-count-6 .st-team {
+.team-count-4 .saved-trade-team,
+.team-count-5 .saved-trade-team,
+.team-count-6 .saved-trade-team {
 	width: 220px;
 }
 
@@ -130,7 +136,7 @@
 	animation: fadeIn 0.25s ease-out;
 }
 
-.st-trade-actions {
+.saved-trade-actions {
 	display: flex;
 	gap: 8px;
 }
@@ -156,22 +162,22 @@
 }
 
 /* Staggered animation for team elements */
-.st-team-details:nth-child(1) {
+.saved-trade-team-details:nth-child(1) {
 	transition-delay: 0.05s;
 }
 
-.st-team-details:nth-child(3) {
+.saved-trade-team-details:nth-child(3) {
 	transition-delay: 0.1s;
 }
 
-.st-team-details:nth-child(5) {
+.saved-trade-team-details:nth-child(5) {
 	transition-delay: 0.15s;
 }
 
-.st-team-details:nth-child(7) {
+.saved-trade-team-details:nth-child(7) {
 	transition-delay: 0.2s;
 }
 
-.st-team-details:nth-child(9) {
+.saved-trade-team-details:nth-child(9) {
 	transition-delay: 0.25s;
 }

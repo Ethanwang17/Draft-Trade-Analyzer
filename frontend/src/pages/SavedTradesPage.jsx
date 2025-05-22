@@ -55,11 +55,11 @@ function SavedTradesPage() {
 	};
 
 	return (
-		<div className="st-container">
+		<div className="saved-trade-container">
 			<Title level={2}>Saved Trade Concepts</Title>
 
 			{loading ? (
-				<div className="st-loading-container">
+				<div>
 					<Spin indicator={<LoadingOutlined style={{ fontSize: 24 }} spin />} />
 					<p>Loading saved trades...</p>
 				</div>
@@ -75,7 +75,7 @@ function SavedTradesPage() {
 						onValuationChange={handleValuationChange}
 					/>
 
-					<div className="st-trades-list">
+					<div className="saved-trade-list">
 						{filteredTrades.map((trade) => (
 							<SavedTradeCard
 								key={trade.id}

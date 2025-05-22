@@ -204,14 +204,14 @@ function SavedTradeCard({
 	return (
 		<Card
 			key={trade.id}
-			className={`st-trade-card team-count-${trade.teams ? trade.teams.length : 0} ${isExpanded ? 'expanded' : ''}`}
+			className={`saved-trade-card team-count-${trade.teams ? trade.teams.length : 0} ${isExpanded ? 'expanded' : ''}`}
 			onClick={handleCardClick}
 			hoverable
 			style={{
 				transition: 'box-shadow 0.3s ease',
 			}}
 		>
-			<div className="st-trade-header">
+			<div className="saved-trade-header">
 				<div className="trade-title">
 					<Title level={4}>{trade.trade_name || `Trade #${trade.id}`}</Title>
 					<Text type="secondary">{formatDate(trade.created_at)}</Text>
@@ -231,7 +231,7 @@ function SavedTradeCard({
 							<TradeBalanceBadge tradeBalance={evaluateTrade()} />
 						</div>
 					)}
-				<div className="st-trade-actions">
+				<div className="saved-trade-actions">
 					<LoadTradeButton tradeId={trade.id} />
 					<Button
 						type="text"
@@ -242,20 +242,19 @@ function SavedTradeCard({
 				</div>
 			</div>
 
-			<div className="st-trade-teams">
+			<div className="saved-trade-teams">
 				{trade.teams &&
 					trade.teams.map((team, index) => (
 						<React.Fragment key={team.id}>
-							<div className="st-team">
+							<div className="saved-trade-team">
 								<SavedTeamDisplay team={team} />
 
 								{isExpanded && (
 									<div
-										className="st-team-details"
+										className="saved-trade-team-details"
 										style={{
 											opacity: contentVisible ? 1 : 0,
-											maxHeight: contentVisible ? '500px' : '0',
-											overflow: 'hidden',
+											overflow: contentVisible ? 'visible' : 'hidden',
 											transition: 'opacity 0.3s ease, max-height 0.3s ease-in-out',
 											transformOrigin: 'top',
 											width: '100%',
@@ -298,8 +297,8 @@ function SavedTradeCard({
 							</div>
 
 							{index < trade.teams.length - 1 && (
-								<div className="st-trade-direction">
-									<SwapOutlined className="st-swap-icon" />
+								<div className="saved-trade-direction">
+									<SwapOutlined className="saved-trade-icon" />
 								</div>
 							)}
 						</React.Fragment>
@@ -308,7 +307,7 @@ function SavedTradeCard({
 
 			{isExpanded && loadingDetails[trade.id] && (
 				<div
-					className="st-loading-details"
+					className="saved-trade-loading"
 					style={{
 						opacity: contentVisible ? 1 : 0,
 					}}
