@@ -128,7 +128,9 @@ function HomePage() {
 		// Return picks that belong to the removed team but are held by others
 		updatedTeamGroups = updatedTeamGroups.map((group) => {
 			if (group.id === teamId) return group;
-			const picksToReturn = group.picks.filter((pick) => pick.originalTeamId === teamToRemove.teamId);
+			const picksToReturn = group.picks.filter(
+				(pick) => pick.originalTeamId === teamToRemove.teamId
+			);
 			if (picksToReturn.length === 0) return group;
 			return {
 				...group,
@@ -142,7 +144,9 @@ function HomePage() {
 		);
 
 		picksToReturn.forEach((pick) => {
-			const originalTeamGroup = updatedTeamGroups.find((group) => group.teamId === pick.originalTeamId);
+			const originalTeamGroup = updatedTeamGroups.find(
+				(group) => group.teamId === pick.originalTeamId
+			);
 			if (originalTeamGroup) {
 				const resetPick = { ...pick, className: '' };
 				const teamIndex = updatedTeamGroups.findIndex((group) => group.id === originalTeamGroup.id);
@@ -174,8 +178,7 @@ function HomePage() {
 	// UI callbacks for reset and analyze
 	const handleResetTrades = () => showResetConfirmation(teamGroups);
 	const handleModalResetConfirm = () => handleResetConfirm(teamGroups);
-	const handleAnalyze = () =>
-		handleAnalyzeTrade(teamGroups, selectedValuation, hasTradesMade);
+	const handleAnalyze = () => handleAnalyzeTrade(teamGroups, selectedValuation, hasTradesMade);
 
 	return (
 		<div className="home-page">
@@ -214,7 +217,10 @@ function HomePage() {
 					style: { backgroundColor: '#5b21b6', borderColor: '#5b21b6' },
 				}}
 			>
-				<p>This will reset all trades and return picks to their original teams. Are you sure you want to continue?</p>
+				<p>
+					This will reset all trades and return picks to their original teams. Are you sure you want
+					to continue?
+				</p>
 			</Modal>
 		</div>
 	);
