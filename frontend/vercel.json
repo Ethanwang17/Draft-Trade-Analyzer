@@ -21,7 +21,7 @@
 		},
 		{
 			"src": "/api/(.*)",
-			"dest": "https://draft-trade-analyzer-api.onrender.com/api/$1"
+			"dest": "https://draft-trade-analyzer.onrender.com/api/$1"
 		},
 		{
 			"src": "/(.*)",

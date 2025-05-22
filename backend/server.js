@@ -13,6 +13,7 @@ const allowedOrigins = [
 	"http://localhost:5173", // Local development
 	"https://draft-trade-analyzer.vercel.app", // Production Vercel URL
 	/\.vercel\.app$/, // Any Vercel preview deployments
+	"https://draft-trade-analyzer-frontend.vercel.app", // In case your Vercel domain is different
 ];
 
 const corsOptions = {
