@@ -10,14 +10,19 @@
 }
 
 .analyze-trade-badge.slightly-favors {
-	/* background-color: #52c41a; */
-	background-color: #e5ffd8;
-	color: #349006;
-	border: 1px solid #c2e3b2;
+	background-color: #feffd6;
+	color: #80820a;
+	border: 1px solid #e0e190;
 }
 
 .analyze-trade-badge.heavily-favors {
 	background-color: #ffddde;
 	color: #b10e11;
 	border: 1px solid #ddafb1;
+}
+
+.analyze-trade-badge.perfectly-balanced {
+	background-color: #e5ffd8;
+	color: #349006;
+	border: 1px solid #c2e3b2;
 }

@@ -163,15 +163,20 @@ export const useTradeEvaluation = (tradeData, pickValues) => {
 		const percentageDifference =
 			totalTradeValue > 0 ? (valueDifference / totalTradeValue) * 100 : 0;
 
-		// Determine if the trade is balanced - use 5% as threshold
-		if (percentageDifference < 5) {
+		// Determine if the trade is balanced
+		if (percentageDifference === 0) {
+			return {
+				status: 'perfectlyBalanced',
+				message: 'The Trade is Perfectly Balanced',
+				iconType: CheckCircleOutlined,
+			};
+		} else if (percentageDifference < 5) {
+			// use 5% as threshold
 			return {
 				status: 'slightlyFavors',
 				message: `Slightly Favors ${highestValue.name} (${Math.round(percentageDifference)}%)`,
 				value: `+${Math.round(highestValue.netValue)}`,
 				iconType: CheckCircleOutlined,
-
-				// iconType: WarningOutlined,
 			};
 		} else {
 			return {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, Typography, Button, Spin } from 'antd';
 import { DeleteOutlined, SwapOutlined, LoadingOutlined } from '@ant-design/icons';
 import LoadTradeButton from '../../LoadTradeButton/LoadTradeButton';
@@ -41,7 +41,7 @@ function SavedTradeCard({
 	}, [expandedTradeIds, trade.id]);
 
 	// Create a structure for trade evaluation
-	const getTradeDataForEvaluation = () => {
+	const getTradeDataForEvaluation = useCallback(() => {
 		if (!tradeDetails || !tradeDetails[trade.id] || !tradeDetails[trade.id].picksByTeam)
 			return null;
 
@@ -72,7 +72,7 @@ function SavedTradeCard({
 		);
 
 		return { teamGroups };
-	};
+	}, [tradeDetails, trade.id, pickValues]);
 
 	// Update trade data for evaluation when pickValues change
 	useEffect(() => {
@@ -84,7 +84,15 @@ function SavedTradeCard({
 		) {
 			setTradeDataForEvaluation(getTradeDataForEvaluation());
 		}
-	}, [pickValues, tradeDetails, loadingDetails, expandedTradeIds, trade.id, loadingValues]);
+	}, [
+		pickValues,
+		tradeDetails,
+		loadingDetails,
+		expandedTradeIds,
+		trade.id,
+		loadingValues,
+		getTradeDataForEvaluation,
+	]);
 
 	// Use the trade evaluation hook
 	const { evaluateTrade } = useTradeEvaluation(tradeDataForEvaluation, pickValues);
@@ -100,7 +108,7 @@ function SavedTradeCard({
 	}, [expandedTradeIds, loadingDetails, tradeDetails, trade.id]);
 
 	// Fetch values for all picks
-	const fetchPickValues = async () => {
+	const fetchPickValues = useCallback(async () => {
 		if (!tradeDetails[trade.id] || !tradeDetails[trade.id].picksByTeam) return;
 
 		const currentTradeDetails = tradeDetails[trade.id];
@@ -149,7 +157,7 @@ function SavedTradeCard({
 		await Promise.all(valuePromises);
 		setPickValues(pickData);
 		setLoadingValues(false);
-	};
+	}, [tradeDetails, trade.id, selectedValuation]);
 
 	// Fetch pick values when tradeDetails or valuation model changes
 	useEffect(() => {
@@ -160,7 +168,14 @@ function SavedTradeCard({
 		) {
 			fetchPickValues();
 		}
-	}, [tradeDetails, selectedValuation, expandedTradeIds, trade.id, loadingDetails]);
+	}, [
+		tradeDetails,
+		selectedValuation,
+		expandedTradeIds,
+		trade.id,
+		loadingDetails,
+		fetchPickValues,
+	]);
 
 	// Transform pick data for a specific team to the format expected by TradeSummary
 	const formatPicksForTeam = (teamId) => {

@@ -14,9 +14,11 @@ function TradeBalanceBadge({ tradeBalance, loading, valuesLoading }) {
 					className={`analyze-trade-badge ${
 						tradeBalance.status === 'balanced'
 							? 'balanced'
-							: tradeBalance.status === 'slightlyFavors'
-								? 'slightly-favors'
-								: 'heavily-favors'
+							: tradeBalance.status === 'perfectlyBalanced'
+								? 'perfectly-balanced'
+								: tradeBalance.status === 'slightlyFavors'
+									? 'slightly-favors'
+									: 'heavily-favors'
 					}`}
 				>
 					{tradeBalance.iconType && React.createElement(tradeBalance.iconType)}{' '}
