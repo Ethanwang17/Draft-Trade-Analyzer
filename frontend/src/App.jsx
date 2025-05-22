@@ -30,7 +30,7 @@ function App() {
 	];
 
 	return (
-		<Router basename="/Draft-Trade-Analyzer">
+		<Router>
 			<Layout style={{ minHeight: '100vh' }}>
 				<NavBar items={navItems} collapsed={collapsed} setCollapsed={setCollapsed} />
 				<Layout className="site-layout" style={{ marginLeft: collapsed ? 80 : 180 }}>
