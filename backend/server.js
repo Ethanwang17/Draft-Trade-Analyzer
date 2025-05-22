@@ -8,6 +8,35 @@ const {db, query, execute, getOne, DB_TYPE} = require("./db");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// CORS configuration
+const allowedOrigins = [
+	"http://localhost:5173", // Local development
+	"https://draft-trade-analyzer.vercel.app", // Production Vercel URL
+	/\.vercel\.app$/, // Any Vercel preview deployments
+];
+
+const corsOptions = {
+	origin: function (origin, callback) {
+		// Allow requests with no origin (like mobile apps, curl requests)
+		if (!origin) return callback(null, true);
+
+		// Check if origin is allowed
+		if (
+			allowedOrigins.some((allowedOrigin) => {
+				if (allowedOrigin instanceof RegExp) {
+					return allowedOrigin.test(origin);
+				}
+				return allowedOrigin === origin;
+			})
+		) {
+			return callback(null, true);
+		}
+
+		callback(new Error("Not allowed by CORS"));
+	},
+	credentials: true,
+};
+
 // Helper function to convert round number to ordinal (1 -> 1st, 2 -> 2nd, etc.)
 function getOrdinalRound(round) {
 	const suffixes = ["th", "st", "nd", "rd"];
@@ -19,7 +48,7 @@ function getOrdinalRound(round) {
 }
 
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
