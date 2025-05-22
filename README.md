@@ -36,7 +36,41 @@ A web application that allows users to calculate and compare the value of NBA dr
 -   Express.js REST API
 -   PostgreSQL database hosted on Render.com
 -   Support for multiple pick valuation models
--   Depreciation model for future draft picks
+
+## Implementation Choices
+
+### Technology Stack
+
+-   **React + Vite**: Chosen for its modern development experience, fast refresh capabilities, and optimized build output. React 19 provides enhanced concurrent rendering features that improve the responsiveness of the drag-and-drop interface.
+-   **Express.js**: Selected for its lightweight footprint, middleware ecosystem, and flexibility in creating RESTful APIs with minimal boilerplate.
+-   **PostgreSQL**: Implemented for its robust relational data model support, which effectively handles the complex relationships between teams, draft picks, and valuation models. The normalized database schema ensures data integrity across the application.
+
+### Frontend Architecture
+
+-   **@dnd-kit**: Used instead of alternatives like react-dnd or react-beautiful-dnd for its modular architecture, accessibility features, and superior performance with complex drag operations between multiple containers.
+-   **Ant Design**: Chosen for its comprehensive component library that provides consistent UI elements and responsive design patterns out of the box.
+-   **React Router**: Implemented with a client-side routing approach to create a seamless single-page application experience while maintaining clear URL structure.
+-   **Recharts**: Selected for its React-optimized charting capabilities that integrate well with the application's state management.
+
+### Backend Design
+
+-   **REST API Architecture**: Designed around resource-based endpoints that map cleanly to the domain entities (teams, picks, trades, valuations).
+-   **Database Schema**: Structured with normalization principles to minimize redundancy while optimizing for common query patterns:
+    -   Separate tables for teams, draft picks, and valuations with appropriate foreign key relationships
+    -   Junction tables for many-to-many relationships in saved trades
+    -   Indexed columns for performance on frequently queried fields
+-   **Environment Configuration**: Implemented with dotenv to support different deployment environments (development, production) with appropriate variable isolation.
+
+### Performance Considerations
+
+-   **Optimized React Components**: Used React's memoization patterns (useMemo, memo) to prevent unnecessary re-renders during trade calculations.
+-   **CORS Configuration**: Carefully configured to allow only specific origins, enhancing security while enabling the frontend-backend communication.
+
+### Deployment Strategy
+
+-   **Frontend on Vercel**: Leverages Vercel's global CDN for fast content delivery and preview deployments for testing.
+-   **Backend on Render.com**: Provides reliable PostgreSQL hosting with automated backups and scaling capabilities.
+-   **Environment Separation**: Clear separation between development and production environments with specific configurations for each.
 
 ## Database Structure
 
