@@ -50,21 +50,25 @@ function SavedTradeCard({
 		// Format the team groups in the structure expected by useTradeEvaluation
 		const teamGroups = Object.entries(currentTradeDetails.picksByTeam).map(
 			([teamId, teamPicks]) => {
+				// Find team name from the main trade.teams data as fallback
+				const teamFromMainData = trade.teams?.find((t) => t.id.toString() === teamId.toString());
+				const teamName = teamPicks.team_name || teamFromMainData?.name || `Team ${teamId}`;
+
 				return {
 					teamId,
-					name: teamPicks.team_name || '',
+					name: teamName,
 					picks: [
 						...(teamPicks.sending || []).map((pick) => ({
 							...pick,
 							id: pick.draft_pick_id,
 							originalTeamId: pick.sending_team_id,
-							value: pickValues[pick.draft_pick_id] || 0,
+							// Don't override value here - let useTradeEvaluation handle it
 						})),
 						...(teamPicks.receiving || []).map((pick) => ({
 							...pick,
 							id: pick.draft_pick_id,
 							originalTeamId: pick.sending_team_id,
-							value: pickValues[pick.draft_pick_id] || 0,
+							// Don't override value here - let useTradeEvaluation handle it
 						})),
 					],
 				};
@@ -72,7 +76,7 @@ function SavedTradeCard({
 		);
 
 		return { teamGroups };
-	}, [tradeDetails, trade.id, pickValues]);
+	}, [tradeDetails, trade.id, trade.teams]);
 
 	// Update trade data for evaluation when pickValues change
 	useEffect(() => {
@@ -143,11 +147,34 @@ function SavedTradeCard({
 			const promise = fetch(apiUrl)
 				.then((res) => (res.ok ? res.json() : { value: 0 }))
 				.then((data) => {
-					pickData[pickId] = parseFloat(data.value) || 0;
+					const value = parseFloat(data.value) || 0;
+
+					// Store values in multiple formats to match useTradeEvaluation expectations
+					pickData[pickId] = value; // original format for compatibility
+
+					// If it's a numbered pick, also store by pick_number (for analyze page compatibility)
+					if (pick.pick_number) {
+						pickData[pick.pick_number] = value;
+					}
+
+					// If it's a future pick, also store by future key format (for analyze page compatibility)
+					if (pick.year && pick.round) {
+						const futureKey = `future_${pick.year}_${pick.round}`;
+						pickData[futureKey] = value;
+					}
 				})
 				.catch((err) => {
 					console.error(`Error fetching value for pick ${pickId}:`, err);
 					pickData[pickId] = 0;
+
+					// Also set fallback values for the additional keys
+					if (pick.pick_number) {
+						pickData[pick.pick_number] = 0;
+					}
+					if (pick.year && pick.round) {
+						const futureKey = `future_${pick.year}_${pick.round}`;
+						pickData[futureKey] = 0;
+					}
 				});
 
 			valuePromises.push(promise);
@@ -189,6 +216,31 @@ function SavedTradeCard({
 
 		const teamPicks = tradeDetails[trade.id].picksByTeam[teamId];
 
+		// Helper function to get pick value using the same logic as useTradeEvaluation
+		const getPickValue = (pick) => {
+			if (!pickValues) return 0;
+
+			// For picks with a specific pick number
+			if (pick.pick_number && pickValues[pick.pick_number]) {
+				return pickValues[pick.pick_number];
+			}
+
+			// For future picks, try to get value by pick id
+			if (pick.draft_pick_id && pickValues[pick.draft_pick_id]) {
+				return pickValues[pick.draft_pick_id];
+			}
+
+			// For future picks, try to get value by year and round
+			if (pick.year && pick.round) {
+				const futureKey = `future_${pick.year}_${pick.round}`;
+				if (pickValues[futureKey]) {
+					return pickValues[futureKey];
+				}
+			}
+
+			return 0;
+		};
+
 		return {
 			outgoing: teamPicks.sending.map((pick) => ({
 				...pick,
@@ -197,7 +249,7 @@ function SavedTradeCard({
 				originalTeamLogo: pick.sending_team_logo,
 				fromTeam: pick.sending_team_name,
 				toTeam: pick.receiving_team_name,
-				value: pickValues[pick.draft_pick_id] || 0,
+				value: getPickValue(pick),
 			})),
 			incoming: teamPicks.receiving.map((pick) => ({
 				...pick,
@@ -206,7 +258,7 @@ function SavedTradeCard({
 				originalTeamLogo: pick.sending_team_logo,
 				fromTeam: pick.sending_team_name,
 				toTeam: pick.receiving_team_name,
-				value: pickValues[pick.draft_pick_id] || 0,
+				value: getPickValue(pick),
 			})),
 		};
 	};

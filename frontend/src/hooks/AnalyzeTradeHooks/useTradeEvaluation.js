@@ -134,14 +134,20 @@ export const useTradeEvaluation = (tradeData, pickValues) => {
 				const values = calculateTeamValues(team);
 				return {
 					teamId: team.teamId,
-					name: team.name,
+					name: team.name || `Team ${team.teamId}`,
 					netValue: values.netValue,
 				};
 			});
 
+		// If no teams or only one team, return null
+		if (teamValues.length === 0) return null;
+
 		// Find the team with highest net values
 		const sortedTeams = [...teamValues].sort((a, b) => b.netValue - a.netValue);
 		const highestValue = sortedTeams[0];
+
+		// Safety check for highestValue
+		if (!highestValue) return null;
 
 		// Calculate the absolute difference between highest value
 		const valueDifference = Math.abs(highestValue.netValue);
@@ -164,7 +170,7 @@ export const useTradeEvaluation = (tradeData, pickValues) => {
 			totalTradeValue > 0 ? (valueDifference / totalTradeValue) * 100 : 0;
 
 		// Determine if the trade is balanced
-		if (percentageDifference === 0) {
+		if (percentageDifference === 0 || valueDifference === 0) {
 			return {
 				status: 'perfectlyBalanced',
 				message: 'The Trade is Perfectly Balanced',
